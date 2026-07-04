@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Zoe's Switzerland Quest</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="map-stage" aria-label="Interactive map of Switzerland">
+        <canvas id="swissMap" width="2400" height="1600"></canvas>
+        <div class="map-overlay top-left">
+          <div class="brand">
+            <span class="flag" aria-hidden="true">+</span>
+            <div>
+              <h1>Zoe's Switzerland Quest</h1>
+              <p id="missionText">Tap a place marker to start collecting Swiss knowledge.</p>
+            </div>
+          </div>
+        </div>
+        <div class="map-overlay bottom-left">
+          <div class="mode-bar" role="toolbar" aria-label="Game modes">
+            <button class="mode active" data-mode="explore" aria-pressed="true">Explore</button>
+            <button class="mode" data-mode="find" aria-pressed="false">Find</button>
+            <button class="mode" data-mode="quiz" aria-pressed="false">Quiz</button>
+            <button class="mode" data-mode="route" aria-pressed="false">Route</button>
+          </div>
+        </div>
+        <div class="map-overlay bottom-right">
+          <div class="zoom-controls" role="toolbar" aria-label="Map zoom controls">
+            <button id="zoomOut" title="Zoom out" aria-label="Zoom out">-</button>
+            <button id="zoomReset" title="Reset map view" aria-label="Reset map view">Reset</button>
+            <button id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+          </div>
+        </div>
+        <div class="map-overlay top-right">
+          <div class="score-panel">
+            <div>
+              <span class="metric-label">Score</span>
+              <strong id="score">0</strong>
+            </div>
+            <div>
+              <span class="metric-label">Stamps</span>
+              <strong><span id="stampCount">0</span>/<span id="stampTotal">0</span></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="Game information">
+        <section class="mission-card">
+          <div class="card-header">
+            <span id="placeBadge">CH</span>
+            <div>
+              <h2 id="placeName">Welcome, Zoe</h2>
+              <p id="placeRegion">Swiss explorer passport</p>
+            </div>
+          </div>
+          <p id="placeFact">Your mission is to explore Switzerland's cities, lakes, castles, waterfalls, alpine passes, mountain peaks, and Zoe's Engadin villages. Each stop unlocks a stamp, a fact, and a map clue.</p>
+          <div class="fact-grid">
+            <div>
+              <span>Language clue</span>
+              <strong id="languageFact">German, French, Italian, Romansh</strong>
+            </div>
+            <div>
+              <span>Map skill</span>
+              <strong id="mapSkill">Cantons, lakes, Alps</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="challenge-card">
+          <div class="challenge-top">
+            <h2 id="challengeTitle">Explorer Challenge</h2>
+            <button id="nextChallenge" class="icon-button" title="New challenge" aria-label="New challenge">New</button>
+          </div>
+          <p id="challengePrompt">Switch to Quiz mode for harder Swiss geography, culture, and travel questions.</p>
+          <div id="quizOptions" class="quiz-options" hidden></div>
+          <button id="hintButton" class="primary-action">Show hint</button>
+          <p id="feedback" class="feedback" aria-live="polite"></p>
+        </section>
+
+        <section class="passport-card">
+          <h2>Zoe's Passport</h2>
+          <div id="passport" class="passport-grid" aria-label="Collected place stamps"></div>
+        </section>
+      </aside>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

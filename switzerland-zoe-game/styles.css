@@ -1,0 +1,436 @@
+:root {
+  color-scheme: light;
+  --ink: #173041;
+  --muted: #5d6d75;
+  --paper: #f8f5ec;
+  --panel: rgba(255, 252, 242, 0.94);
+  --line: rgba(23, 48, 65, 0.16);
+  --red: #e33d45;
+  --blue: #2d7fb8;
+  --green: #4f8f56;
+  --gold: #d99a28;
+  --shadow: 0 22px 50px rgba(31, 56, 70, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background:
+    linear-gradient(120deg, rgba(227, 61, 69, 0.12), transparent 28%),
+    linear-gradient(300deg, rgba(45, 127, 184, 0.14), transparent 32%),
+    #e8eef0;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 18px;
+  min-height: 100vh;
+  padding: 18px;
+}
+
+.map-stage {
+  position: relative;
+  height: calc(100vh - 36px);
+  min-height: calc(100vh - 36px);
+  overflow: hidden;
+  border: 1px solid rgba(23, 48, 65, 0.18);
+  border-radius: 8px;
+  background: #d9ebed;
+  box-shadow: var(--shadow);
+}
+
+#swissMap {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 36px);
+  cursor: crosshair;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.map-overlay {
+  position: absolute;
+  pointer-events: none;
+}
+
+.map-overlay > * {
+  pointer-events: auto;
+}
+
+.top-left {
+  top: 18px;
+  left: 18px;
+  right: 180px;
+}
+
+.top-right {
+  top: 18px;
+  right: 18px;
+}
+
+.bottom-left {
+  left: 18px;
+  bottom: 18px;
+}
+
+.bottom-right {
+  right: 18px;
+  bottom: 18px;
+}
+
+.brand,
+.score-panel,
+.mode-bar,
+.zoom-controls,
+.mission-card,
+.challenge-card,
+.passport-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 28px rgba(31, 56, 70, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(620px, 100%);
+  padding: 14px 16px;
+}
+
+.flag {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 6px;
+  color: #fff;
+  background: var(--red);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.35rem, 2vw, 2.1rem);
+  line-height: 1.06;
+}
+
+.brand p,
+.mission-card p,
+.challenge-card p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.score-panel {
+  display: flex;
+  gap: 18px;
+  padding: 12px 16px;
+}
+
+.score-panel strong {
+  display: block;
+  font-size: 1.45rem;
+}
+
+.metric-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.mode-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.mode,
+.zoom-controls button,
+.primary-action,
+.icon-button,
+.quiz-options button {
+  border: 1px solid rgba(23, 48, 65, 0.2);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #fffaf0;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.mode {
+  min-width: 74px;
+  padding: 10px 12px;
+  font-weight: 750;
+}
+
+.zoom-controls button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-weight: 850;
+}
+
+.mode:hover,
+.zoom-controls button:hover,
+.primary-action:hover,
+.icon-button:hover,
+.quiz-options button:hover {
+  transform: translateY(-1px);
+}
+
+.mode.active {
+  color: #fff;
+  border-color: transparent;
+  background: var(--ink);
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.mission-card,
+.challenge-card,
+.passport-card {
+  padding: 16px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+#placeBadge {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  color: white;
+  background: var(--blue);
+  font-weight: 850;
+}
+
+.card-header h2,
+.challenge-card h2,
+.passport-card h2 {
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.card-header p {
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.fact-grid div {
+  min-height: 82px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.fact-grid span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fact-grid strong {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.challenge-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 38px;
+  flex: 0 0 52px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.primary-action {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  color: #fff;
+  border-color: transparent;
+  background: var(--green);
+  font-weight: 800;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quiz-options button {
+  padding: 11px 12px;
+  text-align: left;
+  font-weight: 720;
+}
+
+.feedback {
+  min-height: 48px;
+  margin-top: 12px;
+  font-weight: 750;
+}
+
+.passport-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.stamp {
+  min-height: 66px;
+  padding: 9px;
+  border: 2px dashed rgba(23, 48, 65, 0.18);
+  border-radius: 8px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.stamp.collected {
+  color: var(--ink);
+  border-color: rgba(217, 154, 40, 0.72);
+  background: rgba(255, 236, 183, 0.7);
+}
+
+.stamp strong {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.12;
+}
+
+.stamp span {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.73rem;
+  line-height: 1.25;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .map-stage,
+  #swissMap {
+    height: 64vh;
+    min-height: 64vh;
+  }
+
+  .side-panel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .top-left {
+    right: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .side-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .top-left,
+  .top-right,
+  .bottom-left,
+  .bottom-right {
+    position: static;
+    margin: 10px;
+  }
+
+  .map-stage {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #swissMap {
+    height: 58vh;
+    min-height: 58vh;
+    order: 2;
+  }
+
+  .brand,
+  .score-panel,
+  .mode-bar,
+  .zoom-controls {
+    width: auto;
+  }
+
+  .mode-bar,
+  .zoom-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}

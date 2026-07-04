@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoe's Interactive Art History Map</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <aside class="side-panel" aria-label="Art explorer controls">
+      <div class="brand-block">
+        <p class="kicker">Interactive Art History Map</p>
+        <h1>Zoe's Art Time Machine</h1>
+        <p class="intro">Tap a stop, collect sparks, and try a tiny studio challenge from each style.</p>
+      </div>
+
+      <div class="view-switch" aria-label="Choose view">
+        <button class="view-button active" type="button" data-view="map" aria-pressed="true">
+          <span aria-hidden="true">O</span>
+          Map
+        </button>
+        <button class="view-button" type="button" data-view="timeline" aria-pressed="false">
+          <span aria-hidden="true">&lt;&gt;</span>
+          Timeline
+        </button>
+      </div>
+
+      <section class="passport" aria-label="Art passport">
+        <div>
+          <h2>Art Passport</h2>
+          <p><span id="sparkCount">0</span> of 6 sparks earned</p>
+        </div>
+        <div class="spark-grid" id="sparkGrid" aria-label="Collected art sparks"></div>
+      </section>
+
+      <section class="quick-quest" aria-label="Quick art quest">
+        <h2>Quest Card</h2>
+        <p id="questText">Pick a movement to reveal Zoe's first quest.</p>
+        <button class="primary-action" id="randomStop" type="button">Surprise Me</button>
+      </section>
+    </aside>
+
+    <section class="stage" aria-live="polite">
+      <div class="toolbar">
+        <div>
+          <p class="eyebrow" id="eraLabel">1870s to 1930s and beyond</p>
+          <h2 id="stageTitle">Choose an art adventure</h2>
+        </div>
+        <button class="icon-button" id="resetProgress" type="button" aria-label="Reset art passport" title="Reset passport">R</button>
+      </div>
+
+      <div class="map-view active" id="mapView">
+        <div class="world-board" id="worldBoard" aria-label="Clickable world map of art styles"></div>
+      </div>
+
+      <div class="timeline-view" id="timelineView" aria-label="Clickable art history timeline"></div>
+
+      <article class="detail-panel" id="detailPanel">
+        <div class="movement-art" id="movementArt" aria-hidden="true"></div>
+        <div class="movement-copy">
+          <p class="movement-date" id="movementDate">Start anywhere</p>
+          <h2 id="movementName">Six portals are waiting</h2>
+          <p id="movementSummary">Each stop has a story, a look-for clue, a tiny activity, and a quiz spark to collect.</p>
+          <div class="fact-row" id="factRow"></div>
+        </div>
+      </article>
+
+      <section class="studio" aria-label="Try this style activity">
+        <div class="studio-header">
+          <div>
+            <p class="eyebrow">Mini Studio</p>
+            <h2 id="activityTitle">Choose a stop to unlock an activity</h2>
+          </div>
+          <div class="studio-actions">
+            <button class="secondary-action" id="clearCanvas" type="button">Clear</button>
+            <button class="primary-action" id="completeActivity" type="button">Earn Spark</button>
+          </div>
+        </div>
+        <p class="activity-prompt" id="activityPrompt">Your art tools will appear here.</p>
+        <div class="activity-controls" id="activityControls"></div>
+        <div class="canvas-wrap">
+          <canvas id="studioCanvas" width="900" height="460" aria-label="Interactive art activity canvas"></canvas>
+        </div>
+      </section>
+
+      <section class="quiz" aria-label="Art quiz">
+        <div>
+          <p class="eyebrow">Spark Quiz</p>
+          <h2 id="quizQuestion">Select a movement to answer a question.</h2>
+        </div>
+        <div class="quiz-options" id="quizOptions"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
