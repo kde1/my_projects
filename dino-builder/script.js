@@ -165,6 +165,383 @@ const quizItems = [
   q("Utahraptor", "utahraptor", "Early Cretaceous", "dromaeosaur", "large raptor crop", "57% 45%", 1.6, "a large feathered dromaeosaur with sickle claws and powerful arms", "Much larger dromaeosaur than Velociraptor.")
 ];
 
+const quizFieldGuide = {
+  tyrannosaurus: {
+    lived: "Late Cretaceous, about 68-66 million years ago",
+    where: "Western North America, including places such as Montana, Wyoming, South Dakota, and nearby regions",
+    habitat: "Warm river valleys, forested floodplains, and coastal lowlands",
+    diet: "Carnivore; hunted and scavenged large dinosaurs",
+    facts: [
+      "Its teeth could be as long as bananas.",
+      "Its skull was built for an extremely powerful bite.",
+      "Adults were bulky, but younger animals were probably faster and slimmer."
+    ]
+  },
+  triceratops: {
+    lived: "Late Cretaceous, about 68-66 million years ago",
+    where: "Western North America",
+    habitat: "Open woodlands, floodplains, and lowland plant-rich habitats",
+    diet: "Herbivore; likely ate tough low plants with a strong beak",
+    facts: [
+      "It had two long brow horns, one nose horn, and a huge frill.",
+      "Its beak could clip tough vegetation.",
+      "It lived at the same time and in the same region as Tyrannosaurus rex."
+    ]
+  },
+  spinosaurus: {
+    lived: "Late Cretaceous, about 99-93 million years ago",
+    where: "North Africa, especially Morocco and Egypt",
+    habitat: "River systems, deltas, mangrove-like wetlands, and coastal waterways",
+    diet: "Mostly fish and other aquatic or shoreline prey",
+    facts: [
+      "Its long snout was shaped a bit like a crocodile's.",
+      "The tall back sail was made from extended spine bones.",
+      "It is one of the strongest candidates for a semi-aquatic dinosaur."
+    ]
+  },
+  parasaurolophus: {
+    lived: "Late Cretaceous, about 76-73 million years ago",
+    where: "Western North America",
+    habitat: "Floodplains, forests, and coastal plains",
+    diet: "Herbivore; ate plants with a duck-billed mouth and grinding teeth",
+    facts: [
+      "Its long hollow crest may have helped make deep calls.",
+      "It could walk on two legs or four.",
+      "Its name means 'near crested lizard.'"
+    ]
+  },
+  allosaurus: {
+    lived: "Late Jurassic, about 155-145 million years ago",
+    where: "North America and possibly parts of Europe",
+    habitat: "Seasonal floodplains, fern prairies, and river-edge woodlands",
+    diet: "Carnivore; preyed on other Jurassic dinosaurs",
+    facts: [
+      "It had three-fingered hands with large claws.",
+      "It was one of the top predators of the Morrison Formation.",
+      "Its skull was lighter than T. rex but still dangerous."
+    ]
+  },
+  brachiosaurus: {
+    lived: "Late Jurassic, about 154-150 million years ago",
+    where: "North America, especially Colorado, Utah, and Wyoming",
+    habitat: "Warm floodplains with conifers, cycads, and tall vegetation",
+    diet: "Herbivore; browsed high vegetation",
+    facts: [
+      "Its front legs were longer than its back legs.",
+      "Its nostrils sat high on the skull.",
+      "Its high shoulders helped it reach food other herbivores could not."
+    ]
+  },
+  stegosaurus: {
+    lived: "Late Jurassic, about 155-150 million years ago",
+    where: "Western North America and possibly Portugal",
+    habitat: "Open floodplains and lightly wooded areas",
+    diet: "Herbivore; ate low-growing plants",
+    facts: [
+      "The tail spikes are nicknamed a thagomizer.",
+      "Its back plates may have helped with display or species recognition.",
+      "Its brain was small compared with its body size."
+    ]
+  },
+  ankylosaurus: {
+    lived: "Late Cretaceous, about 68-66 million years ago",
+    where: "Western North America",
+    habitat: "Wooded lowlands and floodplains",
+    diet: "Herbivore; cropped low plants",
+    facts: [
+      "It was covered in bony armor plates called osteoderms.",
+      "Its tail club could have been a serious defensive weapon.",
+      "It lived alongside T. rex and Triceratops."
+    ]
+  },
+  velociraptor: {
+    lived: "Late Cretaceous, about 75-71 million years ago",
+    where: "Mongolia and northern China",
+    habitat: "Dry, sandy environments with dunes, streams, and scrubby vegetation",
+    diet: "Carnivore; hunted small animals and possibly scavenged",
+    facts: [
+      "Real Velociraptor was much smaller than the movie version.",
+      "It almost certainly had feathers.",
+      "A famous fossil preserves Velociraptor locked in combat with Protoceratops."
+    ]
+  },
+  carnotaurus: {
+    lived: "Late Cretaceous, about 72-69 million years ago",
+    where: "Argentina",
+    habitat: "Seasonal plains, river areas, and dry woodland",
+    diet: "Carnivore",
+    facts: [
+      "Its name means 'meat-eating bull.'",
+      "It had short horns above the eyes.",
+      "Its arms were extremely reduced, even compared with many other theropods."
+    ]
+  },
+  dilophosaurus: {
+    lived: "Early Jurassic, about 193 million years ago",
+    where: "Southwestern United States",
+    habitat: "River floodplains and seasonally wet lowlands",
+    diet: "Carnivore; ate smaller dinosaurs and other animals",
+    facts: [
+      "It had two thin crests on its head.",
+      "There is no fossil evidence for the movie-style neck frill.",
+      "It was one of the largest predators of its early Jurassic environment."
+    ]
+  },
+  gallimimus: {
+    lived: "Late Cretaceous, about 70 million years ago",
+    where: "Mongolia",
+    habitat: "Open floodplains and semi-arid plains",
+    diet: "Likely omnivore; may have eaten plants, small animals, and eggs",
+    facts: [
+      "Its name means 'chicken mimic.'",
+      "It had long legs built for speed.",
+      "It belonged to the ostrich-like ornithomimids."
+    ]
+  },
+  pachycephalosaurus: {
+    lived: "Late Cretaceous, about 70-66 million years ago",
+    where: "Western North America",
+    habitat: "Woodlands and floodplains",
+    diet: "Probably herbivore or omnivore",
+    facts: [
+      "Its skull dome could be over 20 cm thick.",
+      "Scientists debate whether it used the dome for head-butting or display.",
+      "Its name means 'thick-headed lizard.'"
+    ]
+  },
+  iguanodon: {
+    lived: "Early Cretaceous, about 126-122 million years ago",
+    where: "Europe, especially Belgium and the United Kingdom",
+    habitat: "Forested floodplains and coastal lowlands",
+    diet: "Herbivore",
+    facts: [
+      "It had a famous thumb spike.",
+      "It was one of the first dinosaurs ever scientifically described.",
+      "It could probably move on two legs or four."
+    ]
+  },
+  diplodocus: {
+    lived: "Late Jurassic, about 154-152 million years ago",
+    where: "Western North America",
+    habitat: "Floodplains with rivers, conifers, ferns, and open spaces",
+    diet: "Herbivore; likely browsed low to mid-height plants",
+    facts: [
+      "It had an extremely long whip-like tail.",
+      "Its skull was small compared with its enormous body.",
+      "It was built longer and lower than many other sauropods."
+    ]
+  },
+  apatosaurus: {
+    lived: "Late Jurassic, about 152-151 million years ago",
+    where: "Western North America",
+    habitat: "River floodplains and open woodland",
+    diet: "Herbivore",
+    facts: [
+      "It had a thick, powerful neck.",
+      "It was more heavily built than Diplodocus.",
+      "The name Brontosaurus is closely tied to its scientific history."
+    ]
+  },
+  deinonychus: {
+    lived: "Early Cretaceous, about 115-108 million years ago",
+    where: "North America",
+    habitat: "Wooded floodplains and seasonal plains",
+    diet: "Carnivore",
+    facts: [
+      "Its name means 'terrible claw.'",
+      "It helped change scientific thinking about dinosaurs as active animals.",
+      "It had a large sickle claw on each second toe."
+    ]
+  },
+  microraptor: {
+    lived: "Early Cretaceous, about 125-120 million years ago",
+    where: "China",
+    habitat: "Forested lake environments",
+    diet: "Carnivore; ate small animals, including fish, mammals, and birds",
+    facts: [
+      "It had long feathers on both arms and legs.",
+      "It may have glided between trees.",
+      "Some fossils preserve dark, glossy feather coloration."
+    ]
+  },
+  archaeopteryx: {
+    lived: "Late Jurassic, about 150 million years ago",
+    where: "Germany",
+    habitat: "Tropical islands and lagoon environments",
+    diet: "Carnivore or insectivore; ate small animals",
+    facts: [
+      "It had feathers and wings, but also teeth and a long bony tail.",
+      "It is a key fossil in the story of bird evolution.",
+      "Its fossils come from fine limestone that preserved feather details."
+    ]
+  },
+  therizinosaurus: {
+    lived: "Late Cretaceous, about 70 million years ago",
+    where: "Mongolia",
+    habitat: "Wooded or semi-arid floodplain environments",
+    diet: "Probably herbivore or omnivore",
+    facts: [
+      "It had some of the longest hand claws of any known animal.",
+      "Despite the claws, it was related to meat-eating theropods.",
+      "It may have used its claws to pull branches or for defense."
+    ]
+  },
+  oviraptor: {
+    lived: "Late Cretaceous, about 75 million years ago",
+    where: "Mongolia",
+    habitat: "Dry dunes and semi-arid plains",
+    diet: "Omnivore; may have eaten plants, small animals, shellfish, or eggs",
+    facts: [
+      "Its name means 'egg thief,' but that reputation may be unfair.",
+      "Related fossils show adults brooding nests.",
+      "It had a short beaked skull and likely feathers."
+    ]
+  },
+  corythosaurus: {
+    lived: "Late Cretaceous, about 77-75 million years ago",
+    where: "Western North America",
+    habitat: "Coastal plains and river floodplains",
+    diet: "Herbivore",
+    facts: [
+      "Its crest looks a bit like a Corinthian helmet.",
+      "The hollow crest may have helped produce calls.",
+      "It belonged to the duck-billed hadrosaurs."
+    ]
+  },
+  lambeosaurus: {
+    lived: "Late Cretaceous, about 76-75 million years ago",
+    where: "Western North America",
+    habitat: "Coastal floodplains and forests",
+    diet: "Herbivore",
+    facts: [
+      "Its crest had a hatchet-like shape.",
+      "It was a lambeosaurine hadrosaur, a group famous for head crests.",
+      "Its teeth formed dental batteries for grinding plants."
+    ]
+  },
+  edmontosaurus: {
+    lived: "Late Cretaceous, about 73-66 million years ago",
+    where: "Western North America",
+    habitat: "Floodplains, coastal plains, and forests",
+    diet: "Herbivore",
+    facts: [
+      "Some fossils preserve skin impressions.",
+      "It was a large duck-billed dinosaur without a tall hollow crest.",
+      "It lived through the very end of the dinosaur age."
+    ]
+  },
+  styracosaurus: {
+    lived: "Late Cretaceous, about 76-75 million years ago",
+    where: "Alberta, Canada",
+    habitat: "River floodplains and lush coastal lowlands",
+    diet: "Herbivore",
+    facts: [
+      "It had a long nose horn and dramatic spikes around the frill.",
+      "Its name means 'spiked lizard.'",
+      "The frill may have helped with display and recognition."
+    ]
+  },
+  protoceratops: {
+    lived: "Late Cretaceous, about 75-71 million years ago",
+    where: "Mongolia and northern China",
+    habitat: "Desert and semi-desert dune environments",
+    diet: "Herbivore",
+    facts: [
+      "It was much smaller than Triceratops.",
+      "It had a parrot-like beak and a modest frill.",
+      "Many fossils are known, including nests and juveniles."
+    ]
+  },
+  giganotosaurus: {
+    lived: "Late Cretaceous, about 99-97 million years ago",
+    where: "Argentina",
+    habitat: "Warm floodplains and river systems",
+    diet: "Carnivore; likely hunted large herbivores",
+    facts: [
+      "It was one of the largest known meat-eating dinosaurs.",
+      "Its skull was long and low compared with T. rex.",
+      "It lived millions of years before T. rex."
+    ]
+  },
+  baryonyx: {
+    lived: "Early Cretaceous, about 130-125 million years ago",
+    where: "United Kingdom and nearby parts of Europe",
+    habitat: "Rivers, lakes, wetlands, and floodplains",
+    diet: "Fish and meat",
+    facts: [
+      "Fish scales were found with the original fossil.",
+      "It had a large thumb claw.",
+      "Its narrow snout helped it catch slippery prey."
+    ]
+  },
+  suchomimus: {
+    lived: "Early Cretaceous, about 125-112 million years ago",
+    where: "Niger, Africa",
+    habitat: "River deltas, floodplains, and wetlands",
+    diet: "Mostly fish, plus other prey",
+    facts: [
+      "Its name means 'crocodile mimic.'",
+      "It had a long narrow snout and big hand claws.",
+      "It was related to Spinosaurus but did not have the same tall sail."
+    ]
+  },
+  acrocanthosaurus: {
+    lived: "Early Cretaceous, about 113-110 million years ago",
+    where: "North America, especially Oklahoma, Texas, and nearby states",
+    habitat: "Floodplains, coastal plains, and open woodland",
+    diet: "Carnivore",
+    facts: [
+      "Its name means 'high-spined lizard.'",
+      "Tall neural spines formed a ridge along its back.",
+      "It was one of North America's biggest predators before T. rex."
+    ]
+  },
+  ceratosaurus: {
+    lived: "Late Jurassic, about 153-148 million years ago",
+    where: "North America, Portugal, and possibly Tanzania",
+    habitat: "River floodplains and wetland edges",
+    diet: "Carnivore",
+    facts: [
+      "It had a horn on its snout and small brow horns.",
+      "Its tail was deep and powerful.",
+      "It shared Jurassic ecosystems with Allosaurus and Stegosaurus."
+    ]
+  },
+  maiasaura: {
+    lived: "Late Cretaceous, about 76 million years ago",
+    where: "Montana, United States",
+    habitat: "Nesting grounds, floodplains, and coastal lowlands",
+    diet: "Herbivore",
+    facts: [
+      "Its name means 'good mother lizard.'",
+      "Huge nesting colonies have been found.",
+      "Fossils show growth stages from hatchlings to adults."
+    ]
+  },
+  kentrosaurus: {
+    lived: "Late Jurassic, about 155-150 million years ago",
+    where: "Tanzania",
+    habitat: "Warm floodplains with seasonal plant growth",
+    diet: "Herbivore",
+    facts: [
+      "It was a smaller relative of Stegosaurus.",
+      "It had plates near the shoulders and long spikes toward the hips and tail.",
+      "Its spikes were probably important for defense."
+    ]
+  },
+  utahraptor: {
+    lived: "Early Cretaceous, about 135-130 million years ago",
+    where: "Utah, United States",
+    habitat: "Seasonal floodplains and semi-arid habitats",
+    diet: "Carnivore",
+    facts: [
+      "It was much larger than Velociraptor.",
+      "It had a huge sickle claw on each foot.",
+      "It probably had feathers like other dromaeosaurs."
+    ]
+  }
+};
+
 const quizChoicePools = {
   tyrannosaur: ["Tyrannosaurus rex", "Tarbosaurus", "Daspletosaurus", "Albertosaurus", "Gorgosaurus", "Alioramus"],
   ceratopsian: ["Triceratops", "Torosaurus", "Styracosaurus", "Centrosaurus", "Protoceratops", "Pachyrhinosaurus", "Chasmosaurus"],
@@ -237,6 +614,7 @@ const state = {
   quizStreak: 0,
   quizAnswered: false,
   quizDifficulty: "expert",
+  quizOrder: [],
   offsets: {}
 };
 
@@ -696,6 +1074,7 @@ function renderBadges(scores) {
 function q(name, slug, era, group, view, position, scale, trait, expertClue) {
   return {
     name,
+    slug,
     image: `assets/quiz-${slug}.png`,
     era,
     group,
@@ -717,7 +1096,11 @@ function shuffle(items) {
 }
 
 function currentQuizItem() {
-  return quizItems[state.quizIndex % quizItems.length];
+  if (!state.quizOrder.length || state.quizIndex >= state.quizOrder.length) {
+    state.quizOrder = shuffle(quizItems.map((_, index) => index));
+    state.quizIndex = 0;
+  }
+  return quizItems[state.quizOrder[state.quizIndex]];
 }
 
 function quizChoices(item, expert) {
@@ -747,6 +1130,7 @@ function renderQuiz() {
   quizEra.textContent = item.era;
   quizView.textContent = expert ? item.view : "Full body view";
   quizPrompt.textContent = expert ? "Identify the dinosaur from a cropped specimen view." : "Which dinosaur is this?";
+  quizFeedback.classList.remove("is-revealed");
   quizFeedback.textContent = expert ? "Expert mode: no hint until you answer." : item.clue;
   quizScore.textContent = state.quizScore;
   quizTotal.textContent = state.quizTotal;
@@ -778,15 +1162,32 @@ function answerQuiz(answer) {
   quizScore.textContent = state.quizScore;
   quizTotal.textContent = state.quizTotal;
   quizStreak.textContent = `Streak ${state.quizStreak}`;
-  const anatomyNote = state.quizDifficulty === "expert" ? `${item.expertClue} ` : "";
-  quizFeedback.textContent = correct
-    ? `Correct. ${anatomyNote}${item.fact}`
-    : `Good try. The answer is ${item.name}. ${anatomyNote}${item.fact}`;
+  renderQuizFeedback(item, correct);
 }
 
 function nextQuiz() {
-  state.quizIndex = (state.quizIndex + 1) % quizItems.length;
+  state.quizIndex += 1;
   renderQuiz();
+}
+
+function renderQuizFeedback(item, correct) {
+  const guide = quizFieldGuide[item.slug];
+  const anatomyNote = state.quizDifficulty === "expert" ? item.expertClue : item.clue;
+  quizFeedback.classList.add("is-revealed");
+  quizFeedback.innerHTML = `
+    <div class="quiz-result ${correct ? "correct" : "wrong"}">${correct ? "Correct." : `Good try. The answer is ${item.name}.`}</div>
+    <div class="dino-guide">
+      <h3>${item.name}</h3>
+      <p>${anatomyNote} ${item.fact}</p>
+      <div class="guide-grid">
+        <div><span>Time period</span><b>${guide.lived}</b></div>
+        <div><span>Where it lived</span><b>${guide.where}</b></div>
+        <div><span>Habitat</span><b>${guide.habitat}</b></div>
+        <div><span>Diet</span><b>${guide.diet}</b></div>
+      </div>
+      <ul>${guide.facts.map((fact) => `<li>${fact}</li>`).join("")}</ul>
+    </div>
+  `;
 }
 
 function buildControls() {
@@ -979,6 +1380,7 @@ function snapshot() {
 }
 
 function showTab(tabName) {
+  document.querySelector(".game-shell").classList.toggle("quiz-focus", tabName === "quiz");
   document.querySelectorAll(".tab").forEach((item) => {
     const active = item.dataset.tab === tabName;
     item.classList.toggle("is-active", active);

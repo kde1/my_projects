@@ -48,6 +48,19 @@ select {
   overflow: hidden;
 }
 
+.game-shell.quiz-focus {
+  grid-template-columns: 1fr;
+}
+
+.game-shell.quiz-focus .workbench {
+  display: none;
+}
+
+.game-shell.quiz-focus .panel {
+  height: calc(100vh - 36px);
+  min-height: calc(100vh - 36px);
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -433,6 +446,68 @@ h1 {
   gap: 12px;
 }
 
+.quiz-focus #quizPanel {
+  padding: 18px;
+}
+
+.quiz-focus .quiz-card {
+  grid-template-columns: minmax(380px, 1.2fr) minmax(320px, .8fr);
+  grid-template-areas:
+    "topline topline"
+    "difficulty meta"
+    "image question"
+    "image options"
+    "image feedback"
+    "image next";
+  align-items: start;
+  gap: 16px 22px;
+  min-height: calc(100vh - 120px);
+  margin: 0 auto;
+  max-width: 1260px;
+}
+
+.quiz-focus .quiz-topline {
+  grid-area: topline;
+}
+
+.quiz-focus .compact-control {
+  grid-area: difficulty;
+}
+
+.quiz-focus .quiz-meta {
+  grid-area: meta;
+  justify-content: end;
+}
+
+.quiz-focus .quiz-image-frame {
+  grid-area: image;
+  aspect-ratio: 16 / 10;
+  min-height: min(62vh, 640px);
+}
+
+.quiz-focus .quiz-question {
+  grid-area: question;
+}
+
+.quiz-focus .quiz-options {
+  grid-area: options;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quiz-focus .quiz-feedback {
+  grid-area: feedback;
+  font-size: 1.04rem;
+}
+
+.quiz-focus #nextQuizBtn {
+  grid-area: next;
+}
+
+.quiz-focus .quiz-option {
+  min-height: 56px;
+  padding: 10px 14px;
+}
+
 .quiz-topline,
 .quiz-question {
   display: flex;
@@ -526,6 +601,73 @@ h1 {
   min-height: 64px;
   color: #dce7d3;
   line-height: 1.42;
+}
+
+.quiz-feedback.is-revealed {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz-result {
+  color: #fff3cf;
+  font-weight: 900;
+}
+
+.quiz-result.correct {
+  color: #c9f2a9;
+}
+
+.quiz-result.wrong {
+  color: #f1b39c;
+}
+
+.dino-guide {
+  display: grid;
+  gap: 10px;
+}
+
+.dino-guide h3 {
+  margin: 0;
+  color: #f4e4b9;
+  font-size: 1.1rem;
+}
+
+.dino-guide p {
+  color: #dce7d3;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.guide-grid div {
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(0, 0, 0, .18);
+  padding: 8px;
+}
+
+.guide-grid span {
+  display: block;
+  margin-bottom: 4px;
+  color: #aebda8;
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.guide-grid b {
+  color: #fff3cf;
+  font-size: .86rem;
+  line-height: 1.3;
+}
+
+.dino-guide ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .toggle {
@@ -624,6 +766,33 @@ h1 {
 
   .stage {
     min-height: 58vh;
+  }
+
+  .game-shell.quiz-focus .panel {
+    height: auto;
+    min-height: calc(100vh - 20px);
+  }
+
+  .quiz-focus .quiz-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topline"
+      "difficulty"
+      "meta"
+      "image"
+      "question"
+      "options"
+      "feedback"
+      "next";
+    min-height: auto;
+  }
+
+  .quiz-focus .quiz-meta {
+    justify-content: start;
+  }
+
+  .quiz-focus .quiz-image-frame {
+    min-height: 42vh;
   }
 }
 
