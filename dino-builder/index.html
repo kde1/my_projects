@@ -6,7 +6,37 @@
     <title>Isaac's Dino DNA Lab</title>
     <link rel="stylesheet" href="styles.css">
   </head>
-  <body>
+  <body class="landing-active">
+    <section class="landing-page" id="landingPage" aria-label="Dino lab landing page">
+      <img class="landing-bg" src="assets/quiz-tyrannosaurus.png" alt="">
+      <div class="landing-shade"></div>
+      <div class="landing-content">
+        <p class="landing-kicker">Fossil gates open</p>
+        <h1>Isaac's Dino DNA Lab</h1>
+        <p class="landing-copy">Build wild prehistoric creatures, crack fossil ID challenges, and print field sheets for the next expedition.</p>
+        <div class="landing-actions">
+          <button class="landing-primary" type="button" data-landing-target="parts">Start Building</button>
+          <button class="landing-action" type="button" data-landing-target="quiz">Fossil Quiz</button>
+          <button class="landing-action" type="button" data-landing-target="gallery">Gallery</button>
+          <button class="landing-action" type="button" data-landing-target="galleryQuiz">GalleryQuiz</button>
+          <button class="landing-print" id="landingPrint" type="button">Print landing page</button>
+        </div>
+      </div>
+      <div class="landing-strip" aria-label="Dino lab highlights">
+        <article>
+          <img src="assets/quiz-triceratops.png" alt="">
+          <b>Horned Defenders</b>
+        </article>
+        <article>
+          <img src="assets/quiz-spinosaurus.png" alt="">
+          <b>River Hunters</b>
+        </article>
+        <article>
+          <img src="assets/quiz-archaeopteryx.png" alt="">
+          <b>Feathered Fossils</b>
+        </article>
+      </div>
+    </section>
     <main class="game-shell">
       <section class="workbench" aria-label="Dinosaur construction area">
         <div class="topbar">
@@ -87,6 +117,8 @@
           <button class="tab is-active" type="button" data-tab="parts" role="tab" aria-selected="true">Parts</button>
           <button class="tab" type="button" data-tab="dna" role="tab" aria-selected="false">DNA</button>
           <button class="tab" type="button" data-tab="quiz" role="tab" aria-selected="false">Quiz</button>
+          <button class="tab" type="button" data-tab="gallery" role="tab" aria-selected="false">Gallery</button>
+          <button class="tab" type="button" data-tab="galleryQuiz" role="tab" aria-selected="false">GalleryQuiz</button>
           <button class="tab" type="button" data-tab="skin" role="tab" aria-selected="false">Skin</button>
           <button class="tab" type="button" data-tab="test" role="tab" aria-selected="false">Test</button>
         </div>
@@ -139,8 +171,8 @@
             <label class="control compact-control">
               <span>Difficulty</span>
               <select id="quizDifficulty">
-                <option value="expert" selected>Expert</option>
-                <option value="field">Field Guide</option>
+                <option value="expert">Expert</option>
+                <option value="field" selected>Field Guide</option>
               </select>
             </label>
             <div class="quiz-meta">
@@ -157,6 +189,40 @@
             <div class="quiz-options" id="quizOptions"></div>
             <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
             <button class="primary-button" id="nextQuizBtn" type="button">Next Fossil</button>
+          </section>
+        </div>
+
+        <div class="tab-panel" id="galleryPanel">
+          <section class="gallery-shell">
+            <div class="gallery-head">
+              <div>
+                <h2>Dinosaur Gallery</h2>
+                <p>Browse every fossil from the quiz field guide.</p>
+              </div>
+              <div class="gallery-tools">
+                <button class="gallery-print-button" id="galleryPrint" type="button">Print gallery</button>
+                <div class="gallery-tabs" id="galleryTabs" role="tablist" aria-label="Gallery pages"></div>
+              </div>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+            <div class="gallery-print-pages" id="galleryPrintPages" aria-hidden="true"></div>
+          </section>
+        </div>
+
+        <div class="tab-panel" id="galleryQuizPanel">
+          <section class="gallery-shell">
+            <div class="gallery-head">
+              <div>
+                <h2>Dinosaur GalleryQuiz</h2>
+                <p>Tap a dinosaur to reveal its field guide card.</p>
+              </div>
+              <div class="gallery-tools">
+                <button class="gallery-print-button" id="galleryQuizPrint" type="button">Print subtab</button>
+                <div class="gallery-tabs" id="galleryQuizTabs" role="tablist" aria-label="GalleryQuiz pages"></div>
+              </div>
+            </div>
+            <div class="gallery-grid" id="galleryQuizGrid"></div>
+            <div class="gallery-print-pages" id="galleryQuizPrintPages" aria-hidden="true"></div>
           </section>
         </div>
 

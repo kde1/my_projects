@@ -613,8 +613,11 @@ const state = {
   quizTotal: 0,
   quizStreak: 0,
   quizAnswered: false,
-  quizDifficulty: "expert",
+  quizDifficulty: "field",
   quizOrder: [],
+  galleryPage: 0,
+  galleryQuizPage: 0,
+  galleryQuizRevealed: new Set(),
   offsets: {}
 };
 
@@ -652,6 +655,15 @@ const quizDifficulty = document.querySelector("#quizDifficulty");
 const quizEra = document.querySelector("#quizEra");
 const quizView = document.querySelector("#quizView");
 const quizPrompt = document.querySelector("#quizPrompt");
+const landingPrint = document.querySelector("#landingPrint");
+const galleryPrint = document.querySelector("#galleryPrint");
+const galleryTabs = document.querySelector("#galleryTabs");
+const galleryGrid = document.querySelector("#galleryGrid");
+const galleryPrintPages = document.querySelector("#galleryPrintPages");
+const galleryQuizTabs = document.querySelector("#galleryQuizTabs");
+const galleryQuizGrid = document.querySelector("#galleryQuizGrid");
+const galleryQuizPrint = document.querySelector("#galleryQuizPrint");
+const galleryQuizPrintPages = document.querySelector("#galleryQuizPrintPages");
 
 function path(attrs) {
   return `<path ${attrs}></path>`;
@@ -1126,6 +1138,7 @@ function renderQuiz() {
   quizImage.style.objectPosition = expert ? item.crop.position : "50% 50%";
   quizImage.style.transform = expert ? `scale(${item.crop.scale})` : "scale(1)";
   quizImage.classList.toggle("expert-crop", expert);
+  quizImage.classList.toggle("field-guide", !expert);
   quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${choice}">${choice}</button>`).join("");
   quizEra.textContent = item.era;
   quizView.textContent = expert ? item.view : "Full body view";
@@ -1188,6 +1201,132 @@ function renderQuizFeedback(item, correct) {
       <ul>${guide.facts.map((fact) => `<li>${fact}</li>`).join("")}</ul>
     </div>
   `;
+}
+
+function renderGallery(options = {}) {
+  const quizMode = options.quizMode || false;
+  const tabsEl = quizMode ? galleryQuizTabs : galleryTabs;
+  const gridEl = quizMode ? galleryQuizGrid : galleryGrid;
+  const pageKey = quizMode ? "galleryQuizPage" : "galleryPage";
+  const pageSize = 10;
+  const pageCount = Math.ceil(quizItems.length / pageSize);
+  state[pageKey] = Math.max(0, Math.min(state[pageKey], pageCount - 1));
+  tabsEl.innerHTML = Array.from({ length: pageCount }, (_, index) => `
+    <button class="gallery-tab ${index === state[pageKey] ? "is-active" : ""}" type="button" data-page="${index}" role="tab" aria-selected="${index === state[pageKey]}">
+      ${index * pageSize + 1}-${Math.min((index + 1) * pageSize, quizItems.length)}
+    </button>
+  `).join("");
+  tabsEl.querySelectorAll(".gallery-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+      state[pageKey] = Number(button.dataset.page);
+      renderGallery({ quizMode });
+    });
+  });
+  const start = state[pageKey] * pageSize;
+  gridEl.innerHTML = quizItems.slice(start, start + pageSize).map((item) => {
+    const guide = quizFieldGuide[item.slug];
+    const revealed = !quizMode || state.galleryQuizRevealed.has(item.slug);
+    const copy = revealed ? `
+      <div class="gallery-card-copy">
+        <h3>${item.name}</h3>
+        <p>${item.era}</p>
+        <dl>
+          <div><dt>Diet</dt><dd>${guide.diet}</dd></div>
+          <div><dt>Habitat</dt><dd>${guide.habitat}</dd></div>
+        </dl>
+      </div>
+    ` : `<div class="gallery-card-copy is-hidden"><span>Tap to reveal</span></div>`;
+    if (quizMode) {
+      return `
+        <button class="gallery-card gallery-quiz-card ${revealed ? "is-revealed" : ""}" type="button" data-slug="${item.slug}" aria-label="${revealed ? item.name : "Reveal dinosaur"}">
+          <div class="gallery-image-frame">
+            <img src="${item.image}" alt="">
+          </div>
+          ${copy}
+        </button>
+      `;
+    }
+    return `
+      <article class="gallery-card">
+        <div class="gallery-image-frame">
+          <img src="${item.image}" alt="${item.name}">
+        </div>
+        ${copy}
+      </article>
+    `;
+  }).join("");
+  if (!quizMode) renderGalleryPrintPages();
+  if (quizMode) {
+    gridEl.querySelectorAll(".gallery-quiz-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        if (state.galleryQuizRevealed.has(card.dataset.slug)) {
+          state.galleryQuizRevealed.delete(card.dataset.slug);
+        } else {
+          state.galleryQuizRevealed.add(card.dataset.slug);
+        }
+        renderGallery({ quizMode: true });
+      });
+    });
+    renderGalleryQuizPrintPages();
+  }
+}
+
+function renderGalleryPrintPages() {
+  const pageSize = 10;
+  galleryPrintPages.innerHTML = Array.from({ length: Math.ceil(quizItems.length / pageSize) }, (_, pageIndex) => {
+    const start = pageIndex * pageSize;
+    const pageItems = quizItems.slice(start, start + pageSize);
+    return `
+      <section class="gallery-print-page gallery-print-page-with-info">
+        <header>
+          <h2>Dinosaur Gallery</h2>
+          <p>Subtab ${start + 1}-${Math.min(start + pageSize, quizItems.length)}</p>
+        </header>
+        <div class="gallery-print-grid">
+          ${pageItems.map((item) => {
+            const guide = quizFieldGuide[item.slug];
+            return `
+              <article class="gallery-print-card">
+                <img src="${item.image}" alt="">
+                <div class="gallery-print-info">
+                  <h3>${item.name}</h3>
+                  <p>${item.era}</p>
+                  <b>Diet</b>
+                  <span>${guide.diet}</span>
+                  <b>Habitat</b>
+                  <span>${guide.habitat}</span>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `;
+  }).join("");
+}
+
+function renderGalleryQuizPrintPages() {
+  const pageSize = 10;
+  galleryQuizPrintPages.innerHTML = Array.from({ length: Math.ceil(quizItems.length / pageSize) }, (_, pageIndex) => {
+    const start = pageIndex * pageSize;
+    const pageItems = quizItems.slice(start, start + pageSize);
+    return `
+      <section class="gallery-print-page">
+        <header>
+          <h2>Dinosaur GalleryQuiz</h2>
+          <p>Subtab ${start + 1}-${Math.min(start + pageSize, quizItems.length)}</p>
+        </header>
+        <div class="gallery-print-grid">
+          ${pageItems.map((item, index) => `
+            <article class="gallery-print-card">
+              <img src="${item.image}" alt="">
+              <div class="gallery-print-answer">${start + index + 1}. Name:</div>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }).join("");
 }
 
 function buildControls() {
@@ -1381,6 +1520,9 @@ function snapshot() {
 
 function showTab(tabName) {
   document.querySelector(".game-shell").classList.toggle("quiz-focus", tabName === "quiz");
+  document.querySelector(".game-shell").classList.toggle("gallery-focus", tabName === "gallery" || tabName === "galleryQuiz");
+  if (tabName === "gallery") renderGallery();
+  if (tabName === "galleryQuiz") renderGallery({ quizMode: true });
   document.querySelectorAll(".tab").forEach((item) => {
     const active = item.dataset.tab === tabName;
     item.classList.toggle("is-active", active);
@@ -1434,14 +1576,37 @@ document.querySelector("#spliceBtn").addEventListener("click", spliceDna);
 document.querySelector("#randomizeBtn").addEventListener("click", randomize);
 document.querySelector("#snapshotBtn").addEventListener("click", snapshot);
 document.querySelector("#testBtn").addEventListener("click", runFieldTest);
+document.querySelectorAll("[data-landing-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.body.classList.remove("landing-active");
+    showTab(button.dataset.landingTarget);
+  });
+});
 nextQuizBtn.addEventListener("click", nextQuiz);
 quizDifficulty.addEventListener("change", (event) => {
   state.quizDifficulty = event.target.value;
   renderQuiz();
 });
+landingPrint.addEventListener("click", () => {
+  document.body.dataset.printMode = "landing";
+  window.print();
+});
+galleryPrint.addEventListener("click", () => {
+  document.body.dataset.printMode = "gallery";
+  window.print();
+});
+galleryQuizPrint.addEventListener("click", () => {
+  document.body.dataset.printMode = "galleryQuiz";
+  window.print();
+});
+window.addEventListener("afterprint", () => {
+  delete document.body.dataset.printMode;
+});
 
 buildControls();
 buildDnaLab();
 renderQuiz();
+renderGallery();
+renderGallery({ quizMode: true });
 syncInputs();
 renderDino();
