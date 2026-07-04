@@ -1,0 +1,473 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #11150f;
+  color: #fff7e1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    linear-gradient(rgba(12, 18, 12, .58), rgba(12, 18, 12, .74)),
+    url("../dino-builder/assets/prehistoric-habitat.png") center / cover fixed,
+    #11150f;
+}
+
+button {
+  font: inherit;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+  min-height: 100vh;
+  padding: 18px;
+}
+
+.board-zone,
+.control-panel {
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(15, 22, 15, .82);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .36);
+}
+
+.board-zone {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(7, 12, 8, .48);
+}
+
+.kicker,
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.kicker {
+  color: #e0bc62;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin-top: 2px;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: .92;
+}
+
+.turn-pill {
+  min-width: 148px;
+  border: 1px solid rgba(224, 188, 98, .52);
+  background: rgba(224, 188, 98, .16);
+  color: #ffe9ac;
+  padding: 10px 12px;
+  text-align: center;
+  font-weight: 900;
+}
+
+.board-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.board-wrap::before {
+  position: absolute;
+  inset: 18px;
+  content: "";
+  background:
+    linear-gradient(rgba(255, 247, 225, .08), rgba(255, 247, 225, .08)),
+    url("../dino-builder/assets/prehistoric-habitat.png") center / cover;
+  filter: saturate(.82) contrast(1.08);
+}
+
+.board,
+.track-layer {
+  width: min(100%, calc(100vh - 128px));
+  max-width: 860px;
+  aspect-ratio: 1;
+}
+
+.board {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  border: 3px solid #2f2615;
+  background: rgba(35, 43, 25, .82);
+}
+
+.track-layer {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid rgba(48, 37, 21, .45);
+  padding: 6px;
+  overflow: hidden;
+}
+
+.cell:nth-child(odd) {
+  background: rgba(207, 183, 109, .62);
+}
+
+.cell:nth-child(even) {
+  background: rgba(111, 143, 84, .66);
+}
+
+.cell:nth-child(5n) {
+  background: rgba(84, 130, 126, .64);
+}
+
+.cell.is-nest {
+  background: linear-gradient(135deg, #ffe8a3, #7fb071);
+}
+
+.cell.is-ladder {
+  box-shadow: inset 0 0 0 4px rgba(248, 220, 129, .42);
+}
+
+.cell.is-slide {
+  box-shadow: inset 0 0 0 4px rgba(72, 37, 25, .48);
+}
+
+.num {
+  position: relative;
+  z-index: 2;
+  color: rgba(37, 31, 20, .78);
+  font-size: clamp(.62rem, 1.2vw, .9rem);
+  font-weight: 900;
+}
+
+.terrain {
+  position: absolute;
+  right: 5px;
+  bottom: 4px;
+  color: rgba(28, 22, 13, .64);
+  font-size: clamp(1rem, 2.2vw, 1.7rem);
+  font-weight: 900;
+}
+
+.token {
+  position: absolute;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  width: 7.3%;
+  aspect-ratio: 1;
+  border: 3px solid rgba(255, 255, 255, .86);
+  border-radius: 50%;
+  color: #1b160c;
+  font-size: clamp(1rem, 2vw, 1.7rem);
+  font-weight: 1000;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .34);
+  transform: translate(-50%, -50%);
+  transition: left .22s ease, top .22s ease, transform .18s ease;
+}
+
+.token.is-jumping {
+  transform: translate(-50%, -62%) scale(1.08);
+}
+
+.token[data-player="0"] {
+  background: #f0b748;
+}
+
+.token[data-player="1"] {
+  background: #78c6d3;
+}
+
+.connector-ladder {
+  stroke: #f8d76b;
+  stroke-width: 18;
+  stroke-linecap: round;
+  filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .28));
+}
+
+.connector-ladder-rung {
+  stroke: rgba(255, 250, 219, .88);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.connector-slide {
+  stroke: #5a2b21;
+  stroke-width: 23;
+  stroke-linecap: round;
+  fill: none;
+  filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .28));
+}
+
+.connector-slide-highlight {
+  stroke: rgba(255, 169, 90, .78);
+  stroke-width: 7;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.control-panel {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  gap: 14px;
+  padding: 14px;
+}
+
+.hero-dino {
+  position: relative;
+  min-height: 190px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .15);
+  background: #161b13;
+}
+
+.hero-dino img {
+  display: block;
+  width: 100%;
+  height: 225px;
+  object-fit: cover;
+}
+
+.hero-copy {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 42px 14px 14px;
+  background: linear-gradient(transparent, rgba(7, 10, 7, .9));
+}
+
+.hero-copy p {
+  color: #fff3cf;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.dice-card,
+.field-guide,
+.player-card {
+  border: 1px solid rgba(255, 255, 255, .13);
+  background: rgba(255, 255, 255, .07);
+}
+
+.dice-card {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+}
+
+.roll-button {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  border: 0;
+  background: #e0bc62;
+  color: #171008;
+  cursor: pointer;
+  font-weight: 1000;
+}
+
+.roll-button:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.roll-button span {
+  font-size: 2.3rem;
+  line-height: 1;
+}
+
+#message {
+  color: #e9eedf;
+  line-height: 1.38;
+}
+
+.players {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.player-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+}
+
+.player-chip {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  aspect-ratio: 1;
+  border: 2px solid rgba(255, 255, 255, .78);
+  border-radius: 50%;
+  color: #171008;
+  font-weight: 1000;
+}
+
+.player-card[data-player="0"] .player-chip {
+  background: #f0b748;
+}
+
+.player-card[data-player="1"] .player-chip {
+  background: #78c6d3;
+}
+
+.player-card.is-active {
+  border-color: #e0bc62;
+  background: rgba(224, 188, 98, .18);
+}
+
+.player-name {
+  color: #fff3cf;
+  font-weight: 900;
+}
+
+.player-pos {
+  color: #becbad;
+  font-size: .9rem;
+}
+
+.field-guide {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+}
+
+.field-guide h2 {
+  color: #fff3cf;
+  font-size: 1rem;
+}
+
+.guide-row {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.guide-row p {
+  color: #dce5d0;
+  line-height: 1.35;
+}
+
+.legend {
+  display: block;
+  width: 28px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.legend.ladder {
+  background: #f8d76b;
+}
+
+.legend.slide {
+  background: #5a2b21;
+}
+
+.legend.nest {
+  background: linear-gradient(90deg, #ffe8a3, #7fb071);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.actions button {
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(255, 255, 255, .1);
+  color: #fff7e1;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.actions button:hover,
+.roll-button:hover {
+  filter: brightness(1.07);
+}
+
+@media (max-width: 980px) {
+  .game {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .board,
+  .track-layer {
+    width: min(100%, 88vh);
+  }
+
+  .control-panel {
+    grid-template-rows: auto;
+  }
+
+  .hero-dino {
+    min-height: 160px;
+  }
+}
+
+@media (max-width: 560px) {
+  .titlebar,
+  .dice-card {
+    grid-template-columns: 1fr;
+  }
+
+  .titlebar {
+    display: grid;
+  }
+
+  .board-wrap {
+    padding: 8px;
+  }
+
+  .board-wrap::before {
+    inset: 8px;
+  }
+
+  .cell {
+    padding: 3px;
+  }
+
+  .token {
+    border-width: 2px;
+    font-size: .8rem;
+  }
+}

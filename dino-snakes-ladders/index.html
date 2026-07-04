@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dino Ladders</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game">
+      <section class="board-zone" aria-label="Dinosaur snakes and ladders board">
+        <div class="titlebar">
+          <div>
+            <p class="kicker">Prehistoric trail race</p>
+            <h1>Dino Ladders</h1>
+          </div>
+          <div class="turn-pill" id="turnPill">Amber is ready</div>
+        </div>
+
+        <div class="board-wrap">
+          <div class="track-layer" aria-hidden="true">
+            <svg id="trackSvg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="board" id="board" aria-label="100 square dinosaur game board"></div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="Game controls">
+        <div class="hero-dino">
+          <img src="../dino-builder/assets/quiz-tyrannosaurus.png" alt="Tyrannosaurus in jungle">
+          <div class="hero-copy">
+            <p>Escape the tar pits and reach the hatchery first.</p>
+          </div>
+        </div>
+
+        <section class="dice-card">
+          <button class="roll-button" id="rollButton" type="button">
+            <span id="dieFace">1</span>
+            <b>Roll</b>
+          </button>
+          <p id="message">Amber starts at the fossil gate.</p>
+        </section>
+
+        <section class="players" id="players"></section>
+
+        <section class="field-guide">
+          <h2>Trail Guide</h2>
+          <div class="guide-row">
+            <span class="legend ladder"></span>
+            <p>Bone ladders and vines carry dinos upward.</p>
+          </div>
+          <div class="guide-row">
+            <span class="legend slide"></span>
+            <p>Tar pits and tricky tails slide dinos backward.</p>
+          </div>
+          <div class="guide-row">
+            <span class="legend nest"></span>
+            <p>Land exactly on 100 to reach the hatchery.</p>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button id="twoPlayerButton" type="button">Two players</button>
+          <button id="resetButton" type="button">New game</button>
+        </div>
+      </aside>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

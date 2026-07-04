@@ -1358,3 +1358,9 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Visible keyboard focus for all interactive controls. */
+:focus-visible {
+  outline: 3px solid #2f6df6;
+  outline-offset: 2px;
+}

@@ -9,7 +9,9 @@
   <body>
     <main class="app-shell">
       <section class="map-stage" aria-label="Interactive map of Switzerland">
-        <canvas id="swissMap" width="2400" height="1600"></canvas>
+        <canvas id="swissMap" width="2400" height="1600" role="img" aria-label="Map of Switzerland. Use the place list below to collect stamps with a keyboard."></canvas>
+        <nav class="place-jump-list sr-only" id="placeJumpList" aria-label="Places to visit"></nav>
+        <p class="sr-only" id="srStatus" aria-live="polite"></p>
         <div class="map-overlay top-left">
           <div class="brand">
             <span class="flag" aria-hidden="true">+</span>

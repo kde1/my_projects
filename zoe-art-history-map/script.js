@@ -3,6 +3,7 @@ const movements = [
     id: "impressionism",
     name: "Impressionism",
     date: "France, 1870s",
+    era: "1870s",
     map: { left: 43, top: 32 },
     color: "#80b7d9",
     className: "art-impressionism",
@@ -27,6 +28,7 @@ const movements = [
     id: "surrealism",
     name: "Surrealism",
     date: "Europe and beyond, 1920s",
+    era: "1920s",
     map: { left: 39, top: 49 },
     color: "#e45f92",
     className: "art-surrealism",
@@ -51,6 +53,7 @@ const movements = [
     id: "pop",
     name: "Pop Art",
     date: "US and UK, 1950s-1960s",
+    era: "1950s-1960s",
     map: { left: 19, top: 42 },
     color: "#d84e3b",
     className: "art-pop",
@@ -75,6 +78,7 @@ const movements = [
     id: "ukiyo",
     name: "Japanese Prints",
     date: "Japan, 1600s-1800s",
+    era: "1600s-1800s",
     map: { left: 80, top: 37 },
     color: "#2066b2",
     className: "art-ukiyo",
@@ -99,6 +103,7 @@ const movements = [
     id: "islamic",
     name: "Islamic Geometric Art",
     date: "Middle East, North Africa, Spain, 700s onward",
+    era: "700s onward",
     map: { left: 55, top: 55 },
     color: "#2f8a6d",
     className: "art-islamic",
@@ -123,6 +128,7 @@ const movements = [
     id: "bauhaus",
     name: "Bauhaus",
     date: "Germany, 1919-1933",
+    era: "1919-1933",
     map: { left: 47, top: 26 },
     color: "#f2c94c",
     className: "art-bauhaus",
@@ -145,13 +151,33 @@ const movements = [
   }
 ];
 
+function loadSparks() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("zoe-art-sparks") || "[]");
+    return Array.isArray(stored) ? stored : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const state = {
   selected: movements[0],
   view: "map",
   tool: "",
-  earned: JSON.parse(localStorage.getItem("zoe-art-sparks") || "[]"),
+  earned: loadSparks(),
   drawing: false,
-  lastPoint: null
+  lastPoint: null,
+  hasDrawn: false,
+  quizAnswered: false
 };
 
 const elements = {
@@ -177,32 +203,47 @@ const elements = {
   clearCanvas: document.querySelector("#clearCanvas"),
   completeActivity: document.querySelector("#completeActivity"),
   quizQuestion: document.querySelector("#quizQuestion"),
-  quizOptions: document.querySelector("#quizOptions")
+  quizOptions: document.querySelector("#quizOptions"),
+  srStatus: document.querySelector("#srStatus")
 };
+
+function announce(message) {
+  if (elements.srStatus) elements.srStatus.textContent = message;
+}
 
 const ctx = elements.canvas.getContext("2d");
 
 function saveSparks() {
-  localStorage.setItem("zoe-art-sparks", JSON.stringify(state.earned));
+  try {
+    localStorage.setItem("zoe-art-sparks", JSON.stringify(state.earned));
+  } catch (error) {
+    /* storage unavailable (private mode / disabled) — keep progress in memory */
+  }
 }
 
 function renderNavigation() {
-  elements.worldBoard.innerHTML = movements.map((movement) => `
-    <button class="map-pin ${state.selected.id === movement.id ? "active" : ""}" data-id="${movement.id}" style="left:${movement.map.left}%;top:${movement.map.top}%">
-      <span class="pin-dot" style="background:${movement.color}"></span>
-      <strong>${movement.name}</strong>
+  elements.worldBoard.innerHTML = movements.map((movement) => {
+    const active = state.selected.id === movement.id;
+    return `
+    <button class="map-pin ${active ? "active" : ""}" data-id="${escapeHtml(movement.id)}" aria-pressed="${active}" style="left:${movement.map.left}%;top:${movement.map.top}%">
+      <span class="pin-dot" style="background:${escapeHtml(movement.color)}"></span>
+      <strong>${escapeHtml(movement.name)}</strong>
     </button>
-  `).join("");
+  `;
+  }).join("");
 
   elements.timelineView.innerHTML = `
     <div class="timeline-line">
-      ${movements.map((movement) => `
-        <button class="time-card ${state.selected.id === movement.id ? "active" : ""}" data-id="${movement.id}">
-          <span>${movement.date.split(",")[1]?.trim() || movement.date}</span>
-          <strong>${movement.name}</strong>
-          <p>${movement.summary.slice(0, 82)}...</p>
+      ${movements.map((movement) => {
+        const active = state.selected.id === movement.id;
+        return `
+        <button class="time-card ${active ? "active" : ""}" data-id="${escapeHtml(movement.id)}" aria-pressed="${active}">
+          <span>${escapeHtml(movement.era || movement.date)}</span>
+          <strong>${escapeHtml(movement.name)}</strong>
+          <p>${escapeHtml(movement.summary.slice(0, 82))}...</p>
         </button>
-      `).join("")}
+      `;
+      }).join("")}
     </div>
   `;
 
@@ -214,8 +255,8 @@ function renderNavigation() {
 function renderPassport() {
   elements.sparkCount.textContent = state.earned.length;
   elements.sparkGrid.innerHTML = movements.map((movement) => `
-    <span class="spark ${state.earned.includes(movement.id) ? "earned" : ""}" title="${movement.name}">
-      ${state.earned.includes(movement.id) ? "*" : movement.name[0]}
+    <span class="spark ${state.earned.includes(movement.id) ? "earned" : ""}" title="${escapeHtml(movement.name)}">
+      ${state.earned.includes(movement.id) ? "*" : escapeHtml(movement.name[0])}
     </span>
   `).join("");
 }
@@ -230,7 +271,7 @@ function renderDetail() {
   elements.movementName.textContent = movement.name;
   elements.movementSummary.textContent = movement.summary;
   elements.factRow.innerHTML = movement.facts.map(([label, value]) => `
-    <div class="fact"><b>${label}</b>${value}</div>
+    <div class="fact"><b>${escapeHtml(label)}</b>${escapeHtml(value)}</div>
   `).join("");
 }
 
@@ -240,32 +281,58 @@ function renderActivity() {
   elements.activityTitle.textContent = movement.activity.title;
   elements.activityPrompt.textContent = movement.activity.prompt;
   elements.activityControls.innerHTML = movement.activity.tools.map((tool, index) => `
-    <button class="control-chip ${index === 0 ? "active" : ""}" type="button" data-tool="${tool}">${tool}</button>
+    <button class="control-chip ${index === 0 ? "active" : ""}" type="button" aria-pressed="${index === 0}" data-tool="${escapeHtml(tool)}">${escapeHtml(tool)}</button>
   `).join("");
 
   document.querySelectorAll("[data-tool]").forEach((button) => {
     button.addEventListener("click", () => {
       state.tool = button.dataset.tool;
-      document.querySelectorAll("[data-tool]").forEach((item) => item.classList.toggle("active", item === button));
+      document.querySelectorAll("[data-tool]").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
     });
   });
 
+  state.hasDrawn = false;
   clearCanvas();
   drawStarter(movement.id);
 }
 
+function lockQuiz(reveal) {
+  state.quizAnswered = true;
+  document.querySelectorAll("[data-answer]").forEach((button) => {
+    button.disabled = true;
+    if (reveal && Number(button.dataset.answer) === state.selected.quiz.answer) {
+      button.classList.add("correct");
+    }
+  });
+}
+
 function renderQuiz() {
   const { quiz } = state.selected;
+  const alreadyEarned = state.earned.includes(state.selected.id);
+  state.quizAnswered = alreadyEarned;
   elements.quizQuestion.textContent = quiz.question;
   elements.quizOptions.innerHTML = quiz.options.map((option, index) => `
-    <button class="quiz-option" type="button" data-answer="${index}">${option}</button>
+    <button class="quiz-option" type="button" data-answer="${index}">${escapeHtml(option)}</button>
   `).join("");
+
+  if (alreadyEarned) {
+    // This movement's spark is already collected — show the answer, don't re-award.
+    lockQuiz(true);
+    return;
+  }
 
   document.querySelectorAll("[data-answer]").forEach((button) => {
     button.addEventListener("click", () => {
+      if (state.quizAnswered) return;
       const correct = Number(button.dataset.answer) === quiz.answer;
       button.classList.add(correct ? "correct" : "wrong");
+      // Award only on a first-attempt correct answer, then lock the quiz.
       if (correct) earnSpark();
+      lockQuiz(!correct);
     });
   });
 }
@@ -511,6 +578,7 @@ function earnSpark() {
     state.earned.push(state.selected.id);
     saveSparks();
     renderPassport();
+    announce(`Spark earned for ${state.selected.name}! ${state.earned.length} of ${movements.length} collected.`);
   }
 }
 
@@ -527,6 +595,7 @@ function setView(view) {
 
 elements.canvas.addEventListener("pointerdown", (event) => {
   state.drawing = true;
+  state.hasDrawn = true;
   state.lastPoint = getPoint(event);
   drawAt(state.lastPoint);
 });
@@ -545,11 +614,23 @@ elements.clearCanvas.addEventListener("click", () => {
   drawStarter(state.selected.id);
 });
 
-elements.completeActivity.addEventListener("click", earnSpark);
+elements.completeActivity.addEventListener("click", () => {
+  if (state.earned.includes(state.selected.id)) return;
+  if (!state.hasDrawn) {
+    // Require the child to actually try the studio challenge first.
+    const prompt = `Draw something in the ${state.selected.activity.title} first, then claim your spark!`;
+    elements.questText.textContent = prompt;
+    announce(prompt);
+    return;
+  }
+  earnSpark();
+});
 
 elements.randomStop.addEventListener("click", () => {
   const currentIndex = movements.findIndex((movement) => movement.id === state.selected.id);
-  selectMovement(movements[(currentIndex + 1 + Math.floor(Math.random() * 5)) % movements.length].id);
+  // Land on any movement other than the current one, uniformly.
+  const offset = 1 + Math.floor(Math.random() * (movements.length - 1));
+  selectMovement(movements[(currentIndex + offset) % movements.length].id);
 });
 
 elements.resetProgress.addEventListener("click", () => {

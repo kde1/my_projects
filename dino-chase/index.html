@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dino Chase</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="arena-card" aria-label="Dino chase game">
+        <div class="hud">
+          <div>
+            <p class="kicker">T-Rex pursuit</p>
+            <h1>Dino Chase</h1>
+          </div>
+          <div class="stats">
+            <span id="lives">Lives 3</span>
+            <span id="points">Points 0</span>
+            <span id="level">Difficulty 1</span>
+          </div>
+        </div>
+
+        <div class="arena" id="arena" tabindex="0" aria-label="Use arrow keys to move the human away from the T-Rex">
+          <img class="habitat" src="../dino-builder/assets/prehistoric-habitat.png" alt="">
+          <div class="shade"></div>
+          <div class="food" id="food" aria-label="Food to collect"></div>
+          <div class="human" id="human" aria-label="Human player">
+            <span class="head"></span>
+            <span class="body"></span>
+            <span class="arm left"></span>
+            <span class="arm right"></span>
+            <span class="leg left"></span>
+            <span class="leg right"></span>
+          </div>
+          <div id="rexLayer"></div>
+          <div class="message" id="message">
+            <h2>Run from the T-Rex</h2>
+            <p>Use the arrow keys. Collect food for points and protect your 3 lives.</p>
+            <button id="startButton" type="button">Start</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <img src="../dino-builder/assets/quiz-tyrannosaurus.png" alt="T-Rex">
+        <section>
+          <h2>Rules</h2>
+          <p>Move the human with the arrow keys. Collect food to score points. If a T-Rex catches the human, you lose 1 life.</p>
+        </section>
+        <section class="difficulty-card" aria-label="Difficulty settings">
+          <label for="difficultySelect">Difficulty</label>
+          <select id="difficultySelect">
+            <option value="1">1 - Easy</option>
+            <option value="2">2 - Explorer</option>
+            <option value="3">3 - Hunter</option>
+            <option value="4">4 - Danger</option>
+            <option value="5">5 - Extinction</option>
+          </select>
+          <p id="difficultyNote">One gentle T-Rex. Food gives 10 points.</p>
+        </section>
+        <button id="restartButton" type="button">Restart game</button>
+      </aside>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

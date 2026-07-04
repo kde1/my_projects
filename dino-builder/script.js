@@ -1,3 +1,12 @@
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const slots = {
   body: [
     { id: "rex", label: "Tyrant torso", score: { speed: 5, defense: 4, reach: 6, ferocity: 9 } },
@@ -595,7 +604,7 @@ const state = {
   head: 0,
   tail: 2,
   legs: 2,
-  armor: 1,
+  armor: 0,
   detail: 0,
   baseColor: "#5f7f45",
   bellyColor: "#d0c09a",
@@ -613,6 +622,7 @@ const state = {
   quizTotal: 0,
   quizStreak: 0,
   quizAnswered: false,
+  currentItem: null,
   quizDifficulty: "field",
   quizOrder: [],
   galleryPage: 0,
@@ -1107,6 +1117,24 @@ function shuffle(items) {
   return copy;
 }
 
+const FALLBACK_GUIDE = { lived: "Unknown", where: "Unknown", habitat: "Unknown", diet: "Unknown", facts: [] };
+
+// Never let a missing field-guide entry crash a render; surface it instead.
+function getGuide(slug) {
+  return quizFieldGuide[slug] || FALLBACK_GUIDE;
+}
+
+// One-time check that the quiz data is internally consistent. Logs loudly rather
+// than failing silently (or crashing) if an item's slug/name gets out of sync.
+function validateQuizData() {
+  const names = new Set();
+  quizItems.forEach((item) => {
+    if (names.has(item.name)) console.error(`Duplicate quiz name: ${item.name}`);
+    names.add(item.name);
+    if (!quizFieldGuide[item.slug]) console.error(`Missing field guide for slug: ${item.slug}`);
+  });
+}
+
 function currentQuizItem() {
   if (!state.quizOrder.length || state.quizIndex >= state.quizOrder.length) {
     state.quizOrder = shuffle(quizItems.map((_, index) => index));
@@ -1131,6 +1159,9 @@ function quizChoices(item, expert) {
 
 function renderQuiz() {
   const item = currentQuizItem();
+  // Grade against the specimen that was actually rendered, not a re-derived one
+  // (currentQuizItem() has reshuffle side effects at the order boundary).
+  state.currentItem = item;
   const expert = state.quizDifficulty === "expert";
   const choices = quizChoices(item, expert);
   quizImage.src = item.image;
@@ -1139,7 +1170,9 @@ function renderQuiz() {
   quizImage.style.transform = expert ? `scale(${item.crop.scale})` : "scale(1)";
   quizImage.classList.toggle("expert-crop", expert);
   quizImage.classList.toggle("field-guide", !expert);
-  quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${choice}">${choice}</button>`).join("");
+  // Mark the correct option with a data flag so grading never depends on
+  // re-matching display strings (robust to name collisions / stray characters).
+  quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${escapeHtml(choice)}" data-correct="${choice === item.name}">${escapeHtml(choice)}</button>`).join("");
   quizEra.textContent = item.era;
   quizView.textContent = expert ? item.view : "Full body view";
   quizPrompt.textContent = expert ? "Identify the dinosaur from a cropped specimen view." : "Which dinosaur is this?";
@@ -1151,14 +1184,14 @@ function renderQuiz() {
   quizDifficulty.value = state.quizDifficulty;
   state.quizAnswered = false;
   quizOptions.querySelectorAll(".quiz-option").forEach((button) => {
-    button.addEventListener("click", () => answerQuiz(button.dataset.answer));
+    button.addEventListener("click", () => answerQuiz(button));
   });
 }
 
-function answerQuiz(answer) {
+function answerQuiz(clicked) {
   if (state.quizAnswered) return;
-  const item = currentQuizItem();
-  const correct = answer === item.name;
+  const item = state.currentItem;
+  const correct = clicked.dataset.correct === "true";
   state.quizAnswered = true;
   state.quizTotal += 1;
   if (correct) {
@@ -1169,8 +1202,8 @@ function answerQuiz(answer) {
   }
   quizOptions.querySelectorAll(".quiz-option").forEach((button) => {
     button.disabled = true;
-    button.classList.toggle("correct", button.dataset.answer === item.name);
-    button.classList.toggle("wrong", button.dataset.answer === answer && !correct);
+    button.classList.toggle("correct", button.dataset.correct === "true");
+    button.classList.toggle("wrong", button === clicked && !correct);
   });
   quizScore.textContent = state.quizScore;
   quizTotal.textContent = state.quizTotal;
@@ -1184,21 +1217,21 @@ function nextQuiz() {
 }
 
 function renderQuizFeedback(item, correct) {
-  const guide = quizFieldGuide[item.slug];
+  const guide = getGuide(item.slug);
   const anatomyNote = state.quizDifficulty === "expert" ? item.expertClue : item.clue;
   quizFeedback.classList.add("is-revealed");
   quizFeedback.innerHTML = `
-    <div class="quiz-result ${correct ? "correct" : "wrong"}">${correct ? "Correct." : `Good try. The answer is ${item.name}.`}</div>
+    <div class="quiz-result ${correct ? "correct" : "wrong"}">${correct ? "Correct." : `Good try. The answer is ${escapeHtml(item.name)}.`}</div>
     <div class="dino-guide">
-      <h3>${item.name}</h3>
-      <p>${anatomyNote} ${item.fact}</p>
+      <h3>${escapeHtml(item.name)}</h3>
+      <p>${escapeHtml(anatomyNote)} ${escapeHtml(item.fact)}</p>
       <div class="guide-grid">
-        <div><span>Time period</span><b>${guide.lived}</b></div>
-        <div><span>Where it lived</span><b>${guide.where}</b></div>
-        <div><span>Habitat</span><b>${guide.habitat}</b></div>
-        <div><span>Diet</span><b>${guide.diet}</b></div>
+        <div><span>Time period</span><b>${escapeHtml(guide.lived)}</b></div>
+        <div><span>Where it lived</span><b>${escapeHtml(guide.where)}</b></div>
+        <div><span>Habitat</span><b>${escapeHtml(guide.habitat)}</b></div>
+        <div><span>Diet</span><b>${escapeHtml(guide.diet)}</b></div>
       </div>
-      <ul>${guide.facts.map((fact) => `<li>${fact}</li>`).join("")}</ul>
+      <ul>${guide.facts.map((fact) => `<li>${escapeHtml(fact)}</li>`).join("")}</ul>
     </div>
   `;
 }
@@ -1224,23 +1257,23 @@ function renderGallery(options = {}) {
   });
   const start = state[pageKey] * pageSize;
   gridEl.innerHTML = quizItems.slice(start, start + pageSize).map((item) => {
-    const guide = quizFieldGuide[item.slug];
+    const guide = getGuide(item.slug);
     const revealed = !quizMode || state.galleryQuizRevealed.has(item.slug);
     const copy = revealed ? `
       <div class="gallery-card-copy">
-        <h3>${item.name}</h3>
-        <p>${item.era}</p>
+        <h3>${escapeHtml(item.name)}</h3>
+        <p>${escapeHtml(item.era)}</p>
         <dl>
-          <div><dt>Diet</dt><dd>${guide.diet}</dd></div>
-          <div><dt>Habitat</dt><dd>${guide.habitat}</dd></div>
+          <div><dt>Diet</dt><dd>${escapeHtml(guide.diet)}</dd></div>
+          <div><dt>Habitat</dt><dd>${escapeHtml(guide.habitat)}</dd></div>
         </dl>
       </div>
     ` : `<div class="gallery-card-copy is-hidden"><span>Tap to reveal</span></div>`;
     if (quizMode) {
       return `
-        <button class="gallery-card gallery-quiz-card ${revealed ? "is-revealed" : ""}" type="button" data-slug="${item.slug}" aria-label="${revealed ? item.name : "Reveal dinosaur"}">
+        <button class="gallery-card gallery-quiz-card ${revealed ? "is-revealed" : ""}" type="button" data-slug="${escapeHtml(item.slug)}" aria-label="${revealed ? escapeHtml(item.name) : "Reveal dinosaur"}">
           <div class="gallery-image-frame">
-            <img src="${item.image}" alt="">
+            <img src="${escapeHtml(item.image)}" alt="">
           </div>
           ${copy}
         </button>
@@ -1249,7 +1282,7 @@ function renderGallery(options = {}) {
     return `
       <article class="gallery-card">
         <div class="gallery-image-frame">
-          <img src="${item.image}" alt="${item.name}">
+          <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
         </div>
         ${copy}
       </article>
@@ -1284,7 +1317,7 @@ function renderGalleryPrintPages() {
         </header>
         <div class="gallery-print-grid">
           ${pageItems.map((item) => {
-            const guide = quizFieldGuide[item.slug];
+            const guide = getGuide(item.slug);
             return `
               <article class="gallery-print-card">
                 <img src="${item.image}" alt="">
@@ -1375,7 +1408,10 @@ function updateScores() {
       if (key in total) total[key] += value;
     });
   });
-  total.strength = total.strength || total.ferocity * .55 + total.defense * .35 + total.reach * .2;
+  // Strength is always derived from the other combat stats (no part contributes
+  // a raw "strength" score), so compute it directly rather than via `|| ` — a
+  // legitimate total of 0 must not silently fall through to the formula.
+  total.strength = total.ferocity * .55 + total.defense * .35 + total.reach * .2;
   const normalized = Object.fromEntries(Object.entries(total).map(([key, value]) => {
     const boost = state.dnaBoost[key] || 0;
     return [key, Math.max(1, Math.min(100, Math.round(value * 2.2 + 12 + boost)))];
@@ -1585,7 +1621,10 @@ document.querySelectorAll("[data-landing-target]").forEach((button) => {
 nextQuizBtn.addEventListener("click", nextQuiz);
 quizDifficulty.addEventListener("change", (event) => {
   state.quizDifficulty = event.target.value;
-  renderQuiz();
+  // If the current fossil was already answered, move to a new one so switching
+  // difficulty can't be used to retry the same specimen for a free point.
+  if (state.quizAnswered) nextQuiz();
+  else renderQuiz();
 });
 landingPrint.addEventListener("click", () => {
   document.body.dataset.printMode = "landing";
@@ -1603,6 +1642,7 @@ window.addEventListener("afterprint", () => {
   delete document.body.dataset.printMode;
 });
 
+validateQuizData();
 buildControls();
 buildDnaLab();
 renderQuiz();

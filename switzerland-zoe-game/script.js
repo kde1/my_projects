@@ -1,6 +1,39 @@
 const canvas = document.getElementById("swissMap");
 const ctx = canvas.getContext("2d");
 
+// Fixed logical drawing space. All map art and coordinates live in this
+// 2400x1600 "world"; it is letterboxed into the real (DPR-scaled) canvas so the
+// map keeps its aspect ratio and stays crisp on high-DPI screens.
+const WORLD = { w: 2400, h: 1600 };
+
+const viewport = { cssW: 0, cssH: 0, dpr: 1, fitScale: 1, baseX: 0, baseY: 0 };
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  viewport.cssW = rect.width;
+  viewport.cssH = rect.height;
+  viewport.dpr = dpr;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  // Uniform scale so Switzerland is never stretched; centered (letterboxed).
+  viewport.fitScale = Math.min(rect.width / WORLD.w, rect.height / WORLD.h);
+  viewport.baseX = (rect.width - WORLD.w * viewport.fitScale) / 2;
+  viewport.baseY = (rect.height - WORLD.h * viewport.fitScale) / 2;
+  clampMapView();
+  drawMap();
+}
+
 const mapView = {
   scale: 1,
   x: 0,
@@ -292,38 +325,79 @@ const els = {
   quizOptions: document.getElementById("quizOptions"),
   hintButton: document.getElementById("hintButton"),
   feedback: document.getElementById("feedback"),
-  passport: document.getElementById("passport")
+  passport: document.getElementById("passport"),
+  placeJumpList: document.getElementById("placeJumpList"),
+  srStatus: document.getElementById("srStatus")
 };
+
+function announce(message) {
+  if (els.srStatus) els.srStatus.textContent = message;
+}
+
+// Keyboard / screen-reader path: a real button per place that collects it,
+// mirroring what clicking the canvas marker does.
+function renderPlaceJumpList() {
+  if (!els.placeJumpList) return;
+  els.placeJumpList.innerHTML = places.map((place) => `
+    <button type="button" data-place="${escapeHtml(place.id)}">
+      Visit ${escapeHtml(place.name)} (${escapeHtml(place.canton)})
+    </button>
+  `).join("");
+  els.placeJumpList.querySelectorAll("[data-place]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const place = placeById(button.dataset.place);
+      if (place) selectPlace(place, true);
+    });
+  });
+}
 
 function project(lon, lat) {
   return {
-    x: ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * canvas.width,
-    y: canvas.height - ((lat - bounds.minLat) / (bounds.maxLat - bounds.minLat)) * canvas.height
+    x: ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * WORLD.w,
+    y: WORLD.h - ((lat - bounds.minLat) / (bounds.maxLat - bounds.minLat)) * WORLD.h
   };
 }
 
-function screenToWorld(point) {
+// World point -> CSS-pixel point (base letterbox transform, then user pan/zoom).
+function worldToCss(point) {
   return {
-    x: (point.x - mapView.x) / mapView.scale,
-    y: (point.y - mapView.y) / mapView.scale
+    x: mapView.x + mapView.scale * (viewport.baseX + viewport.fitScale * point.x),
+    y: mapView.y + mapView.scale * (viewport.baseY + viewport.fitScale * point.y)
   };
+}
+
+// CSS-pixel point (relative to canvas) -> world point.
+function cssToWorld(point) {
+  const px = (point.x - mapView.x) / mapView.scale;
+  const py = (point.y - mapView.y) / mapView.scale;
+  return {
+    x: (px - viewport.baseX) / viewport.fitScale,
+    y: (py - viewport.baseY) / viewport.fitScale
+  };
+}
+
+function clampScale() {
+  mapView.scale = Math.min(4.5, Math.max(1, mapView.scale));
 }
 
 function clampMapView() {
-  mapView.scale = Math.min(4.5, Math.max(1, mapView.scale));
-  const minX = canvas.width - canvas.width * mapView.scale;
-  const minY = canvas.height - canvas.height * mapView.scale;
+  clampScale();
+  const minX = viewport.cssW - viewport.cssW * mapView.scale;
+  const minY = viewport.cssH - viewport.cssH * mapView.scale;
   mapView.x = Math.min(0, Math.max(minX, mapView.x));
   mapView.y = Math.min(0, Math.max(minY, mapView.y));
   canvas.dataset.zoom = mapView.scale.toFixed(2);
 }
 
-function zoomAt(factor, center) {
-  const before = screenToWorld(center);
-  mapView.scale *= factor;
-  clampMapView();
-  mapView.x = center.x - before.x * mapView.scale;
-  mapView.y = center.y - before.y * mapView.scale;
+function zoomAt(factor, centerCss) {
+  const beforeWorld = cssToWorld(centerCss);
+  // Clamp the scale to its final value first, then solve for the pan that keeps
+  // the point under the cursor fixed. (Avoids the old double-clamp drift.)
+  mapView.scale = Math.min(4.5, Math.max(1, mapView.scale * factor));
+  const baseX = viewport.baseX + viewport.fitScale * beforeWorld.x;
+  const baseY = viewport.baseY + viewport.fitScale * beforeWorld.y;
+  mapView.x = centerCss.x - baseX * mapView.scale;
+  mapView.y = centerCss.y - baseY * mapView.scale;
   clampMapView();
   drawMap();
 }
@@ -345,8 +419,8 @@ function pseudoNoise(x, y) {
 }
 
 function elevationAt(x, y) {
-  const south = y / canvas.height;
-  const east = x / canvas.width;
+  const south = y / WORLD.h;
+  const east = x / WORLD.w;
   const alpineArc = Math.exp(-Math.pow((y - (980 + Math.sin(east * 8) * 115)) / 230, 2));
   const valais = Math.exp(-Math.pow((x - 730) / 420, 2) - Math.pow((y - 1370) / 240, 2));
   const grisons = Math.exp(-Math.pow((x - 1810) / 470, 2) - Math.pow((y - 1040) / 330, 2));
@@ -382,18 +456,18 @@ function drawPath(points, options) {
 }
 
 function drawTerrain() {
-  const sky = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  const sky = ctx.createLinearGradient(0, 0, WORLD.w, WORLD.h);
   sky.addColorStop(0, "#cfe5e7");
   sky.addColorStop(0.33, "#e8ead6");
   sky.addColorStop(0.64, "#d9d6b8");
   sky.addColorStop(1, "#b8c3a7");
   ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, WORLD.w, WORLD.h);
 
   for (let band = 0; band < 34; band += 1) {
     const y = 620 + band * 23;
     ctx.beginPath();
-    for (let x = -80; x <= canvas.width + 80; x += 80) {
+    for (let x = -80; x <= WORLD.w + 80; x += 80) {
       const wave = Math.sin(x * 0.008 + band * 0.65) * 36 + Math.cos(x * 0.004 + band) * 28;
       if (x === -80) ctx.moveTo(x, y + wave);
       else ctx.lineTo(x, y + wave);
@@ -434,7 +508,7 @@ function drawTerrain() {
   });
 
   for (let i = 0; i < 420; i += 1) {
-    const x = (i * 149) % canvas.width;
+    const x = (i * 149) % WORLD.w;
     const y = 520 + ((i * 83) % 880);
     const alpha = 0.035 + ((i % 7) * 0.008);
     ctx.fillStyle = `rgba(48, 68, 58, ${alpha})`;
@@ -444,8 +518,8 @@ function drawTerrain() {
 
 function drawSatelliteTexture() {
   const cell = mapView.scale > 2.7 ? 22 : mapView.scale > 1.6 ? 30 : 42;
-  for (let y = 0; y < canvas.height; y += cell) {
-    for (let x = 0; x < canvas.width; x += cell) {
+  for (let y = 0; y < WORLD.h; y += cell) {
+    for (let x = 0; x < WORLD.w; x += cell) {
       const e = elevationAt(x, y);
       const n = pseudoNoise(x * 1.7, y * 1.7);
       const forest = Math.max(0, 1 - Math.abs(e - 0.46) * 3.2) + n * 0.18;
@@ -469,9 +543,9 @@ function drawSatelliteTexture() {
   }
 
   for (let pass = 0; pass < 2; pass += 1) {
-    for (let y = 240; y < canvas.height - 40; y += 34) {
+    for (let y = 240; y < WORLD.h - 40; y += 34) {
       ctx.beginPath();
-      for (let x = -40; x <= canvas.width + 40; x += 48) {
+      for (let x = -40; x <= WORLD.w + 40; x += 48) {
         const e = elevationAt(x, y);
         const contour = y + Math.sin(x * 0.012 + pass) * 18 + (e - 0.5) * 46;
         if (x === -40) ctx.moveTo(x, contour);
@@ -537,11 +611,24 @@ function drawRoute() {
   drawPath(points, { stroke: "rgba(227, 61, 69, 0.82)", lineWidth: 9, dash: [24, 16] });
 }
 
-function drawMap() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save();
+function applyWorldTransform() {
+  // world -> css: base letterbox, then user pan/zoom (applied around css origin).
   ctx.translate(mapView.x, mapView.y);
   ctx.scale(mapView.scale, mapView.scale);
+  ctx.translate(viewport.baseX, viewport.baseY);
+  ctx.scale(viewport.fitScale, viewport.fitScale);
+}
+
+function drawMap() {
+  if (!viewport.cssW) return;
+  // Draw in CSS pixels; the DPR scale keeps everything crisp on retina.
+  ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0);
+  ctx.clearRect(0, 0, viewport.cssW, viewport.cssH);
+  ctx.fillStyle = "#cfe5e7";
+  ctx.fillRect(0, 0, viewport.cssW, viewport.cssH);
+
+  ctx.save();
+  applyWorldTransform();
   drawTerrain();
   drawPath(swissOutline, { close: true, fill: "rgba(244, 241, 214, 0.86)", stroke: "rgba(23, 48, 65, 0.5)", lineWidth: 7 });
   ctx.save();
@@ -556,9 +643,16 @@ function drawMap() {
   places.forEach(drawPlace);
   ctx.restore();
   ctx.restore();
+
+  // Fixed overlays: uniform base scale, but not affected by pan/zoom.
+  ctx.save();
+  ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0);
+  ctx.translate(viewport.baseX, viewport.baseY);
+  ctx.scale(viewport.fitScale, viewport.fitScale);
   drawCompass();
   drawScale();
   drawLegend();
+  ctx.restore();
 }
 
 function drawMajorRegionLabels() {
@@ -631,7 +725,7 @@ function drawPlace(place) {
 
 function drawCompass() {
   ctx.save();
-  ctx.translate(canvas.width - 150, canvas.height - 150);
+  ctx.translate(WORLD.w - 150, WORLD.h - 150);
   ctx.fillStyle = "rgba(255, 250, 240, 0.84)";
   ctx.strokeStyle = "rgba(23, 48, 65, 0.24)";
   ctx.lineWidth = 3;
@@ -659,22 +753,22 @@ function drawScale() {
   ctx.fillStyle = "rgba(255, 250, 240, 0.84)";
   ctx.strokeStyle = "rgba(23, 48, 65, 0.28)";
   ctx.lineWidth = 3;
-  ctx.fillRect(105, canvas.height - 128, 300, 74);
-  ctx.strokeRect(105, canvas.height - 128, 300, 74);
+  ctx.fillRect(105, WORLD.h - 128, 300, 74);
+  ctx.strokeRect(105, WORLD.h - 128, 300, 74);
   ctx.strokeStyle = "#173041";
   ctx.lineWidth = 8;
   ctx.beginPath();
-  ctx.moveTo(142, canvas.height - 82);
-  ctx.lineTo(330, canvas.height - 82);
+  ctx.moveTo(142, WORLD.h - 82);
+  ctx.lineTo(330, WORLD.h - 82);
   ctx.stroke();
   ctx.fillStyle = "#173041";
   ctx.font = "800 23px Segoe UI, sans-serif";
-  ctx.fillText("about 100 km", 142, canvas.height - 95);
+  ctx.fillText("about 100 km", 142, WORLD.h - 95);
   ctx.restore();
 }
 
 function drawLegend() {
-  const x = canvas.width - 470;
+  const x = WORLD.w - 470;
   const y = 180;
   const rows = [
     ["#e33d45", "city"],
@@ -715,7 +809,8 @@ function drawLegend() {
   ctx.restore();
 }
 
-function selectPlace(place, fromClick = false) {
+// Show a place in the side panel WITHOUT collecting it or awarding points.
+function showPlace(place) {
   state.selected = place;
   els.placeBadge.textContent = place.badge;
   els.placeName.textContent = place.name;
@@ -723,11 +818,19 @@ function selectPlace(place, fromClick = false) {
   els.placeFact.textContent = place.fact;
   els.languageFact.textContent = place.language;
   els.mapSkill.textContent = place.skill;
+}
+
+// Collect a place: this is the scoring action, only triggered by actually
+// choosing a marker (click, keyboard, or a correct Find).
+function selectPlace(place, fromClick = false) {
+  showPlace(place);
 
   if (!state.collected.has(place.id)) {
     state.collected.add(place.id);
     state.score += place.type === "attraction" ? 15 : 10;
     state.lastMessage = `Stamp collected: ${place.name}.`;
+  } else {
+    state.lastMessage = `${place.name} is already in your passport.`;
   }
 
   if (state.mode === "find" && fromClick) {
@@ -740,23 +843,31 @@ function selectPlace(place, fromClick = false) {
     }
   }
 
+  announce(state.lastMessage);
   updateUI();
   drawMap();
 }
 
 function canvasPoint(event) {
   const rect = canvas.getBoundingClientRect();
-  return {
-    x: ((event.clientX - rect.left) / rect.width) * canvas.width,
-    y: ((event.clientY - rect.top) / rect.height) * canvas.height
-  };
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
 }
 
-function placeAt(point) {
-  return places.find((place) => {
-    const p = project(place.lon, place.lat);
-    return Math.hypot(point.x - p.x, point.y - p.y) < 52;
+// Nearest marker within a fixed on-screen radius, so hit accuracy is the same
+// at every zoom level and clustered markers (e.g. the Engadin) resolve to the
+// closest one rather than the first in array order.
+function placeAt(cssPoint) {
+  let best = null;
+  let bestDist = Infinity;
+  places.forEach((place) => {
+    const c = worldToCss(project(place.lon, place.lat));
+    const d = Math.hypot(cssPoint.x - c.x, cssPoint.y - c.y);
+    if (d < bestDist) {
+      bestDist = d;
+      best = place;
+    }
   });
+  return bestDist <= 28 ? best : null;
 }
 
 function setMode(mode) {
@@ -768,8 +879,8 @@ function setMode(mode) {
     button.setAttribute("aria-pressed", String(active));
   });
   if (mode === "find") {
-    state.target = nextUncollected() || places[(state.score + 7) % places.length];
-    state.lastMessage = "";
+    state.target = nextUncollected();
+    state.lastMessage = state.target ? "" : "Every stamp is collected — try another mode!";
   }
   if (mode === "quiz") buildQuiz();
   updateUI();
@@ -777,19 +888,30 @@ function setMode(mode) {
 }
 
 function nextUncollected() {
-  return places.find((place) => !state.collected.has(place.id));
+  return places.find((place) => !state.collected.has(place.id)) || null;
 }
 
 function nextFindTarget() {
-  const current = state.target ? places.indexOf(state.target) : 0;
-  state.target = places[(current + 5) % places.length];
+  // Pick a random uncollected place that isn't the current target, so Find mode
+  // actually covers the whole map and reaches a clean "all found" state.
+  const remaining = places.filter((place) => !state.collected.has(place.id) && place.id !== state.target?.id);
+  state.target = remaining.length ? remaining[Math.floor(Math.random() * remaining.length)] : null;
   state.hintVisible = false;
+}
+
+function shuffle(list) {
+  const result = [...list];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }
 
 function buildQuiz() {
   state.quiz = quizBank[state.quizIndex % quizBank.length];
   state.quizIndex += 1;
-  const answers = [...state.quiz.options].sort(() => Math.random() - 0.5);
+  const answers = shuffle(state.quiz.options);
   els.quizOptions.innerHTML = "";
   answers.forEach((answer) => {
     const button = document.createElement("button");
@@ -803,15 +925,19 @@ function buildQuiz() {
 function answerQuiz(answer) {
   if (answer === state.quiz.answer) {
     state.score += 35;
+    // Highlight the matching place if there is one, but do NOT collect its stamp
+    // — quiz points and stamp collection are kept separate.
     const matchedPlace = places.find((place) => place.name === answer);
-    if (matchedPlace) selectPlace(matchedPlace);
+    if (matchedPlace) showPlace(matchedPlace);
     state.lastMessage = `Correct. ${state.quiz.explanation}`;
     buildQuiz();
   } else {
     state.score = Math.max(0, state.score - 5);
     state.lastMessage = `Not quite. Answer: ${state.quiz.answer}. ${state.quiz.explanation}`;
   }
+  announce(state.lastMessage);
   updateUI();
+  drawMap();
 }
 
 function updateUI() {
@@ -827,9 +953,14 @@ function updateUI() {
     els.challengeTitle.textContent = "Explorer Challenge";
     els.challengePrompt.textContent = "Collect stamps from cities, alpine villages, castles, waterfalls, mountain passes, and lake towns.";
   } else if (state.mode === "find") {
-    els.missionText.textContent = `Find ${state.target.name} on the realistic map.`;
     els.challengeTitle.textContent = "Find The Place";
-    els.challengePrompt.textContent = state.hintVisible ? state.target.clue : `Zoe's target: ${state.target.name}`;
+    if (state.target) {
+      els.missionText.textContent = `Find ${state.target.name} on the realistic map.`;
+      els.challengePrompt.textContent = state.hintVisible ? state.target.clue : `Zoe's target: ${state.target.name}`;
+    } else {
+      els.missionText.textContent = "You've found every place on the map!";
+      els.challengePrompt.textContent = "All stamps collected. Try Quiz or Route mode next.";
+    }
   } else if (state.mode === "quiz") {
     els.missionText.textContent = "Harder questions now use geography, language, culture, and routes.";
     els.challengeTitle.textContent = "Swiss Master Quiz";
@@ -848,67 +979,107 @@ function renderPassport() {
   places.forEach((place) => {
     const stamp = document.createElement("div");
     stamp.className = `stamp ${state.collected.has(place.id) ? "collected" : ""}`;
-    stamp.innerHTML = `<strong>${place.name}</strong><span>${state.collected.has(place.id) ? place.skill : `${place.type} stamp waiting`}</span>`;
+    stamp.innerHTML = `<strong>${escapeHtml(place.name)}</strong><span>${escapeHtml(state.collected.has(place.id) ? place.skill : `${place.type} stamp waiting`)}</span>`;
     els.passport.appendChild(stamp);
   });
 }
 
-canvas.addEventListener("click", (event) => {
-  if (mapView.moved) {
-    mapView.moved = false;
+// Pointer Events unify mouse, touch, and pen. Two active pointers = pinch zoom.
+const activePointers = new Map();
+const DRAG_THRESHOLD = 5; // css px before a press counts as a drag, not a tap
+let pinchStartDist = 0;
+let pinchStartScale = 1;
+
+function pointerDistance() {
+  const pts = [...activePointers.values()];
+  return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+}
+
+function pointerMidpoint() {
+  const pts = [...activePointers.values()];
+  return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+}
+
+canvas.addEventListener("pointerdown", (event) => {
+  const point = canvasPoint(event);
+  activePointers.set(event.pointerId, point);
+  if (activePointers.size === 2) {
+    pinchStartDist = pointerDistance();
+    pinchStartScale = mapView.scale;
+    mapView.dragging = false;
     return;
   }
-  const hit = placeAt(screenToWorld(canvasPoint(event)));
-  if (hit) selectPlace(hit, true);
+  mapView.dragging = true;
+  mapView.moved = false;
+  mapView.lastX = point.x;
+  mapView.lastY = point.y;
+  canvas.style.cursor = "grabbing";
+  if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
 });
 
-canvas.addEventListener("mousemove", (event) => {
+canvas.addEventListener("pointermove", (event) => {
+  const point = canvasPoint(event);
+  if (activePointers.has(event.pointerId)) activePointers.set(event.pointerId, point);
+
+  if (activePointers.size === 2 && pinchStartDist > 0) {
+    event.preventDefault();
+    const factor = (pointerDistance() / pinchStartDist) * (pinchStartScale / mapView.scale);
+    zoomAt(factor, pointerMidpoint());
+    return;
+  }
+
   if (mapView.dragging) {
-    const point = canvasPoint(event);
     const dx = point.x - mapView.lastX;
     const dy = point.y - mapView.lastY;
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) mapView.moved = true;
     mapView.x += dx;
     mapView.y += dy;
     mapView.lastX = point.x;
     mapView.lastY = point.y;
-    mapView.moved = true;
     clampMapView();
     drawMap();
     return;
   }
-  canvas.style.cursor = placeAt(screenToWorld(canvasPoint(event))) ? "pointer" : "grab";
+
+  if (event.pointerType === "mouse") {
+    canvas.style.cursor = placeAt(point) ? "pointer" : "grab";
+  }
 });
 
-canvas.addEventListener("mousedown", (event) => {
-  mapView.dragging = true;
-  mapView.moved = false;
+function endPointer(event) {
+  const wasDragging = mapView.dragging;
   const point = canvasPoint(event);
-  mapView.lastX = point.x;
-  mapView.lastY = point.y;
-  canvas.style.cursor = "grabbing";
-});
+  activePointers.delete(event.pointerId);
+  if (activePointers.size < 2) pinchStartDist = 0;
 
-window.addEventListener("mouseup", () => {
+  if (wasDragging && !mapView.moved) {
+    // A press that didn't move past the threshold is a tap → try to collect.
+    const hit = placeAt(point);
+    if (hit) selectPlace(hit, true);
+  }
   mapView.dragging = false;
+  mapView.moved = false;
   canvas.style.cursor = "grab";
-});
+}
 
-canvas.addEventListener("mouseleave", () => {
+canvas.addEventListener("pointerup", endPointer);
+canvas.addEventListener("pointercancel", (event) => {
+  activePointers.delete(event.pointerId);
+  if (activePointers.size < 2) pinchStartDist = 0;
   mapView.dragging = false;
 });
 
 canvas.addEventListener("wheel", (event) => {
   event.preventDefault();
-  const point = canvasPoint(event);
-  zoomAt(event.deltaY < 0 ? 1.22 : 0.82, point);
+  zoomAt(event.deltaY < 0 ? 1.22 : 0.82, canvasPoint(event));
 }, { passive: false });
 
 document.getElementById("zoomIn").addEventListener("click", () => {
-  zoomAt(1.28, { x: canvas.width / 2, y: canvas.height / 2 });
+  zoomAt(1.28, { x: viewport.cssW / 2, y: viewport.cssH / 2 });
 });
 
 document.getElementById("zoomOut").addEventListener("click", () => {
-  zoomAt(0.78, { x: canvas.width / 2, y: canvas.height / 2 });
+  zoomAt(0.78, { x: viewport.cssW / 2, y: viewport.cssH / 2 });
 });
 
 document.getElementById("zoomReset").addEventListener("click", () => {
@@ -926,19 +1097,36 @@ document.getElementById("hintButton").addEventListener("click", () => {
 });
 
 document.getElementById("nextChallenge").addEventListener("click", () => {
-  if (state.mode === "quiz") buildQuiz();
-  else if (state.mode === "find") nextFindTarget();
-  else selectPlace(places[(places.indexOf(state.selected || places[0]) + 1) % places.length]);
+  if (state.mode === "quiz") {
+    buildQuiz();
+  } else if (state.mode === "find") {
+    nextFindTarget();
+  } else {
+    // Preview the next place without auto-collecting its stamp.
+    const start = state.selected || places[0];
+    showPlace(places[(places.indexOf(start) + 1) % places.length]);
+  }
   state.lastMessage = "New challenge ready.";
   updateUI();
   drawMap();
 });
 
-window.addEventListener("resize", drawMap);
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(resizeCanvas, 120);
+});
+
+// Redraw whenever the canvas actually gets/changes size — robust to late layout
+// (size 0 at script run) and to the responsive breakpoints reflowing the stage.
+if (typeof ResizeObserver !== "undefined") {
+  new ResizeObserver(resizeCanvas).observe(canvas);
+}
 
 state.target = places[0];
 canvas.dataset.zoom = "1.00";
 buildQuiz();
 renderPassport();
+renderPlaceJumpList();
 updateUI();
-drawMap();
+resizeCanvas();
