@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Zoe's Dress Star Studio</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="screen setup-screen is-active" id="setupScreen" aria-label="Player setup">
+        <div class="setup-hero">
+          <div>
+            <p class="eyebrow">Pink closet fashion game</p>
+            <h1>Zoe's Dress Star Studio</h1>
+            <p class="intro">Pick 2 to 4 players, choose different colors, dress up for the theme, then vote for the runway winner.</p>
+          </div>
+          <div class="mini-runway" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="setup-grid">
+          <section class="setup-panel" aria-label="Choose number of players">
+            <h2>Players</h2>
+            <div class="segmented" id="playerCountButtons">
+              <button type="button" data-count="2">2</button>
+              <button type="button" data-count="3">3</button>
+              <button type="button" data-count="4">4</button>
+            </div>
+            <p class="hint">Minimum 2, maximum 4. Each color can only be used once.</p>
+            <button class="primary-action" id="startGameBtn" type="button">Start 5 minute round</button>
+            <p class="error-message" id="setupError" role="alert"></p>
+          </section>
+
+          <section class="players-panel" id="playersPanel" aria-label="Player names and colors"></section>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="gameScreen" aria-label="Dress up game">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Theme</p>
+            <h1 id="themeTitle">Royal Candy Runway</h1>
+          </div>
+          <div class="timer" aria-live="polite">
+            <span>Time left</span>
+            <b id="timerText">5:00</b>
+          </div>
+          <button class="secondary-action" id="finishEarlyBtn" type="button">Finish early</button>
+        </header>
+
+        <div class="studio-layout">
+          <aside class="player-rail" id="playerRail" aria-label="Choose player"></aside>
+
+          <section class="runway-area" aria-label="Current outfit">
+            <div class="runway-card">
+              <div class="spotlight"></div>
+              <div class="avatar" id="avatar" aria-label="Dressed player preview"></div>
+              <div class="outfit-caption">
+                <h2 id="activePlayerName">Player</h2>
+                <p id="outfitSummary">Choose pieces from the closets.</p>
+              </div>
+            </div>
+          </section>
+
+          <aside class="closet-area" aria-label="Pink dressing closets">
+            <div class="closet-header">
+              <h2>Pink Closets</h2>
+              <button class="tiny-action" id="randomOutfitBtn" type="button">Surprise outfit</button>
+            </div>
+            <div class="tabs" id="categoryTabs" role="tablist" aria-label="Clothing categories"></div>
+            <div class="closet-grid" id="closetGrid"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen vote-screen" id="voteScreen" aria-label="Voting">
+        <header class="topbar vote-topbar">
+          <div>
+            <p class="eyebrow">Runway vote</p>
+            <h1>Who wins?</h1>
+          </div>
+          <button class="secondary-action" id="newRoundBtn" type="button">New round</button>
+        </header>
+
+        <div class="vote-layout">
+          <section class="vote-cards" id="voteCards" aria-label="Final outfits"></section>
+          <section class="ballot-panel">
+            <h2>Ballots</h2>
+            <div id="ballots"></div>
+            <button class="primary-action" id="showWinnerBtn" type="button">Show winner</button>
+            <div class="winner-box" id="winnerBox" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <template id="playerFormTemplate">
+      <article class="player-form">
+        <label>
+          <span>Nickname</span>
+          <input type="text" maxlength="14" autocomplete="off">
+        </label>
+        <div class="color-choices"></div>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>

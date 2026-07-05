@@ -171,7 +171,23 @@ const quizItems = [
   q("Ceratosaurus", "ceratosaurus", "Late Jurassic", "theropod", "nasal horn crop", "64% 39%", 1.65, "a nasal horn on the snout, small brow horns, and a deep tail", "Jurassic theropod with a distinctive horn on the snout."),
   q("Maiasaura", "maiasaura", "Late Cretaceous", "hadrosaur", "low crest crop", "64% 39%", 1.55, "a duck-billed hadrosaur with a low crest above the eyes", "Hadrosaur with a gentle low cranial crest."),
   q("Kentrosaurus", "kentrosaurus", "Late Jurassic", "stegosaur", "spikes and plates crop", "54% 43%", 1.6, "a smaller stegosaur with plates near the shoulders and long paired spikes toward the hips and tail", "Stegosaur with more dramatic rear-body spikes than Stegosaurus."),
-  q("Utahraptor", "utahraptor", "Early Cretaceous", "dromaeosaur", "large raptor crop", "57% 45%", 1.6, "a large feathered dromaeosaur with sickle claws and powerful arms", "Much larger dromaeosaur than Velociraptor.")
+  q("Utahraptor", "utahraptor", "Early Cretaceous", "dromaeosaur", "large raptor crop", "57% 45%", 1.6, "a large feathered dromaeosaur with sickle claws and powerful arms", "Much larger dromaeosaur than Velociraptor."),
+  q("Tarbosaurus", "tarbosaurus", "Late Cretaceous", "tyrannosaur", "skull and jaw crop", "65% 43%", 1.6, "a deep tyrannosaur skull, powerful jaws, and reduced two-fingered arms", "Asian tyrannosaur with a T. rex-like deep skull and tiny forelimbs."),
+  q("Torosaurus", "torosaurus", "Late Cretaceous", "ceratopsian", "huge frill crop", "70% 37%", 1.65, "a very large frill, long brow horns, and a Triceratops-like body", "Ceratopsian with an especially long frill and paired brow horns."),
+  q("Pachyrhinosaurus", "pachyrhinosaurus", "Late Cretaceous", "ceratopsian", "boss and frill crop", "69% 38%", 1.65, "a thick bony nasal boss instead of a long nose horn", "Ceratopsian with a blunt nasal boss rather than a tall nasal horn."),
+  q("Carcharodontosaurus", "carcharodontosaurus", "Late Cretaceous", "carcharodontosaur", "toothed skull crop", "63% 43%", 1.55, "a giant long skull with blade-like serrated teeth", "Carcharodontosaurid with long jaws and shark-tooth-like serrations."),
+  q("Mapusaurus", "mapusaurus", "Late Cretaceous", "carcharodontosaur", "long predator crop", "62% 43%", 1.55, "a long low skull, three-fingered arms, and giant predator build", "South American carcharodontosaur closely related to Giganotosaurus."),
+  q("Camarasaurus", "camarasaurus", "Late Jurassic", "sauropod", "boxy skull crop", "48% 39%", 1.45, "a shorter boxy skull, sturdy neck, and compact sauropod body", "Sauropod with a boxier head and sturdier proportions than Diplodocus."),
+  q("Brontosaurus", "brontosaurus", "Late Jurassic", "sauropod", "heavy neck crop", "47% 42%", 1.45, "a massive body, strong neck, and long whip-like tail", "Heavy diplodocid sauropod with a robust neck and long tail."),
+  q("Sauropelta", "sauropelta", "Early Cretaceous", "ankylosaur", "shoulder spike crop", "54% 45%", 1.55, "armor plates and large shoulder spikes along a low body", "Nodosaur with prominent shoulder spikes and no tail club."),
+  q("Nodosaurus", "nodosaurus", "Late Cretaceous", "ankylosaur", "armor plate crop", "53% 46%", 1.55, "a low armored body covered in bony plates but no tail club", "Armored nodosaur body with osteoderms and a clubless tail."),
+  q("Struthiomimus", "struthiomimus", "Late Cretaceous", "ornithomimid", "runner body crop", "54% 44%", 1.55, "an ostrich-like runner with long legs, long arms, and a toothless beak", "Slender ornithomimid with long grasping arms and cursorial legs."),
+  q("Ornithomimus", "ornithomimus", "Late Cretaceous", "ornithomimid", "beak and legs crop", "55% 44%", 1.55, "a lightweight ostrich-mimic body with a small head and fast legs", "Classic ostrich-mimic dinosaur with toothless beak and long legs."),
+  q("Ouranosaurus", "ouranosaurus", "Early Cretaceous", "ornithopod", "sail back crop", "56% 42%", 1.55, "an Iguanodon-like body with tall spines forming a back sail", "Ornithopod with thumb spikes and a high-spined back sail."),
+  q("Dryosaurus", "dryosaurus", "Late Jurassic", "ornithopod", "small runner crop", "57% 45%", 1.6, "a small fast ornithopod with long hind legs and a stiff tail", "Light Jurassic plant-eater built for quick running."),
+  q("Citipati", "citipati", "Late Cretaceous", "oviraptorid", "crest and beak crop", "58% 39%", 1.7, "a tall head crest, short beak, and feathered oviraptorid body", "Oviraptorid with a high rounded crest and birdlike posture."),
+  q("Majungasaurus", "majungasaurus", "Late Cretaceous", "abelisaurid", "short skull crop", "65% 42%", 1.6, "a short deep skull, rough skull ornament, and very tiny arms", "Abelisaurid with a blunt skull and extremely reduced forelimbs."),
+  q("Coelophysis", "coelophysis", "Late Triassic", "theropod", "slender body crop", "60% 42%", 1.6, "a slim early theropod body, long neck, and narrow jaws", "Early lightweight theropod with a long neck and narrow skull.")
 ];
 
 const quizFieldGuide = {
@@ -548,6 +564,118 @@ const quizFieldGuide = {
       "It had a huge sickle claw on each foot.",
       "It probably had feathers like other dromaeosaurs."
     ]
+  },
+  tarbosaurus: {
+    lived: "Late Cretaceous, about 70 million years ago",
+    where: "Mongolia and northern China",
+    habitat: "River floodplains, woodlands, and semi-arid plains",
+    diet: "Carnivore; hunted and scavenged large dinosaurs",
+    facts: ["It was a close Asian relative of Tyrannosaurus rex.", "Its skull was deep and powerful.", "Its arms were small with two-fingered hands."]
+  },
+  torosaurus: {
+    lived: "Late Cretaceous, about 68-66 million years ago",
+    where: "Western North America",
+    habitat: "Floodplains, open woodland, and coastal lowlands",
+    diet: "Herbivore",
+    facts: ["It had one of the longest frills among horned dinosaurs.", "It carried two long brow horns and a smaller nose horn.", "Scientists have debated its relationship to Triceratops."]
+  },
+  pachyrhinosaurus: {
+    lived: "Late Cretaceous, about 73-69 million years ago",
+    where: "Alaska and western Canada",
+    habitat: "Cool coastal plains, river valleys, and forests",
+    diet: "Herbivore",
+    facts: ["Its name means 'thick-nosed lizard.'", "It had a rough bony boss on its nose.", "Large bonebeds suggest it may have gathered in groups."]
+  },
+  carcharodontosaurus: {
+    lived: "Late Cretaceous, about 100-94 million years ago",
+    where: "North Africa",
+    habitat: "River systems, deltas, and warm floodplains",
+    diet: "Carnivore",
+    facts: ["Its name means 'shark-toothed lizard.'", "Its teeth were serrated like steak knives.", "It was one of the giant predators of Cretaceous Africa."]
+  },
+  mapusaurus: {
+    lived: "Late Cretaceous, about 97-93 million years ago",
+    where: "Argentina",
+    habitat: "Warm floodplains and river channels",
+    diet: "Carnivore",
+    facts: ["It was closely related to Giganotosaurus.", "Several individuals were found together in one fossil site.", "It belonged to the carcharodontosaurids."]
+  },
+  camarasaurus: {
+    lived: "Late Jurassic, about 155-145 million years ago",
+    where: "Western North America",
+    habitat: "Seasonal floodplains with conifers, ferns, and open woodland",
+    diet: "Herbivore",
+    facts: ["It had a boxy skull with spoon-shaped teeth.", "It was one of the more common sauropods of the Morrison Formation.", "Its body was shorter and sturdier than Diplodocus."]
+  },
+  brontosaurus: {
+    lived: "Late Jurassic, about 156-146 million years ago",
+    where: "Western North America",
+    habitat: "River floodplains and open woodland",
+    diet: "Herbivore",
+    facts: ["Its name means 'thunder lizard.'", "It was a robust relative of Apatosaurus.", "It had a long neck and long tail balanced on a massive body."]
+  },
+  sauropelta: {
+    lived: "Early Cretaceous, about 108 million years ago",
+    where: "Western North America",
+    habitat: "Floodplains, forests, and river-edge habitats",
+    diet: "Herbivore",
+    facts: ["It had large spikes projecting from the shoulder area.", "It was a nodosaur, an armored dinosaur without a tail club.", "Bony plates protected its back and sides."]
+  },
+  nodosaurus: {
+    lived: "Late Cretaceous, about 95-90 million years ago",
+    where: "North America",
+    habitat: "Coastal plains and lowland forests",
+    diet: "Herbivore",
+    facts: ["It gave its name to the nodosaur family.", "It had armor plates but no heavy tail club.", "Its low body helped shield it from predators."]
+  },
+  struthiomimus: {
+    lived: "Late Cretaceous, about 77-66 million years ago",
+    where: "Western North America",
+    habitat: "Open floodplains and lightly wooded plains",
+    diet: "Likely omnivore",
+    facts: ["Its name means 'ostrich mimic.'", "It had long arms and hands with three fingers.", "Its long legs suggest it was a fast runner."]
+  },
+  ornithomimus: {
+    lived: "Late Cretaceous, about 76-66 million years ago",
+    where: "Western North America",
+    habitat: "Floodplains, open woodland, and coastal plains",
+    diet: "Likely omnivore",
+    facts: ["It had a toothless beak.", "Some relatives preserve feather impressions.", "Its body plan looked much like a modern ostrich."]
+  },
+  ouranosaurus: {
+    lived: "Early Cretaceous, about 125-112 million years ago",
+    where: "Niger, Africa",
+    habitat: "River floodplains and warm seasonal lowlands",
+    diet: "Herbivore",
+    facts: ["It had tall spines along its back.", "It was related to Iguanodon.", "It had thumb spikes and a broad beaked mouth."]
+  },
+  dryosaurus: {
+    lived: "Late Jurassic, about 155-145 million years ago",
+    where: "Western North America and Tanzania",
+    habitat: "Open woodland and floodplains",
+    diet: "Herbivore",
+    facts: ["It was a small, nimble plant-eater.", "Its long hind legs suggest quick running.", "Its stiff tail helped with balance."]
+  },
+  citipati: {
+    lived: "Late Cretaceous, about 75-71 million years ago",
+    where: "Mongolia",
+    habitat: "Dry dunes and semi-arid plains",
+    diet: "Omnivore",
+    facts: ["Fossils show adults sitting on nests.", "It had a short beak and a tall head crest.", "It was likely covered in feathers."]
+  },
+  majungasaurus: {
+    lived: "Late Cretaceous, about 70-66 million years ago",
+    where: "Madagascar",
+    habitat: "Seasonal floodplains and dry woodland",
+    diet: "Carnivore",
+    facts: ["It had a short, deep skull.", "Its arms were extremely small.", "Fossil evidence suggests it sometimes bit other Majungasaurus."]
+  },
+  coelophysis: {
+    lived: "Late Triassic, about 216-203 million years ago",
+    where: "Southwestern United States",
+    habitat: "Seasonal river plains and dry lowlands",
+    diet: "Carnivore",
+    facts: ["It was a slim early theropod.", "Many fossils were found at Ghost Ranch in New Mexico.", "Its light body and long legs made it an agile hunter."]
   }
 };
 

@@ -8,10 +8,28 @@ const turnPill = document.querySelector("#turnPill");
 const resetButton = document.querySelector("#resetButton");
 const twoPlayerButton = document.querySelector("#twoPlayerButton");
 
-const terrain = {
-  4: "V", 9: "F", 14: "B", 19: "E", 24: "T", 29: "F", 34: "B", 39: "V", 44: "E", 49: "T",
-  54: "F", 59: "B", 64: "V", 69: "E", 74: "T", 79: "F", 84: "B", 89: "V", 94: "E", 100: "N"
-};
+const dinoImages = [
+  "quiz-tyrannosaurus.png",
+  "quiz-triceratops.png",
+  "quiz-stegosaurus.png",
+  "quiz-brachiosaurus.png",
+  "quiz-velociraptor.png",
+  "quiz-spinosaurus.png",
+  "quiz-ankylosaurus.png",
+  "quiz-parasaurolophus.png",
+  "quiz-allosaurus.png",
+  "quiz-diplodocus.png",
+  "quiz-carnotaurus.png",
+  "quiz-iguanodon.png",
+  "quiz-pachycephalosaurus.png",
+  "quiz-therizinosaurus.png",
+  "quiz-giganotosaurus.png",
+  "quiz-maiasaura.png",
+  "quiz-styracosaurus.png",
+  "quiz-baryonyx.png",
+  "quiz-apatosaurus.png",
+  "quiz-dilophosaurus.png"
+];
 
 const jumps = {
   3: 22,
@@ -33,30 +51,30 @@ const jumps = {
 
 const jumpNames = {
   3: "a baby brachiosaurus neck",
-  8: "a stack of fossil ribs",
-  17: "a vine ladder",
-  28: "a friendly stegosaurs tail",
-  40: "a cliff of dino footprints",
-  58: "a pterosaur updraft",
-  70: "a golden bone bridge",
-  97: "a slippery tar pit",
-  88: "a spinosaurus splash zone",
-  76: "a crumbling volcano path",
-  65: "a sneaky raptor trail",
-  52: "a mudslide",
-  43: "a tyrannosaur scare",
-  35: "a broken egg detour",
-  25: "a fern-covered sinkhole"
+  8: "a tall apatosaurus neck",
+  17: "a gentle diplodocus neck",
+  28: "a friendly brachiosaurus neck",
+  40: "a leafy sauropod neck",
+  58: "a lookout dinosaur neck",
+  70: "a golden longneck",
+  97: "a sweeping tyrannosaur tail",
+  88: "a slippery spinosaurus tail",
+  76: "a curling allosaurus tail",
+  65: "a sneaky raptor tail",
+  52: "a muddy dinosaur tail",
+  43: "a swinging tyrannosaur tail",
+  35: "a heavy stegosaurus tail",
+  25: "a fern-covered dinosaur tail"
 };
 
 const playerSets = [
   [
-    { name: "Amber", mark: "A", position: 1 },
-    { name: "Blue", mark: "B", position: 1 }
+    { name: "Carnotaurus", mark: "C", avatar: "../dino-builder/assets/quiz-carnotaurus.png", position: 1 },
+    { name: "Mosasaurus", mark: "M", avatar: "assets/avatar-mosasaurus.png", position: 1 }
   ],
   [
-    { name: "Amber", mark: "A", position: 1 },
-    { name: "Rex Bot", mark: "R", position: 1, bot: true }
+    { name: "Carnotaurus", mark: "C", avatar: "../dino-builder/assets/quiz-carnotaurus.png", position: 1 },
+    { name: "Mosasaurus Bot", mark: "M", avatar: "assets/avatar-mosasaurus.png", position: 1, bot: true }
   ]
 ];
 
@@ -87,12 +105,16 @@ function buildBoard() {
 
   cellsByGrid.forEach((square) => {
     const cell = document.createElement("div");
+    const dinoImage = dinoImages[(square - 1) % dinoImages.length];
     cell.className = "cell";
     cell.dataset.square = square;
     if (square === 100) cell.classList.add("is-nest");
     if (jumps[square] > square) cell.classList.add("is-ladder");
     if (jumps[square] < square) cell.classList.add("is-slide");
-    cell.innerHTML = `<span class="num">${square}</span><span class="terrain">${terrain[square] || ""}</span>`;
+    cell.innerHTML = `
+      <span class="num">${square}</span>
+      <img class="square-dino" src="../dino-builder/assets/${dinoImage}" alt="" aria-hidden="true">
+    `;
     board.appendChild(cell);
   });
 
@@ -100,7 +122,7 @@ function buildBoard() {
     const token = document.createElement("div");
     token.className = "token";
     token.dataset.player = index;
-    token.textContent = player.mark;
+    token.innerHTML = `<img src="${player.avatar}" alt="${player.name}">`;
     board.appendChild(token);
   });
 
@@ -114,48 +136,54 @@ function drawConnectors() {
     const from = Number(fromText);
     const start = cellPosition(from);
     const end = cellPosition(to);
-    if (to > from) drawLadder(start, end);
-    else drawSlide(start, end);
+    if (to > from) drawNeck(start, end);
+    else drawTail(start, end);
   });
 }
 
-function svgLine(x1, y1, x2, y2, className) {
-  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  line.setAttribute("x1", x1);
-  line.setAttribute("y1", y1);
-  line.setAttribute("x2", x2);
-  line.setAttribute("y2", y2);
-  line.setAttribute("class", className);
-  trackSvg.appendChild(line);
-}
-
-function drawLadder(start, end) {
+function drawNeck(start, end) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
-  const length = Math.hypot(dx, dy) || 1;
-  const offsetX = (-dy / length) * 1.7;
-  const offsetY = (dx / length) * 1.7;
-  svgLine(start.x * 10 - offsetX * 10, start.y * 10 - offsetY * 10, end.x * 10 - offsetX * 10, end.y * 10 - offsetY * 10, "connector-ladder");
-  svgLine(start.x * 10 + offsetX * 10, start.y * 10 + offsetY * 10, end.x * 10 + offsetX * 10, end.y * 10 + offsetY * 10, "connector-ladder");
-  for (let step = 1; step < 6; step += 1) {
-    const t = step / 6;
-    const x = (start.x + dx * t) * 10;
-    const y = (start.y + dy * t) * 10;
-    svgLine(x - offsetX * 19, y - offsetY * 19, x + offsetX * 19, y + offsetY * 19, "connector-ladder-rung");
-  }
+  const midX = (start.x + dx * .48) * 10;
+  const midY = (start.y + dy * .48) * 10;
+  const bend = dx >= 0 ? 42 : -42;
+  const d = `M ${start.x * 10} ${start.y * 10} Q ${midX + bend} ${midY} ${end.x * 10} ${end.y * 10}`;
+  const neck = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  const belly = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  const head = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+  const eye = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  neck.setAttribute("d", d);
+  neck.setAttribute("class", "connector-neck");
+  belly.setAttribute("d", d);
+  belly.setAttribute("class", "connector-neck-highlight");
+  head.setAttribute("cx", end.x * 10);
+  head.setAttribute("cy", end.y * 10 - 16);
+  head.setAttribute("rx", 28);
+  head.setAttribute("ry", 18);
+  head.setAttribute("class", "connector-neck-head");
+  eye.setAttribute("cx", end.x * 10 + 8);
+  eye.setAttribute("cy", end.y * 10 - 21);
+  eye.setAttribute("r", 3.5);
+  eye.setAttribute("class", "connector-eye");
+  trackSvg.append(neck, belly, head, eye);
 }
 
-function drawSlide(start, end) {
+function drawTail(start, end) {
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   const hi = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  const tip = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   const midX = (start.x + end.x) * 5;
   const midY = (start.y + end.y) * 5;
   const d = `M ${start.x * 10} ${start.y * 10} Q ${midX + 55} ${midY - 20} ${end.x * 10} ${end.y * 10}`;
   path.setAttribute("d", d);
-  path.setAttribute("class", "connector-slide");
+  path.setAttribute("class", "connector-tail");
   hi.setAttribute("d", d);
-  hi.setAttribute("class", "connector-slide-highlight");
-  trackSvg.append(path, hi);
+  hi.setAttribute("class", "connector-tail-highlight");
+  tip.setAttribute("cx", end.x * 10);
+  tip.setAttribute("cy", end.y * 10);
+  tip.setAttribute("r", 10);
+  tip.setAttribute("class", "connector-tail-tip");
+  trackSvg.append(path, hi, tip);
 }
 
 function render() {
@@ -169,7 +197,7 @@ function render() {
 
   playersEl.innerHTML = players.map((player, index) => `
     <article class="player-card ${index === currentPlayer && !gameOver ? "is-active" : ""}" data-player="${index}">
-      <span class="player-chip">${player.mark}</span>
+      <span class="player-chip"><img src="${player.avatar}" alt="${player.name}"></span>
       <div>
         <div class="player-name">${player.name}</div>
         <div class="player-pos">Square ${player.position}</div>
@@ -238,8 +266,8 @@ async function movePlayer(player, steps) {
     const to = jumps[from];
     const up = to > from;
     message.textContent = up
-      ? `${player.name} climbs ${jumpNames[from]} to square ${to}.`
-      : `${player.name} hits ${jumpNames[from]} and slides to square ${to}.`;
+      ? `${player.name} climbs up ${jumpNames[from]} to square ${to}.`
+      : `${player.name} slides down ${jumpNames[from]} to square ${to}.`;
     await sleep(520);
     player.position = to;
     bounceToken(currentPlayer);
