@@ -52,21 +52,22 @@ body:not(.landing-active) .landing-page {
 
 .landing-bg {
   object-fit: cover;
-  object-position: 52% 50%;
+  object-position: 64% 50%;
   z-index: -3;
 }
 
 .landing-shade {
   z-index: -2;
   background:
-    linear-gradient(90deg, rgba(8, 11, 8, .88) 0%, rgba(8, 11, 8, .68) 38%, rgba(8, 11, 8, .18) 72%),
-    linear-gradient(0deg, rgba(8, 11, 8, .88) 0%, transparent 42%);
+    radial-gradient(circle at 72% 48%, rgba(255, 218, 126, .16), transparent 24%),
+    linear-gradient(90deg, rgba(6, 8, 7, .94) 0%, rgba(8, 11, 8, .76) 38%, rgba(8, 11, 8, .12) 75%),
+    linear-gradient(0deg, rgba(8, 11, 8, .92) 0%, transparent 46%);
 }
 
 .landing-content {
   align-self: center;
-  width: min(760px, calc(100% - 48px));
-  padding: 48px 0 32px 42px;
+  width: min(800px, calc(100% - 48px));
+  padding: 44px 0 28px 42px;
 }
 
 .landing-kicker {
@@ -94,6 +95,23 @@ body:not(.landing-active) .landing-page {
   line-height: 1.35;
 }
 
+.landing-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.landing-specs span {
+  border: 1px solid rgba(255, 255, 255, .2);
+  background: rgba(5, 8, 6, .58);
+  color: #f8e7b4;
+  padding: 8px 10px;
+  font-size: .8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .landing-actions {
   display: flex;
   flex-wrap: wrap;
@@ -109,6 +127,13 @@ body:not(.landing-active) .landing-page {
   cursor: pointer;
   padding: 0 15px;
   font-weight: 900;
+  transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.landing-actions button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 243, 207, .55);
+  background: rgba(39, 48, 35, .9);
 }
 
 .landing-actions .landing-primary,
@@ -116,6 +141,15 @@ body:not(.landing-active) .landing-page {
   border-color: transparent;
   background: #d2b15f;
   color: #17130b;
+}
+
+.landing-actions .landing-primary:hover,
+.landing-actions .landing-print:hover {
+  background: #f0cf71;
+}
+
+.landing-actions .landing-print {
+  background: #77c8bd;
 }
 
 .landing-strip {
@@ -132,7 +166,8 @@ body:not(.landing-active) .landing-page {
   min-height: 92px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .15);
-  background: rgba(13, 17, 12, .78);
+  background: rgba(13, 17, 12, .82);
+  backdrop-filter: blur(8px);
 }
 
 .landing-strip img {
@@ -1038,6 +1073,14 @@ h1 {
     padding: 26mm 0 0 18mm;
   }
 
+  body[data-print-mode="landing"] .landing-specs {
+    display: flex;
+  }
+
+  body[data-print-mode="landing"] .landing-specs span {
+    color: #f8e7b4;
+  }
+
   body[data-print-mode="landing"] .landing-content h1 {
     color: #fff3cf;
     font-size: 44pt;
@@ -1264,6 +1307,10 @@ h1 {
     min-height: auto;
   }
 
+  .landing-bg {
+    object-position: 68% 50%;
+  }
+
   .landing-content {
     width: calc(100% - 28px);
     padding: 34px 0 28px 14px;
@@ -1336,6 +1383,20 @@ h1 {
 }
 
 @media (max-width: 560px) {
+  .landing-bg {
+    object-position: 72% 50%;
+  }
+
+  .landing-shade {
+    background:
+      linear-gradient(90deg, rgba(6, 8, 7, .95) 0%, rgba(8, 11, 8, .75) 52%, rgba(8, 11, 8, .3) 100%),
+      linear-gradient(0deg, rgba(8, 11, 8, .95) 0%, transparent 48%);
+  }
+
+  .landing-actions button {
+    flex: 1 1 145px;
+  }
+
   .game-shell {
     padding: 10px;
     gap: 10px;
