@@ -750,8 +750,10 @@ const state = {
   quizTotal: 0,
   quizStreak: 0,
   quizAnswered: false,
+  quizPotential: 10,
+  quizHintsUsed: 0,
   currentItem: null,
-  quizDifficulty: "field",
+  quizDifficulty: "easy",
   quizOrder: [],
   galleryPage: 0,
   galleryQuizPage: 0,
@@ -790,6 +792,8 @@ const quizTotal = document.querySelector("#quizTotal");
 const quizStreak = document.querySelector("#quizStreak");
 const nextQuizBtn = document.querySelector("#nextQuizBtn");
 const quizDifficulty = document.querySelector("#quizDifficulty");
+const quizPotential = document.querySelector("#quizPotential");
+const hintQuizBtn = document.querySelector("#hintQuizBtn");
 const quizEra = document.querySelector("#quizEra");
 const quizView = document.querySelector("#quizView");
 const quizPrompt = document.querySelector("#quizPrompt");
@@ -1263,19 +1267,93 @@ function validateQuizData() {
   });
 }
 
+const quizDifficultySettings = {
+  easy: {
+    label: "Easy",
+    points: 10,
+    hintCost: 3,
+    choiceCount: 4,
+    slugs: [
+      "tyrannosaurus",
+      "triceratops",
+      "stegosaurus",
+      "velociraptor",
+      "brachiosaurus",
+      "spinosaurus",
+      "ankylosaurus",
+      "parasaurolophus",
+      "allosaurus",
+      "archaeopteryx"
+    ]
+  },
+  medium: {
+    label: "Medium",
+    points: 15,
+    hintCost: 4,
+    choiceCount: 4,
+    slugs: [
+      "tyrannosaurus",
+      "triceratops",
+      "spinosaurus",
+      "parasaurolophus",
+      "allosaurus",
+      "brachiosaurus",
+      "stegosaurus",
+      "ankylosaurus",
+      "velociraptor",
+      "carnotaurus",
+      "dilophosaurus",
+      "gallimimus",
+      "pachycephalosaurus",
+      "iguanodon",
+      "diplodocus",
+      "apatosaurus",
+      "deinonychus",
+      "microraptor",
+      "archaeopteryx",
+      "therizinosaurus",
+      "oviraptor",
+      "corythosaurus",
+      "lambeosaurus",
+      "edmontosaurus"
+    ]
+  },
+  hard: {
+    label: "Hard",
+    points: 25,
+    hintCost: 6,
+    choiceCount: 6,
+    slugs: null
+  }
+};
+
+function quizDifficultySetting() {
+  return quizDifficultySettings[state.quizDifficulty] || quizDifficultySettings.easy;
+}
+
+function quizPoolIndices() {
+  const setting = quizDifficultySetting();
+  if (!setting.slugs) return quizItems.map((_, index) => index);
+  const slugs = new Set(setting.slugs);
+  const indices = quizItems.map((item, index) => (slugs.has(item.slug) ? index : -1)).filter((index) => index >= 0);
+  return indices.length ? indices : quizItems.map((_, index) => index);
+}
+
 function currentQuizItem() {
   if (!state.quizOrder.length || state.quizIndex >= state.quizOrder.length) {
-    state.quizOrder = shuffle(quizItems.map((_, index) => index));
+    state.quizOrder = shuffle(quizPoolIndices());
     state.quizIndex = 0;
   }
   return quizItems[state.quizOrder[state.quizIndex]];
 }
 
-function quizChoices(item, expert) {
-  const pool = expert ? quizChoicePools[item.group] || [] : quizItems.map((quizItem) => quizItem.name);
-  const targetCount = expert ? 6 : 4;
+function quizChoices(item) {
+  const setting = quizDifficultySetting();
+  const targetCount = setting.choiceCount;
+  const difficultyPool = quizPoolIndices().map((index) => quizItems[index].name);
+  const groupPool = quizChoicePools[item.group] || [];
   const choices = [item.name];
-  const candidates = shuffle(pool.filter((name) => name !== item.name));
+  const candidates = shuffle([...groupPool, ...difficultyPool].filter((name) => name !== item.name));
   candidates.forEach((name) => {
     if (choices.length < targetCount && !choices.includes(name)) choices.push(name);
   });
@@ -1290,30 +1368,68 @@ function renderQuiz() {
   // Grade against the specimen that was actually rendered, not a re-derived one
   // (currentQuizItem() has reshuffle side effects at the order boundary).
   state.currentItem = item;
-  const expert = state.quizDifficulty === "expert";
-  const choices = quizChoices(item, expert);
+  state.quizHintsUsed = 0;
+  state.quizPotential = quizDifficultySetting().points;
+  const choices = quizChoices(item);
   quizImage.src = item.image;
   quizImage.alt = `Photorealistic quiz image of ${item.name}`;
-  quizImage.style.objectPosition = expert ? item.crop.position : "50% 50%";
-  quizImage.style.transform = expert ? `scale(${item.crop.scale})` : "scale(1)";
-  quizImage.classList.toggle("expert-crop", expert);
-  quizImage.classList.toggle("field-guide", !expert);
+  quizImage.style.objectPosition = "50% 50%";
+  quizImage.style.transform = "scale(1)";
+  quizImage.classList.remove("expert-crop");
+  quizImage.classList.add("field-guide");
   // Mark the correct option with a data flag so grading never depends on
   // re-matching display strings (robust to name collisions / stray characters).
   quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${escapeHtml(choice)}" data-correct="${choice === item.name}">${escapeHtml(choice)}</button>`).join("");
   quizEra.textContent = item.era;
-  quizView.textContent = expert ? item.view : "Full body view";
-  quizPrompt.textContent = expert ? "Identify the dinosaur from a cropped specimen view." : "Which dinosaur is this?";
+  quizView.textContent = `${quizDifficultySetting().label} level`;
+  quizPrompt.textContent = "Which dinosaur is this?";
   quizFeedback.classList.remove("is-revealed");
-  quizFeedback.textContent = expert ? "Expert mode: no hint until you answer." : item.clue;
+  quizFeedback.innerHTML = `<span class="quiz-intro">Choose carefully. Hints help, but each one lowers this fossil's point value.</span>`;
   quizScore.textContent = state.quizScore;
   quizTotal.textContent = state.quizTotal;
   quizStreak.textContent = `Streak ${state.quizStreak}`;
   quizDifficulty.value = state.quizDifficulty;
+  quizPotential.textContent = state.quizPotential;
+  hintQuizBtn.disabled = false;
+  hintQuizBtn.textContent = `Get Hint (-${quizDifficultySetting().hintCost} pts)`;
   state.quizAnswered = false;
   quizOptions.querySelectorAll(".quiz-option").forEach((button) => {
     button.addEventListener("click", () => answerQuiz(button));
   });
+}
+
+function revealQuizHint() {
+  if (state.quizAnswered || !state.currentItem) return;
+  const item = state.currentItem;
+  const guide = getGuide(item.slug);
+  const setting = quizDifficultySetting();
+  state.quizHintsUsed += 1;
+  state.quizPotential = Math.max(1, state.quizPotential - setting.hintCost);
+  quizPotential.textContent = state.quizPotential;
+  quizFeedback.classList.add("is-revealed");
+  const hintText = [
+    `Field clue: ${item.clue}`,
+    `Habitat clue: ${guide.habitat}. Diet: ${guide.diet}.`,
+    `Era clue: ${guide.lived}. Fossil family: ${item.group}.`
+  ][state.quizHintsUsed - 1] || `Final clue: ${item.expertClue}`;
+  if (state.quizHintsUsed === 3) {
+    const wrongOptions = shuffle([...quizOptions.querySelectorAll(".quiz-option")].filter((button) => button.dataset.correct !== "true" && !button.disabled));
+    wrongOptions.slice(0, 2).forEach((button) => {
+      button.disabled = true;
+      button.classList.add("is-eliminated");
+    });
+  }
+  quizFeedback.innerHTML = `
+    <div class="quiz-hint">
+      <b>Hint ${state.quizHintsUsed}</b>
+      <span>${escapeHtml(hintText)}</span>
+      <small>This fossil is now worth up to ${state.quizPotential} points.</small>
+    </div>
+  `;
+  if (state.quizHintsUsed >= 4 || state.quizPotential <= 1) {
+    hintQuizBtn.disabled = true;
+    hintQuizBtn.textContent = "Hints used";
+  }
 }
 
 function answerQuiz(clicked) {
@@ -1323,11 +1439,13 @@ function answerQuiz(clicked) {
   state.quizAnswered = true;
   state.quizTotal += 1;
   if (correct) {
-    state.quizScore += 1;
+    state.quizScore += state.quizPotential;
     state.quizStreak += 1;
   } else {
     state.quizStreak = 0;
   }
+  hintQuizBtn.disabled = true;
+  hintQuizBtn.textContent = "Hint closed";
   quizOptions.querySelectorAll(".quiz-option").forEach((button) => {
     button.disabled = true;
     button.classList.toggle("correct", button.dataset.correct === "true");
@@ -1346,13 +1464,14 @@ function nextQuiz() {
 
 function renderQuizFeedback(item, correct) {
   const guide = getGuide(item.slug);
-  const anatomyNote = state.quizDifficulty === "expert" ? item.expertClue : item.clue;
+  const earned = correct ? state.quizPotential : 0;
+  const streakNote = state.quizStreak >= 3 ? ` Hot streak: ${state.quizStreak} correct in a row.` : "";
   quizFeedback.classList.add("is-revealed");
   quizFeedback.innerHTML = `
-    <div class="quiz-result ${correct ? "correct" : "wrong"}">${correct ? "Correct." : `Good try. The answer is ${escapeHtml(item.name)}.`}</div>
+    <div class="quiz-result ${correct ? "correct" : "wrong"}">${correct ? `Correct. +${earned} points.${streakNote}` : `Good try. The answer is ${escapeHtml(item.name)}.`}</div>
     <div class="dino-guide">
       <h3>${escapeHtml(item.name)}</h3>
-      <p>${escapeHtml(anatomyNote)} ${escapeHtml(item.fact)}</p>
+      <p>${escapeHtml(item.clue)} ${escapeHtml(item.fact)}</p>
       <div class="guide-grid">
         <div><span>Time period</span><b>${escapeHtml(guide.lived)}</b></div>
         <div><span>Where it lived</span><b>${escapeHtml(guide.where)}</b></div>
@@ -1761,12 +1880,15 @@ document.querySelector("#randomizeBtn").addEventListener("click", randomize);
 document.querySelector("#snapshotBtn").addEventListener("click", snapshot);
 document.querySelector("#testBtn").addEventListener("click", runFieldTest);
 nextQuizBtn.addEventListener("click", nextQuiz);
+hintQuizBtn.addEventListener("click", revealQuizHint);
 quizDifficulty.addEventListener("change", (event) => {
   state.quizDifficulty = event.target.value;
-  // If the current fossil was already answered, move to a new one so switching
-  // difficulty can't be used to retry the same specimen for a free point.
-  if (state.quizAnswered) nextQuiz();
-  else renderQuiz();
+  state.quizScore = 0;
+  state.quizTotal = 0;
+  state.quizOrder = [];
+  state.quizIndex = 0;
+  state.quizStreak = 0;
+  renderQuiz();
 });
 landingPrint.addEventListener("click", () => {
   document.body.dataset.printMode = "landing";

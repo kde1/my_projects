@@ -218,19 +218,21 @@
         <div class="tab-panel" id="quizPanel">
           <section class="lab-card quiz-card">
             <div class="quiz-topline">
-              <h2>Fossil ID Quiz</h2>
-              <div class="quiz-score"><span id="quizScore">0</span>/<span id="quizTotal">0</span></div>
+              <h2>Dino Quiz</h2>
+              <div class="quiz-score"><span id="quizScore">0</span> pts / <span id="quizTotal">0</span> fossils</div>
             </div>
             <label class="control compact-control">
               <span>Difficulty</span>
               <select id="quizDifficulty">
-                <option value="expert">Expert</option>
-                <option value="field" selected>Field Guide</option>
+                <option value="easy" selected>Easy: Famous dinosaurs</option>
+                <option value="medium">Medium: Bigger fossil set</option>
+                <option value="hard">Hard: All 50 dinosaurs</option>
               </select>
             </label>
             <div class="quiz-meta">
               <span id="quizEra">Specimen</span>
-              <span id="quizView">Cropped view</span>
+              <span id="quizView">Full body view</span>
+              <span>Up to <b id="quizPotential">10</b> pts</span>
             </div>
             <div class="quiz-image-frame">
               <img id="quizImage" class="quiz-image" src="" alt="Dinosaur quiz specimen">
@@ -241,7 +243,10 @@
             </div>
             <div class="quiz-options" id="quizOptions"></div>
             <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
-            <button class="primary-button" id="nextQuizBtn" type="button">Next Fossil</button>
+            <div class="quiz-actions">
+              <button class="hint-button" id="hintQuizBtn" type="button">Get Hint</button>
+              <button class="primary-button" id="nextQuizBtn" type="button">Next Fossil</button>
+            </div>
           </section>
         </div>
 
