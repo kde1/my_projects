@@ -748,10 +748,13 @@ const state = {
   quizIndex: 0,
   quizScore: 0,
   quizTotal: 0,
+  quizCorrect: 0,
   quizStreak: 0,
   quizAnswered: false,
   quizPotential: 10,
   quizHintsUsed: 0,
+  quizRoundHints: 0,
+  quizRoundComplete: false,
   currentItem: null,
   quizDifficulty: "easy",
   quizOrder: [],
@@ -1327,6 +1330,8 @@ const quizDifficultySettings = {
   }
 };
 
+const QUIZ_ROUND_SIZE = 10;
+
 function quizDifficultySetting() {
   return quizDifficultySettings[state.quizDifficulty] || quizDifficultySettings.easy;
 }
@@ -1339,11 +1344,27 @@ function quizPoolIndices() {
   return indices.length ? indices : quizItems.map((_, index) => index);
 }
 
+function startQuizRound() {
+  state.quizScore = 0;
+  state.quizTotal = 0;
+  state.quizCorrect = 0;
+  state.quizStreak = 0;
+  state.quizAnswered = false;
+  state.quizHintsUsed = 0;
+  state.quizRoundHints = 0;
+  state.quizRoundComplete = false;
+  state.currentItem = null;
+  state.quizOrder = shuffle(quizPoolIndices()).slice(0, QUIZ_ROUND_SIZE);
+  state.quizIndex = 0;
+  renderQuiz();
+}
+
 function currentQuizItem() {
-  if (!state.quizOrder.length || state.quizIndex >= state.quizOrder.length) {
-    state.quizOrder = shuffle(quizPoolIndices());
+  if (!state.quizOrder.length) {
+    state.quizOrder = shuffle(quizPoolIndices()).slice(0, QUIZ_ROUND_SIZE);
     state.quizIndex = 0;
   }
+  if (state.quizIndex >= state.quizOrder.length) return null;
   return quizItems[state.quizOrder[state.quizIndex]];
 }
 
@@ -1365,6 +1386,10 @@ function quizChoices(item) {
 
 function renderQuiz() {
   const item = currentQuizItem();
+  if (!item) {
+    renderQuizResults();
+    return;
+  }
   // Grade against the specimen that was actually rendered, not a re-derived one
   // (currentQuizItem() has reshuffle side effects at the order boundary).
   state.currentItem = item;
@@ -1381,7 +1406,7 @@ function renderQuiz() {
   // re-matching display strings (robust to name collisions / stray characters).
   quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${escapeHtml(choice)}" data-correct="${choice === item.name}">${escapeHtml(choice)}</button>`).join("");
   quizEra.textContent = item.era;
-  quizView.textContent = `${quizDifficultySetting().label} level`;
+  quizView.textContent = `${quizDifficultySetting().label} ${state.quizIndex + 1}/${QUIZ_ROUND_SIZE}`;
   quizPrompt.textContent = "Which dinosaur is this?";
   quizFeedback.classList.remove("is-revealed");
   quizFeedback.innerHTML = `<span class="quiz-intro">Choose carefully. Hints help, but each one lowers this fossil's point value.</span>`;
@@ -1392,6 +1417,8 @@ function renderQuiz() {
   quizPotential.textContent = state.quizPotential;
   hintQuizBtn.disabled = false;
   hintQuizBtn.textContent = `Get Hint (-${quizDifficultySetting().hintCost} pts)`;
+  nextQuizBtn.disabled = true;
+  nextQuizBtn.textContent = "Next Fossil";
   state.quizAnswered = false;
   quizOptions.querySelectorAll(".quiz-option").forEach((button) => {
     button.addEventListener("click", () => answerQuiz(button));
@@ -1404,6 +1431,7 @@ function revealQuizHint() {
   const guide = getGuide(item.slug);
   const setting = quizDifficultySetting();
   state.quizHintsUsed += 1;
+  state.quizRoundHints += 1;
   state.quizPotential = Math.max(1, state.quizPotential - setting.hintCost);
   quizPotential.textContent = state.quizPotential;
   quizFeedback.classList.add("is-revealed");
@@ -1440,12 +1468,14 @@ function answerQuiz(clicked) {
   state.quizTotal += 1;
   if (correct) {
     state.quizScore += state.quizPotential;
+    state.quizCorrect += 1;
     state.quizStreak += 1;
   } else {
     state.quizStreak = 0;
   }
   hintQuizBtn.disabled = true;
   hintQuizBtn.textContent = "Hint closed";
+  nextQuizBtn.disabled = false;
   quizOptions.querySelectorAll(".quiz-option").forEach((button) => {
     button.disabled = true;
     button.classList.toggle("correct", button.dataset.correct === "true");
@@ -1454,10 +1484,20 @@ function answerQuiz(clicked) {
   quizScore.textContent = state.quizScore;
   quizTotal.textContent = state.quizTotal;
   quizStreak.textContent = `Streak ${state.quizStreak}`;
+  nextQuizBtn.textContent = state.quizTotal >= QUIZ_ROUND_SIZE ? "See Results" : "Next Fossil";
   renderQuizFeedback(item, correct);
 }
 
 function nextQuiz() {
+  if (state.quizRoundComplete) {
+    startQuizRound();
+    return;
+  }
+  if (!state.quizAnswered) return;
+  if (state.quizTotal >= QUIZ_ROUND_SIZE) {
+    renderQuizResults();
+    return;
+  }
   state.quizIndex += 1;
   renderQuiz();
 }
@@ -1481,6 +1521,75 @@ function renderQuizFeedback(item, correct) {
       <ul>${guide.facts.map((fact) => `<li>${escapeHtml(fact)}</li>`).join("")}</ul>
     </div>
   `;
+}
+
+function quizExpertiseResult(percent, accuracy, hints) {
+  if (percent >= 90 && accuracy >= 90 && hints <= 3) {
+    return {
+      title: "Expert Paleontologist",
+      note: "Museum badge unlocked. You are reading fossils like a seasoned field scientist."
+    };
+  }
+  if (percent >= 75 || accuracy >= 80) {
+    return {
+      title: "Fossil Field Captain",
+      note: "You are close to expert level. A little less hint dust and you are expedition-ready."
+    };
+  }
+  if (percent >= 55 || accuracy >= 60) {
+    return {
+      title: "Dino Detective",
+      note: "Strong instincts. Keep matching shapes, eras, and body clues to sharpen your fossil eye."
+    };
+  }
+  if (percent >= 35 || accuracy >= 40) {
+    return {
+      title: "Junior Bone Hunter",
+      note: "The fossil trail is warming up. Try using one clue, then trust your first observation."
+    };
+  }
+  return {
+    title: "New Museum Intern",
+    note: "Every expert starts with dusty boots. Visit the gallery, study a few silhouettes, and try again."
+  };
+}
+
+function renderQuizResults() {
+  const setting = quizDifficultySetting();
+  const maxScore = setting.points * QUIZ_ROUND_SIZE;
+  const scorePercent = Math.round((state.quizScore / maxScore) * 100);
+  const accuracy = Math.round((state.quizCorrect / QUIZ_ROUND_SIZE) * 100);
+  const result = quizExpertiseResult(scorePercent, accuracy, state.quizRoundHints);
+  state.quizRoundComplete = true;
+  state.quizAnswered = true;
+  state.currentItem = null;
+  quizEra.textContent = `${setting.label} round complete`;
+  quizView.textContent = `${state.quizCorrect}/${QUIZ_ROUND_SIZE} identified`;
+  quizPrompt.textContent = "Expedition results";
+  quizPotential.textContent = maxScore;
+  quizScore.textContent = state.quizScore;
+  quizTotal.textContent = QUIZ_ROUND_SIZE;
+  quizStreak.textContent = `${accuracy}% accurate`;
+  quizOptions.innerHTML = "";
+  quizFeedback.classList.add("is-revealed");
+  quizFeedback.innerHTML = `
+    <div class="quiz-results">
+      <span class="quiz-results-kicker">Round complete</span>
+      <h3>${escapeHtml(result.title)}</h3>
+      <p>${escapeHtml(result.note)}</p>
+      <div class="quiz-results-grid">
+        <div><span>Score</span><b>${state.quizScore}/${maxScore}</b></div>
+        <div><span>Accuracy</span><b>${accuracy}%</b></div>
+        <div><span>Dinosaurs</span><b>${state.quizCorrect}/${QUIZ_ROUND_SIZE}</b></div>
+        <div><span>Hints used</span><b>${state.quizRoundHints}</b></div>
+      </div>
+      <small>${escapeHtml(setting.label)} rounds use 10 randomly selected dinosaurs. Play again for a fresh fossil lineup.</small>
+    </div>
+  `;
+  hintQuizBtn.disabled = true;
+  hintQuizBtn.textContent = "Round complete";
+  nextQuizBtn.disabled = false;
+  nextQuizBtn.textContent = "Play Again";
 }
 
 function renderGallery(options = {}) {
@@ -1883,12 +1992,7 @@ nextQuizBtn.addEventListener("click", nextQuiz);
 hintQuizBtn.addEventListener("click", revealQuizHint);
 quizDifficulty.addEventListener("change", (event) => {
   state.quizDifficulty = event.target.value;
-  state.quizScore = 0;
-  state.quizTotal = 0;
-  state.quizOrder = [];
-  state.quizIndex = 0;
-  state.quizStreak = 0;
-  renderQuiz();
+  startQuizRound();
 });
 landingPrint.addEventListener("click", () => {
   document.body.dataset.printMode = "landing";
@@ -1909,7 +2013,7 @@ window.addEventListener("afterprint", () => {
 validateQuizData();
 buildControls();
 buildDnaLab();
-renderQuiz();
+startQuizRound();
 renderGallery();
 renderGallery({ quizMode: true });
 syncInputs();
