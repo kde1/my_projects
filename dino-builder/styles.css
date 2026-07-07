@@ -226,6 +226,8 @@ body:not(.landing-active) .landing-page {
 }
 
 .game-app {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
   height: calc(100vh - var(--app-nav-space));
   min-height: 0;
   padding: 12px 18px 18px;
@@ -233,8 +235,9 @@ body:not(.landing-active) .landing-page {
 
 .game-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 440px);
   gap: 18px;
+  height: 100%;
   min-height: 0;
 }
 

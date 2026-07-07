@@ -1474,7 +1474,7 @@ function renderGalleryQuizPrintPages() {
     return `
       <section class="gallery-print-page">
         <header>
-          <h2>Dinosaur Gallery Quiz</h2>
+          <h2>Dinosaur Practice</h2>
           <p>Subtab ${start + 1}-${Math.min(start + pageSize, quizItems.length)}</p>
         </header>
         <div class="gallery-print-grid">
