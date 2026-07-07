@@ -1688,13 +1688,15 @@ function showTab(tabName) {
   document.querySelector(".game-shell").classList.toggle("gallery-focus", tabName === "gallery" || tabName === "galleryQuiz");
   if (tabName === "gallery") renderGallery();
   if (tabName === "galleryQuiz") renderGallery({ quizMode: true });
+  document.querySelectorAll(".app-nav-button").forEach((item) => {
+    item.classList.remove("is-active");
+    item.removeAttribute("aria-current");
+  });
   document.querySelectorAll(".app-nav-button[data-tab]").forEach((item) => {
     const active = item.dataset.tab === tabName;
-    item.classList.toggle("is-active", active);
     if (active) {
+      item.classList.add("is-active");
       item.setAttribute("aria-current", "page");
-    } else {
-      item.removeAttribute("aria-current");
     }
   });
   document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("is-active"));
@@ -1704,10 +1706,12 @@ function showTab(tabName) {
 function showLanding() {
   document.body.classList.add("landing-active");
   document.querySelector(".game-shell").classList.remove("quiz-focus", "gallery-focus");
-  document.querySelectorAll(".app-nav-button[data-tab]").forEach((item) => {
+  document.querySelectorAll(".app-nav-button").forEach((item) => {
     item.classList.remove("is-active");
     item.removeAttribute("aria-current");
   });
+  document.querySelector("[data-nav-home]").classList.add("is-active");
+  document.querySelector("[data-nav-home]").setAttribute("aria-current", "page");
 }
 
 document.querySelectorAll(".app-nav-button[data-tab]").forEach((tab) => {
@@ -1756,11 +1760,6 @@ document.querySelector("#spliceBtn").addEventListener("click", spliceDna);
 document.querySelector("#randomizeBtn").addEventListener("click", randomize);
 document.querySelector("#snapshotBtn").addEventListener("click", snapshot);
 document.querySelector("#testBtn").addEventListener("click", runFieldTest);
-document.querySelectorAll("[data-landing-target]").forEach((button) => {
-  button.addEventListener("click", () => {
-    showTab(button.dataset.landingTarget);
-  });
-});
 nextQuizBtn.addEventListener("click", nextQuiz);
 quizDifficulty.addEventListener("change", (event) => {
   state.quizDifficulty = event.target.value;

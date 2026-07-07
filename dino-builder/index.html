@@ -3,27 +3,32 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Isaac's Dino DNA Lab</title>
+    <title>Isaac's Dino Quiz</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="landing-active">
-    <section class="landing-page" id="landingPage" aria-label="Dino lab landing page">
+    <nav class="app-nav" aria-label="Dino Quiz navigation">
+      <button class="app-nav-button app-home-button is-active" type="button" data-nav-home aria-current="page">Home</button>
+      <button class="app-nav-button" type="button" data-tab="gallery">Gallery</button>
+      <button class="app-nav-button" type="button" data-tab="galleryQuiz">Gallery Quiz</button>
+      <button class="app-nav-button" type="button" data-tab="quiz">Fossil Quiz</button>
+      <button class="app-nav-button" type="button" data-tab="parts">Builder</button>
+      <button class="app-nav-button" type="button" data-tab="dna">DNA</button>
+    </nav>
+
+    <section class="landing-page" id="landingPage" aria-label="Dino quiz landing page">
       <img class="landing-bg" src="assets/landing-trex-hero.png" alt="">
       <div class="landing-shade"></div>
       <div class="landing-content">
         <p class="landing-kicker">Featured specimen: Tyrannosaurus rex</p>
-        <h1>Isaac's Dino DNA Lab</h1>
-        <p class="landing-copy">Power up the lab, splice wild dinosaur DNA, and race into a fossil adventure starring a roaring T. rex.</p>
+        <h1>Isaac's Dino Quiz</h1>
+        <p class="landing-copy">Race into a fossil adventure, master the dino gallery, and test your prehistoric knowledge with a roaring T. rex.</p>
         <div class="landing-specs" aria-label="Featured dinosaur facts">
           <span>Apex bite</span>
           <span>Late Cretaceous</span>
           <span>Lab breach level: 10</span>
         </div>
         <div class="landing-actions">
-          <button class="landing-primary" type="button" data-landing-target="parts">Start Building</button>
-          <button class="landing-action" type="button" data-landing-target="quiz">Fossil Quiz</button>
-          <button class="landing-action" type="button" data-landing-target="gallery">Gallery</button>
-          <button class="landing-action" type="button" data-landing-target="galleryQuiz">Gallery Quiz</button>
           <button class="landing-print" id="landingPrint" type="button">Print Mission Poster</button>
         </div>
       </div>
@@ -44,19 +49,11 @@
     </section>
 
     <div class="game-app">
-      <nav class="app-nav" aria-label="Dino Lab navigation">
-        <button class="app-nav-button app-home-button" type="button" data-nav-home>Home</button>
-        <button class="app-nav-button" type="button" data-tab="gallery">Gallery</button>
-        <button class="app-nav-button" type="button" data-tab="galleryQuiz">Gallery Quiz</button>
-        <button class="app-nav-button is-active" type="button" data-tab="parts" aria-current="page">Builder</button>
-        <button class="app-nav-button" type="button" data-tab="dna">DNA</button>
-      </nav>
-
       <main class="game-shell">
         <section class="workbench" aria-label="Dinosaur construction area">
           <div class="topbar">
             <div>
-              <h1>Isaac's Dino DNA Lab</h1>
+              <h1>Isaac's Dino Quiz</h1>
               <p id="dinoName">Triassic prototype</p>
             </div>
             <div class="top-actions">

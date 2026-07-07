@@ -3,6 +3,7 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #11130f;
   color: #f4f1e7;
+  --app-nav-space: 74px;
 }
 
 * {
@@ -32,11 +33,55 @@ body:not(.landing-active) .landing-page {
   display: none;
 }
 
+.app-nav {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(20, 24, 18, .86);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, .26);
+  margin: 14px 18px 0;
+  padding: 8px;
+  scrollbar-width: thin;
+}
+
+.app-nav-button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(244, 241, 231, .08);
+  color: #dce7d3;
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.app-nav-button:hover {
+  border-color: rgba(255, 243, 207, .5);
+  background: rgba(244, 241, 231, .16);
+}
+
+.app-nav-button.is-active {
+  border-color: transparent;
+  background: #d2b15f;
+  color: #17130b;
+}
+
+.app-home-button {
+  border-color: rgba(119, 200, 189, .62);
+  color: #dbfffb;
+}
+
 .landing-page {
   position: relative;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--app-nav-space));
   overflow: hidden;
   isolation: isolate;
   background: #11130f;
@@ -136,14 +181,12 @@ body:not(.landing-active) .landing-page {
   background: rgba(39, 48, 35, .9);
 }
 
-.landing-actions .landing-primary,
 .landing-actions .landing-print {
   border-color: transparent;
   background: #d2b15f;
   color: #17130b;
 }
 
-.landing-actions .landing-primary:hover,
 .landing-actions .landing-print:hover {
   background: #f0cf71;
 }
@@ -183,53 +226,9 @@ body:not(.landing-active) .landing-page {
 }
 
 .game-app {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 12px;
-  height: 100vh;
-  min-height: 100vh;
-  padding: 14px 18px 18px;
-}
-
-.app-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, .14);
-  background: rgba(20, 24, 18, .86);
-  box-shadow: 0 16px 50px rgba(0, 0, 0, .26);
-  padding: 8px;
-  scrollbar-width: thin;
-}
-
-.app-nav-button {
-  flex: 0 0 auto;
-  min-height: 42px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  background: rgba(244, 241, 231, .08);
-  color: #dce7d3;
-  cursor: pointer;
-  padding: 0 14px;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.app-nav-button:hover {
-  border-color: rgba(255, 243, 207, .5);
-  background: rgba(244, 241, 231, .16);
-}
-
-.app-nav-button.is-active {
-  border-color: transparent;
-  background: #d2b15f;
-  color: #17130b;
-}
-
-.app-home-button {
-  border-color: rgba(119, 200, 189, .62);
-  color: #dbfffb;
+  height: calc(100vh - var(--app-nav-space));
+  min-height: 0;
+  padding: 12px 18px 18px;
 }
 
 .game-shell {
