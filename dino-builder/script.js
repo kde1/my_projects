@@ -1182,7 +1182,7 @@ function spliceDna() {
   syncInputs();
   refreshControls();
   renderDino();
-  showTab("test");
+  showTab("parts");
   runFieldTest();
 }
 

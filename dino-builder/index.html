@@ -50,8 +50,6 @@
         <button class="app-nav-button" type="button" data-tab="galleryQuiz">Gallery Quiz</button>
         <button class="app-nav-button is-active" type="button" data-tab="parts" aria-current="page">Builder</button>
         <button class="app-nav-button" type="button" data-tab="dna">DNA</button>
-        <button class="app-nav-button" type="button" data-tab="skin">Skin</button>
-        <button class="app-nav-button" type="button" data-tab="test">Test</button>
       </nav>
 
       <main class="game-shell">
@@ -131,7 +129,58 @@
 
         <aside class="panel" aria-label="Construction controls">
         <div class="tab-panel is-active" id="partsPanel">
-          <div class="slot-grid" id="partControls"></div>
+          <section class="builder-section">
+            <div class="builder-section-head">
+              <h2>Body Parts</h2>
+            </div>
+            <div class="slot-grid" id="partControls"></div>
+          </section>
+
+          <section class="builder-section">
+            <div class="builder-section-head">
+              <h2>Look & Color</h2>
+            </div>
+            <label class="control">
+              <span>Base color</span>
+              <input type="color" id="baseColor" value="#5f7f45">
+            </label>
+            <label class="control">
+              <span>Belly color</span>
+              <input type="color" id="bellyColor" value="#d0c09a">
+            </label>
+            <label class="control">
+              <span>Pattern</span>
+              <select id="patternSelect">
+                <option value="scales">Scales</option>
+                <option value="stripes">Stripes</option>
+                <option value="plain">Plain hide</option>
+              </select>
+            </label>
+            <label class="control">
+              <span>Size</span>
+              <input type="range" id="sizeRange" min="82" max="118" value="100">
+            </label>
+            <label class="control">
+              <span>Posture</span>
+              <input type="range" id="postureRange" min="-10" max="12" value="0">
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="nameToggle" checked>
+              <span>Use fossil-style name</span>
+            </label>
+          </section>
+
+          <section class="builder-section">
+            <div class="builder-section-head">
+              <h2>Stats & Field Test</h2>
+            </div>
+            <div class="meter"><span>Speed</span><b id="speedValue"></b><i id="speedMeter"></i></div>
+            <div class="meter"><span>Strength</span><b id="strengthValue"></b><i id="strengthMeter"></i></div>
+            <div class="meter"><span>Defense</span><b id="defenseValue"></b><i id="defenseMeter"></i></div>
+            <div class="meter"><span>Reach</span><b id="reachValue"></b><i id="reachMeter"></i></div>
+            <div class="meter"><span>Ferocity</span><b id="ferocityValue"></b><i id="ferocityMeter"></i></div>
+            <button class="primary-button" id="testBtn" type="button">Run Field Test</button>
+          </section>
         </div>
 
         <div class="tab-panel" id="dnaPanel">
@@ -233,45 +282,6 @@
           </section>
         </div>
 
-        <div class="tab-panel" id="skinPanel">
-          <label class="control">
-            <span>Base color</span>
-            <input type="color" id="baseColor" value="#5f7f45">
-          </label>
-          <label class="control">
-            <span>Belly color</span>
-            <input type="color" id="bellyColor" value="#d0c09a">
-          </label>
-          <label class="control">
-            <span>Pattern</span>
-            <select id="patternSelect">
-              <option value="scales">Scales</option>
-              <option value="stripes">Stripes</option>
-              <option value="plain">Plain hide</option>
-            </select>
-          </label>
-          <label class="control">
-            <span>Size</span>
-            <input type="range" id="sizeRange" min="82" max="118" value="100">
-          </label>
-          <label class="control">
-            <span>Posture</span>
-            <input type="range" id="postureRange" min="-10" max="12" value="0">
-          </label>
-          <label class="toggle">
-            <input type="checkbox" id="nameToggle" checked>
-            <span>Use fossil-style name</span>
-          </label>
-        </div>
-
-        <div class="tab-panel" id="testPanel">
-          <div class="meter"><span>Speed</span><b id="speedValue"></b><i id="speedMeter"></i></div>
-          <div class="meter"><span>Strength</span><b id="strengthValue"></b><i id="strengthMeter"></i></div>
-          <div class="meter"><span>Defense</span><b id="defenseValue"></b><i id="defenseMeter"></i></div>
-          <div class="meter"><span>Reach</span><b id="reachValue"></b><i id="reachMeter"></i></div>
-          <div class="meter"><span>Ferocity</span><b id="ferocityValue"></b><i id="ferocityMeter"></i></div>
-          <button class="primary-button" id="testBtn" type="button">Run Field Test</button>
-        </div>
         </aside>
       </main>
     </div>

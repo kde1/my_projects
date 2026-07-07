@@ -476,6 +476,26 @@ h1 {
   display: block;
 }
 
+.builder-section {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.builder-section:last-child {
+  margin-bottom: 0;
+}
+
+.builder-section-head {
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  padding-bottom: 8px;
+}
+
+.builder-section-head h2 {
+  color: #f4e4b9;
+  font-size: 1rem;
+}
+
 .slot-grid {
   display: grid;
   gap: 12px;
@@ -1046,9 +1066,7 @@ h1 {
   #dnaPanel,
   #quizPanel,
   #galleryPanel,
-  #galleryQuizPanel,
-  #skinPanel,
-  #testPanel {
+  #galleryQuizPanel {
     display: none !important;
   }
 
