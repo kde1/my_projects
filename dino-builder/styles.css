@@ -24,7 +24,7 @@ select {
   font: inherit;
 }
 
-body.landing-active .game-shell {
+body.landing-active .game-app {
   display: none;
 }
 
@@ -182,13 +182,61 @@ body:not(.landing-active) .landing-page {
   font-size: .95rem;
 }
 
+.game-app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 14px 18px 18px;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(20, 24, 18, .86);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, .26);
+  padding: 8px;
+  scrollbar-width: thin;
+}
+
+.app-nav-button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(244, 241, 231, .08);
+  color: #dce7d3;
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.app-nav-button:hover {
+  border-color: rgba(255, 243, 207, .5);
+  background: rgba(244, 241, 231, .16);
+}
+
+.app-nav-button.is-active {
+  border-color: transparent;
+  background: #d2b15f;
+  color: #17130b;
+}
+
+.app-home-button {
+  border-color: rgba(119, 200, 189, .62);
+  color: #dbfffb;
+}
+
 .game-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 18px;
-  height: 100vh;
-  min-height: 100vh;
-  padding: 18px;
+  min-height: 0;
 }
 
 .workbench,
@@ -201,8 +249,8 @@ body:not(.landing-active) .landing-page {
 .workbench {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  height: calc(100vh - 36px);
-  min-height: calc(100vh - 36px);
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -218,8 +266,8 @@ body:not(.landing-active) .landing-page {
 
 .game-shell.quiz-focus .panel,
 .game-shell.gallery-focus .panel {
-  height: calc(100vh - 36px);
-  min-height: calc(100vh - 36px);
+  height: 100%;
+  min-height: 0;
 }
 
 .topbar {
@@ -271,7 +319,7 @@ h1 {
 
 .icon-button:hover,
 .stepper button:hover,
-.tab:hover {
+.app-nav-button:hover {
   background: rgba(244, 241, 231, .18);
 }
 
@@ -412,34 +460,9 @@ h1 {
 .panel {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 36px);
-  min-height: calc(100vh - 36px);
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-}
-
-.tabs {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid rgba(255, 255, 255, .12);
-}
-
-.tab {
-  min-height: 48px;
-  border: 0;
-  border-right: 1px solid rgba(255, 255, 255, .1);
-  background: rgba(255, 255, 255, .06);
-  color: #dce7d3;
-  cursor: pointer;
-}
-
-.tab:last-child {
-  border-right: 0;
-}
-
-.tab.is-active {
-  background: #d2b15f;
-  color: #17130b;
-  font-weight: 800;
 }
 
 .tab-panel {
@@ -1014,7 +1037,7 @@ h1 {
   }
 
   .workbench,
-  .tabs,
+  .app-nav,
   .gallery-print-button,
   .gallery-head,
   .gallery-grid,
@@ -1027,6 +1050,14 @@ h1 {
   #skinPanel,
   #testPanel {
     display: none !important;
+  }
+
+  .game-app {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
   }
 
   .game-shell,
@@ -1054,7 +1085,7 @@ h1 {
     box-shadow: none !important;
   }
 
-  body[data-print-mode="landing"] .game-shell {
+  body[data-print-mode="landing"] .game-app {
     display: none !important;
   }
 
@@ -1321,9 +1352,22 @@ h1 {
     padding: 0 10px 10px;
   }
 
+  .game-app {
+    height: auto;
+    min-height: 100vh;
+    padding: 10px;
+  }
+
+  .app-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
   .game-shell {
     grid-template-columns: 1fr;
     height: auto;
+    min-height: 0;
   }
 
   .workbench,
@@ -1397,9 +1441,18 @@ h1 {
     flex: 1 1 145px;
   }
 
-  .game-shell {
+  .game-app {
     padding: 10px;
+  }
+
+  .game-shell {
     gap: 10px;
+    padding: 0;
+  }
+
+  .app-nav-button {
+    min-height: 40px;
+    padding: 0 12px;
   }
 
   .topbar {
@@ -1409,10 +1462,6 @@ h1 {
 
   .choice-row {
     grid-template-columns: 1fr;
-  }
-
-  .tabs {
-    grid-template-columns: repeat(3, 1fr);
   }
 
   .gallery-grid {

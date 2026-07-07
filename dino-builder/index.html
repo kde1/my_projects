@@ -23,7 +23,7 @@
           <button class="landing-primary" type="button" data-landing-target="parts">Start Building</button>
           <button class="landing-action" type="button" data-landing-target="quiz">Fossil Quiz</button>
           <button class="landing-action" type="button" data-landing-target="gallery">Gallery</button>
-          <button class="landing-action" type="button" data-landing-target="galleryQuiz">GalleryQuiz</button>
+          <button class="landing-action" type="button" data-landing-target="galleryQuiz">Gallery Quiz</button>
           <button class="landing-print" id="landingPrint" type="button">Print Mission Poster</button>
         </div>
       </div>
@@ -42,92 +42,95 @@
         </article>
       </div>
     </section>
-    <main class="game-shell">
-      <section class="workbench" aria-label="Dinosaur construction area">
-        <div class="topbar">
-          <div>
-            <h1>Isaac's Dino DNA Lab</h1>
-            <p id="dinoName">Triassic prototype</p>
-          </div>
-          <div class="top-actions">
-            <button class="icon-button" id="randomizeBtn" type="button" title="Create a random dinosaur" aria-label="Create a random dinosaur">
-              <span aria-hidden="true">?</span>
-            </button>
-            <button class="icon-button" id="snapshotBtn" type="button" title="Save a snapshot" aria-label="Save a snapshot">
-              <span aria-hidden="true">DL</span>
-            </button>
-          </div>
-        </div>
 
-        <div class="stage" id="stage">
-          <img class="habitat" src="assets/prehistoric-habitat.png" alt="">
-          <div class="mist"></div>
-          <svg id="dinoSvg" viewBox="0 0 900 520" role="img" aria-labelledby="svgTitle svgDesc">
-            <title id="svgTitle">Constructed dinosaur</title>
-            <desc id="svgDesc">A dinosaur assembled from selectable body, head, tail, leg, armor, and detail parts.</desc>
-            <defs>
-              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
-                <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#101814" flood-opacity=".38"></feDropShadow>
-              </filter>
-              <linearGradient id="skinGradient" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="var(--skin-light)"></stop>
-                <stop offset=".42" stop-color="var(--skin)"></stop>
-                <stop offset="1" stop-color="var(--skin-dark)"></stop>
-              </linearGradient>
-              <radialGradient id="headGradient" cx=".42" cy=".25" r=".82">
-                <stop offset="0" stop-color="var(--skin-glow)"></stop>
-                <stop offset=".5" stop-color="var(--skin)"></stop>
-                <stop offset="1" stop-color="var(--skin-dark)"></stop>
-              </radialGradient>
-              <linearGradient id="boneGradient" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stop-color="#fff6d2"></stop>
-                <stop offset=".55" stop-color="#d8c491"></stop>
-                <stop offset="1" stop-color="#8f7a50"></stop>
-              </linearGradient>
-              <pattern id="scalePattern" width="18" height="14" patternUnits="userSpaceOnUse">
-                <path d="M2 8 Q7 2 13 8" fill="none" stroke="rgba(8,12,8,.28)" stroke-width="1"></path>
-                <circle cx="5" cy="5" r="1.1" fill="rgba(255,255,255,.22)"></circle>
-                <circle cx="14" cy="11" r="1" fill="rgba(0,0,0,.18)"></circle>
-              </pattern>
-              <pattern id="stripePattern" width="48" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(-9)">
-                <path d="M0 0 C14 8 14 17 0 26 L16 30 C32 16 30 5 14 -6Z" fill="rgba(0,0,0,.30)"></path>
-              </pattern>
-              <linearGradient id="bellyGradient" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stop-color="var(--belly-light)"></stop>
-                <stop offset=".7" stop-color="var(--belly)"></stop>
-                <stop offset="1" stop-color="var(--belly-dark)"></stop>
-              </linearGradient>
-            </defs>
-            <ellipse class="ground-shadow" cx="454" cy="424" rx="250" ry="34"></ellipse>
-            <g id="dino" filter="url(#softShadow)">
-              <g id="tailLayer" class="part-layer"></g>
-              <g id="backLegLayer" class="part-layer"></g>
-              <g id="bodyLayer" class="part-layer"></g>
-              <g id="frontLegLayer" class="part-layer"></g>
-              <g id="neckLayer" class="part-layer"></g>
-              <g id="headLayer" class="part-layer"></g>
-              <g id="armorLayer" class="part-layer"></g>
-              <g id="detailLayer" class="part-layer"></g>
-            </g>
-          </svg>
-          <div class="field-test" id="fieldTest" aria-live="polite">
-            <h2>Field Test</h2>
-            <p id="fieldSummary"></p>
+    <div class="game-app">
+      <nav class="app-nav" aria-label="Dino Lab navigation">
+        <button class="app-nav-button app-home-button" type="button" data-nav-home>Home</button>
+        <button class="app-nav-button is-active" type="button" data-tab="parts" aria-current="page">Builder</button>
+        <button class="app-nav-button" type="button" data-tab="dna">DNA</button>
+        <button class="app-nav-button" type="button" data-tab="quiz">Quiz</button>
+        <button class="app-nav-button" type="button" data-tab="gallery">Gallery</button>
+        <button class="app-nav-button" type="button" data-tab="galleryQuiz">Gallery Quiz</button>
+        <button class="app-nav-button" type="button" data-tab="skin">Skin</button>
+        <button class="app-nav-button" type="button" data-tab="test">Test</button>
+      </nav>
+
+      <main class="game-shell">
+        <section class="workbench" aria-label="Dinosaur construction area">
+          <div class="topbar">
+            <div>
+              <h1>Isaac's Dino DNA Lab</h1>
+              <p id="dinoName">Triassic prototype</p>
+            </div>
+            <div class="top-actions">
+              <button class="icon-button" id="randomizeBtn" type="button" title="Create a random dinosaur" aria-label="Create a random dinosaur">
+                <span aria-hidden="true">?</span>
+              </button>
+              <button class="icon-button" id="snapshotBtn" type="button" title="Save a snapshot" aria-label="Save a snapshot">
+                <span aria-hidden="true">DL</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
 
-      <aside class="panel" aria-label="Construction controls">
-        <div class="tabs" role="tablist" aria-label="Builder tabs">
-          <button class="tab is-active" type="button" data-tab="parts" role="tab" aria-selected="true">Parts</button>
-          <button class="tab" type="button" data-tab="dna" role="tab" aria-selected="false">DNA</button>
-          <button class="tab" type="button" data-tab="quiz" role="tab" aria-selected="false">Quiz</button>
-          <button class="tab" type="button" data-tab="gallery" role="tab" aria-selected="false">Gallery</button>
-          <button class="tab" type="button" data-tab="galleryQuiz" role="tab" aria-selected="false">GalleryQuiz</button>
-          <button class="tab" type="button" data-tab="skin" role="tab" aria-selected="false">Skin</button>
-          <button class="tab" type="button" data-tab="test" role="tab" aria-selected="false">Test</button>
-        </div>
+          <div class="stage" id="stage">
+            <img class="habitat" src="assets/prehistoric-habitat.png" alt="">
+            <div class="mist"></div>
+            <svg id="dinoSvg" viewBox="0 0 900 520" role="img" aria-labelledby="svgTitle svgDesc">
+              <title id="svgTitle">Constructed dinosaur</title>
+              <desc id="svgDesc">A dinosaur assembled from selectable body, head, tail, leg, armor, and detail parts.</desc>
+              <defs>
+                <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+                  <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#101814" flood-opacity=".38"></feDropShadow>
+                </filter>
+                <linearGradient id="skinGradient" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="var(--skin-light)"></stop>
+                  <stop offset=".42" stop-color="var(--skin)"></stop>
+                  <stop offset="1" stop-color="var(--skin-dark)"></stop>
+                </linearGradient>
+                <radialGradient id="headGradient" cx=".42" cy=".25" r=".82">
+                  <stop offset="0" stop-color="var(--skin-glow)"></stop>
+                  <stop offset=".5" stop-color="var(--skin)"></stop>
+                  <stop offset="1" stop-color="var(--skin-dark)"></stop>
+                </radialGradient>
+                <linearGradient id="boneGradient" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#fff6d2"></stop>
+                  <stop offset=".55" stop-color="#d8c491"></stop>
+                  <stop offset="1" stop-color="#8f7a50"></stop>
+                </linearGradient>
+                <pattern id="scalePattern" width="18" height="14" patternUnits="userSpaceOnUse">
+                  <path d="M2 8 Q7 2 13 8" fill="none" stroke="rgba(8,12,8,.28)" stroke-width="1"></path>
+                  <circle cx="5" cy="5" r="1.1" fill="rgba(255,255,255,.22)"></circle>
+                  <circle cx="14" cy="11" r="1" fill="rgba(0,0,0,.18)"></circle>
+                </pattern>
+                <pattern id="stripePattern" width="48" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(-9)">
+                  <path d="M0 0 C14 8 14 17 0 26 L16 30 C32 16 30 5 14 -6Z" fill="rgba(0,0,0,.30)"></path>
+                </pattern>
+                <linearGradient id="bellyGradient" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="var(--belly-light)"></stop>
+                  <stop offset=".7" stop-color="var(--belly)"></stop>
+                  <stop offset="1" stop-color="var(--belly-dark)"></stop>
+                </linearGradient>
+              </defs>
+              <ellipse class="ground-shadow" cx="454" cy="424" rx="250" ry="34"></ellipse>
+              <g id="dino" filter="url(#softShadow)">
+                <g id="tailLayer" class="part-layer"></g>
+                <g id="backLegLayer" class="part-layer"></g>
+                <g id="bodyLayer" class="part-layer"></g>
+                <g id="frontLegLayer" class="part-layer"></g>
+                <g id="neckLayer" class="part-layer"></g>
+                <g id="headLayer" class="part-layer"></g>
+                <g id="armorLayer" class="part-layer"></g>
+                <g id="detailLayer" class="part-layer"></g>
+              </g>
+            </svg>
+            <div class="field-test" id="fieldTest" aria-live="polite">
+              <h2>Field Test</h2>
+              <p id="fieldSummary"></p>
+            </div>
+          </div>
+        </section>
 
+        <aside class="panel" aria-label="Construction controls">
         <div class="tab-panel is-active" id="partsPanel">
           <div class="slot-grid" id="partControls"></div>
         </div>
@@ -218,12 +221,12 @@
           <section class="gallery-shell">
             <div class="gallery-head">
               <div>
-                <h2>Dinosaur GalleryQuiz</h2>
+                <h2>Dinosaur Gallery Quiz</h2>
                 <p>Tap a dinosaur to reveal its field guide card.</p>
               </div>
               <div class="gallery-tools">
                 <button class="gallery-print-button" id="galleryQuizPrint" type="button">Print subtab</button>
-                <div class="gallery-tabs" id="galleryQuizTabs" role="tablist" aria-label="GalleryQuiz pages"></div>
+                <div class="gallery-tabs" id="galleryQuizTabs" role="tablist" aria-label="Gallery Quiz pages"></div>
               </div>
             </div>
             <div class="gallery-grid" id="galleryQuizGrid"></div>
@@ -270,8 +273,9 @@
           <div class="meter"><span>Ferocity</span><b id="ferocityValue"></b><i id="ferocityMeter"></i></div>
           <button class="primary-button" id="testBtn" type="button">Run Field Test</button>
         </div>
-      </aside>
-    </main>
+        </aside>
+      </main>
+    </div>
 
     <template id="slotTemplate">
       <section class="slot">

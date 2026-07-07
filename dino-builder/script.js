@@ -1474,7 +1474,7 @@ function renderGalleryQuizPrintPages() {
     return `
       <section class="gallery-print-page">
         <header>
-          <h2>Dinosaur GalleryQuiz</h2>
+          <h2>Dinosaur Gallery Quiz</h2>
           <p>Subtab ${start + 1}-${Math.min(start + pageSize, quizItems.length)}</p>
         </header>
         <div class="gallery-print-grid">
@@ -1683,22 +1683,38 @@ function snapshot() {
 }
 
 function showTab(tabName) {
+  document.body.classList.remove("landing-active");
   document.querySelector(".game-shell").classList.toggle("quiz-focus", tabName === "quiz");
   document.querySelector(".game-shell").classList.toggle("gallery-focus", tabName === "gallery" || tabName === "galleryQuiz");
   if (tabName === "gallery") renderGallery();
   if (tabName === "galleryQuiz") renderGallery({ quizMode: true });
-  document.querySelectorAll(".tab").forEach((item) => {
+  document.querySelectorAll(".app-nav-button[data-tab]").forEach((item) => {
     const active = item.dataset.tab === tabName;
     item.classList.toggle("is-active", active);
-    item.setAttribute("aria-selected", active ? "true" : "false");
+    if (active) {
+      item.setAttribute("aria-current", "page");
+    } else {
+      item.removeAttribute("aria-current");
+    }
   });
   document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("is-active"));
   document.querySelector(`#${tabName}Panel`).classList.add("is-active");
 }
 
-document.querySelectorAll(".tab").forEach((tab) => {
+function showLanding() {
+  document.body.classList.add("landing-active");
+  document.querySelector(".game-shell").classList.remove("quiz-focus", "gallery-focus");
+  document.querySelectorAll(".app-nav-button[data-tab]").forEach((item) => {
+    item.classList.remove("is-active");
+    item.removeAttribute("aria-current");
+  });
+}
+
+document.querySelectorAll(".app-nav-button[data-tab]").forEach((tab) => {
   tab.addEventListener("click", () => showTab(tab.dataset.tab));
 });
+
+document.querySelector("[data-nav-home]").addEventListener("click", showLanding);
 
 document.querySelector("#baseColor").addEventListener("input", (event) => {
   state.baseColor = event.target.value;
@@ -1742,7 +1758,6 @@ document.querySelector("#snapshotBtn").addEventListener("click", snapshot);
 document.querySelector("#testBtn").addEventListener("click", runFieldTest);
 document.querySelectorAll("[data-landing-target]").forEach((button) => {
   button.addEventListener("click", () => {
-    document.body.classList.remove("landing-active");
     showTab(button.dataset.landingTarget);
   });
 });
