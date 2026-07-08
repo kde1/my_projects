@@ -6,6 +6,8 @@
   window.createGallery = function createGallery(ctx) {
     const { state, quizItems, getGuide } = ctx;
     const { $, $$, escapeHtml } = ctx.helpers;
+    const store = ctx.store;
+    const progression = ctx.progression;
 
     const galleryTabs = $("#galleryTabs");
     const galleryGrid = $("#galleryGrid");
@@ -13,29 +15,123 @@
     const galleryQuizTabs = $("#galleryQuizTabs");
     const galleryQuizGrid = $("#galleryQuizGrid");
     const galleryQuizPrintPages = $("#galleryQuizPrintPages");
+    const galleryDexProgress = $("#galleryDexProgress");
+    const galleryDexPill = $("#galleryDexPill");
+    const galleryDexBar = $("#galleryDexBar");
+    const galleryDexFilter = $("#galleryDexFilter");
 
-    function renderGallery(options = {}) {
-      const quizMode = options.quizMode || false;
-      const tabsEl = quizMode ? galleryQuizTabs : galleryTabs;
-      const gridEl = quizMode ? galleryQuizGrid : galleryGrid;
-      const pageKey = quizMode ? "galleryQuizPage" : "galleryPage";
+    if (galleryDexFilter) {
+      galleryDexFilter.addEventListener("click", (event) => {
+        const button = event.target.closest(".dex-filter-btn");
+        if (!button) return;
+        state.galleryDexFilter = button.dataset.filter;
+        $$(".dex-filter-btn", galleryDexFilter).forEach((btn) => btn.classList.toggle("is-active", btn === button));
+        state.galleryPage = 0;
+        renderGallery();
+      });
+    }
+
+    function discoveredSet() {
+      if (!state.playerName || !store) return null;
+      const player = store.getPlayer(state.playerName);
+      return player ? new Set(player.profile.discovered) : new Set();
+    }
+
+    function renderDexHeader(discovered) {
+      if (!galleryDexProgress) return;
+      if (!discovered) {
+        galleryDexProgress.hidden = true;
+        return;
+      }
+      const total = quizItems.length;
+      const count = discovered.size;
+      galleryDexProgress.hidden = false;
+      galleryDexPill.textContent = `🦕 ${count}/${total} discovered`;
+      galleryDexBar.style.setProperty("--dex", `${Math.round((count / total) * 100)}%`);
+    }
+
+    function galleryCardMarkup(item, discovered) {
+      const guide = getGuide(item.slug);
+      const isDiscovered = !discovered || discovered.has(item.slug);
+      const stamp = discovered && isDiscovered ? `<span class="dex-stamp">Collected</span>` : "";
+      if (!isDiscovered) {
+        return `
+          <article class="gallery-card is-undiscovered">
+            <div class="gallery-image-frame">
+              <img src="${escapeHtml(item.image)}" alt="">
+            </div>
+            <div class="gallery-card-copy is-hidden"><h3>???</h3><p>${escapeHtml(item.era)}</p><span>Identify it in the Quiz to discover it.</span></div>
+          </article>
+        `;
+      }
+      return `
+        <article class="gallery-card">
+          ${stamp}
+          <div class="gallery-image-frame">
+            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
+          </div>
+          <div class="gallery-card-copy">
+            <h3>${escapeHtml(item.name)}</h3>
+            <p>${escapeHtml(item.era)}</p>
+            <dl>
+              <div><dt>Diet</dt><dd>${escapeHtml(guide.diet)}</dd></div>
+              <div><dt>Habitat</dt><dd>${escapeHtml(guide.habitat)}</dd></div>
+            </dl>
+          </div>
+        </article>
+      `;
+    }
+
+    function filteredItems(discovered) {
+      const filter = state.galleryDexFilter || "all";
+      if (!discovered || filter === "all") return quizItems;
+      if (filter === "discovered") return quizItems.filter((item) => discovered.has(item.slug));
+      return quizItems.filter((item) => !discovered.has(item.slug));
+    }
+
+    function renderMainGallery() {
+      const discovered = discoveredSet();
+      renderDexHeader(discovered);
+      const items = filteredItems(discovered);
+      const pageCount = Math.max(1, Math.ceil(items.length / GALLERY_PAGE_SIZE));
+      state.galleryPage = Math.max(0, Math.min(state.galleryPage, pageCount - 1));
+      galleryTabs.innerHTML = Array.from({ length: pageCount }, (_, index) => `
+        <button class="gallery-tab ${index === state.galleryPage ? "is-active" : ""}" type="button" data-page="${index}" role="tab" aria-selected="${index === state.galleryPage}">
+          ${index * GALLERY_PAGE_SIZE + 1}-${Math.min((index + 1) * GALLERY_PAGE_SIZE, items.length)}
+        </button>
+      `).join("");
+      $$(".gallery-tab", galleryTabs).forEach((button) => {
+        button.addEventListener("click", () => {
+          state.galleryPage = Number(button.dataset.page);
+          renderMainGallery();
+        });
+      });
+      const start = state.galleryPage * GALLERY_PAGE_SIZE;
+      const pageItems = items.slice(start, start + GALLERY_PAGE_SIZE);
+      galleryGrid.innerHTML = pageItems.length
+        ? pageItems.map((item) => galleryCardMarkup(item, discovered)).join("")
+        : `<p class="gallery-empty">No dinosaurs here yet — go identify some in the Quiz!</p>`;
+      renderGalleryPrintPages();
+    }
+
+    function renderPracticeGallery() {
       const pageCount = Math.ceil(quizItems.length / GALLERY_PAGE_SIZE);
-      state[pageKey] = Math.max(0, Math.min(state[pageKey], pageCount - 1));
-      tabsEl.innerHTML = Array.from({ length: pageCount }, (_, index) => `
-        <button class="gallery-tab ${index === state[pageKey] ? "is-active" : ""}" type="button" data-page="${index}" role="tab" aria-selected="${index === state[pageKey]}">
+      state.galleryQuizPage = Math.max(0, Math.min(state.galleryQuizPage, pageCount - 1));
+      galleryQuizTabs.innerHTML = Array.from({ length: pageCount }, (_, index) => `
+        <button class="gallery-tab ${index === state.galleryQuizPage ? "is-active" : ""}" type="button" data-page="${index}" role="tab" aria-selected="${index === state.galleryQuizPage}">
           ${index * GALLERY_PAGE_SIZE + 1}-${Math.min((index + 1) * GALLERY_PAGE_SIZE, quizItems.length)}
         </button>
       `).join("");
-      $$(".gallery-tab", tabsEl).forEach((button) => {
+      $$(".gallery-tab", galleryQuizTabs).forEach((button) => {
         button.addEventListener("click", () => {
-          state[pageKey] = Number(button.dataset.page);
-          renderGallery({ quizMode });
+          state.galleryQuizPage = Number(button.dataset.page);
+          renderPracticeGallery();
         });
       });
-      const start = state[pageKey] * GALLERY_PAGE_SIZE;
-      gridEl.innerHTML = quizItems.slice(start, start + GALLERY_PAGE_SIZE).map((item) => {
+      const start = state.galleryQuizPage * GALLERY_PAGE_SIZE;
+      galleryQuizGrid.innerHTML = quizItems.slice(start, start + GALLERY_PAGE_SIZE).map((item) => {
         const guide = getGuide(item.slug);
-        const revealed = !quizMode || state.galleryQuizRevealed.has(item.slug);
+        const revealed = state.galleryQuizRevealed.has(item.slug);
         const copy = revealed ? `
           <div class="gallery-card-copy">
             <h3>${escapeHtml(item.name)}</h3>
@@ -46,38 +142,33 @@
             </dl>
           </div>
         ` : `<div class="gallery-card-copy is-hidden"><span>Tap to reveal</span></div>`;
-        if (quizMode) {
-          return `
-            <button class="gallery-card gallery-quiz-card ${revealed ? "is-revealed" : ""}" type="button" data-slug="${escapeHtml(item.slug)}" aria-label="${revealed ? escapeHtml(item.name) : "Reveal dinosaur"}">
-              <div class="gallery-image-frame">
-                <img src="${escapeHtml(item.image)}" alt="">
-              </div>
-              ${copy}
-            </button>
-          `;
-        }
         return `
-          <article class="gallery-card">
+          <button class="gallery-card gallery-quiz-card ${revealed ? "is-revealed" : ""}" type="button" data-slug="${escapeHtml(item.slug)}" aria-label="${revealed ? escapeHtml(item.name) : "Reveal dinosaur"}">
             <div class="gallery-image-frame">
-              <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
+              <img src="${escapeHtml(item.image)}" alt="">
             </div>
             ${copy}
-          </article>
+          </button>
         `;
       }).join("");
-      if (!quizMode) renderGalleryPrintPages();
-      if (quizMode) {
-        $$(".gallery-quiz-card", gridEl).forEach((card) => {
-          card.addEventListener("click", () => {
-            if (state.galleryQuizRevealed.has(card.dataset.slug)) {
-              state.galleryQuizRevealed.delete(card.dataset.slug);
-            } else {
-              state.galleryQuizRevealed.add(card.dataset.slug);
-            }
-            renderGallery({ quizMode: true });
-          });
+      $$(".gallery-quiz-card", galleryQuizGrid).forEach((card) => {
+        card.addEventListener("click", () => {
+          if (state.galleryQuizRevealed.has(card.dataset.slug)) {
+            state.galleryQuizRevealed.delete(card.dataset.slug);
+          } else {
+            state.galleryQuizRevealed.add(card.dataset.slug);
+          }
+          renderPracticeGallery();
         });
-        renderGalleryQuizPrintPages();
+      });
+      renderGalleryQuizPrintPages();
+    }
+
+    function renderGallery(options = {}) {
+      if (options.quizMode) {
+        renderPracticeGallery();
+      } else {
+        renderMainGallery();
       }
     }
 

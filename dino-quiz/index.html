@@ -14,6 +14,7 @@
       <button class="app-nav-button" type="button" data-tab="quiz">Quiz</button>
       <button class="app-nav-button" type="button" data-tab="parts">Builder</button>
       <button class="app-nav-button" type="button" data-tab="dna">DNA</button>
+      <button class="app-nav-button sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="Sound off">🔇</button>
     </nav>
 
     <section class="landing-page" id="landingPage" aria-label="Dino quiz landing page">
@@ -243,6 +244,11 @@
                 <ol id="explorerManagerList"></ol>
               </div>
               <span id="quizPlayerStatus">Register your field badge to start scoring.</span>
+              <div class="dex-progress" id="quizDexProgress" hidden>
+                <span class="dex-pill" id="quizDexPill">🦕 0/50 discovered</span>
+                <div class="dex-bar"><i id="quizDexBar"></i></div>
+              </div>
+              <div class="trophy-shelf" id="trophyShelf" hidden></div>
             </form>
             <aside class="quiz-leaderboard" aria-labelledby="quizLeaderboardTitle">
               <div>
@@ -288,6 +294,15 @@
               <div>
                 <h2>Dinosaur Gallery</h2>
                 <p>Browse every fossil from the quiz field guide.</p>
+                <div class="dex-progress gallery-dex" id="galleryDexProgress" hidden>
+                  <span class="dex-pill" id="galleryDexPill">🦕 0/50 discovered</span>
+                  <div class="dex-bar"><i id="galleryDexBar"></i></div>
+                  <div class="dex-filter" id="galleryDexFilter" role="group" aria-label="Filter dinosaurs">
+                    <button class="dex-filter-btn is-active" type="button" data-filter="all">All</button>
+                    <button class="dex-filter-btn" type="button" data-filter="discovered">Discovered</button>
+                    <button class="dex-filter-btn" type="button" data-filter="hidden">Still hidden</button>
+                  </div>
+                </div>
               </div>
               <div class="gallery-tools">
                 <button class="gallery-print-button" id="galleryPrint" type="button">Print gallery</button>
@@ -320,6 +335,8 @@
       </main>
     </div>
 
+    <section class="certificate-page" id="certificatePage" aria-hidden="true"></section>
+
     <template id="slotTemplate">
       <section class="slot">
         <div class="slot-head">
@@ -336,7 +353,9 @@
     <script src="js/data.js"></script>
     <script src="js/player-data.js"></script>
     <script src="js/helpers.js"></script>
+    <script src="js/celebrate.js"></script>
     <script src="js/store.js"></script>
+    <script src="js/progression.js"></script>
     <script src="js/quiz.js"></script>
     <script src="js/builder.js"></script>
     <script src="js/dna.js"></script>

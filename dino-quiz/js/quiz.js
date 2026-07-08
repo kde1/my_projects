@@ -8,6 +8,7 @@
     const {
       state,
       store,
+      progression,
       quizItems,
       quizChoicePools,
       getGuide,
@@ -49,7 +50,11 @@
       hintQuizBtn: $("#hintQuizBtn"),
       quizEra: $("#quizEra"),
       quizView: $("#quizView"),
-      quizPrompt: $("#quizPrompt")
+      quizPrompt: $("#quizPrompt"),
+      trophyShelf: $("#trophyShelf"),
+      quizDexProgress: $("#quizDexProgress"),
+      quizDexPill: $("#quizDexPill"),
+      quizDexBar: $("#quizDexBar")
     };
 
     state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY) || "");
@@ -166,6 +171,19 @@
       renderExplorerManager();
     }
 
+    function renderDexProgress() {
+      if (!el.quizDexProgress) return;
+      if (!state.playerName || !progression) {
+        el.quizDexProgress.hidden = true;
+        return;
+      }
+      const count = progression.dexCount(state.playerName);
+      const total = progression.totalDinos || 50;
+      el.quizDexProgress.hidden = false;
+      el.quizDexPill.textContent = `🦕 ${count}/${total} discovered`;
+      el.quizDexBar.style.setProperty("--dex", `${Math.round((count / total) * 100)}%`);
+    }
+
     function renderPlayerProfile() {
       el.quizPlayerName.value = "";
       refreshExplorerControls();
@@ -177,6 +195,8 @@
         el.quizPlayerStatus.textContent = `Register your field badge to start scoring. ${count} explorers remembered.`;
         el.quizPlayerForm.classList.remove("is-registered");
       }
+      if (progression) progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+      renderDexProgress();
     }
 
     function setActivePlayer(name, { start = true } = {}) {
@@ -198,7 +218,7 @@
     function leaderboardMarkup(entries) {
       return entries.length ? entries.map((entry, index) => `
         <li class="${index === 0 ? "is-champion" : ""}">
-          <span>${escapeHtml(entry.name)}</span>
+          <span>${escapeHtml(entry.name)}<span class="lb-badges">${progression ? progression.badgeIconsFor(entry.name, 3) : ""}</span></span>
           <b>${entry.score} pts</b>
           <small>${escapeHtml(entry.difficulty)} - ${entry.accuracy}% - ${escapeHtml(entry.title || "Fossil Hunter")} - ${escapeHtml(entry.date)}</small>
         </li>
@@ -319,6 +339,9 @@
       state.quizRoundComplete = false;
       state.quizResultSaved = false;
       state.currentItem = null;
+      state.quizMaxStreak = 0;
+      state.quizNewDiscoveries = [];
+      state.quizLastCorrectItem = null;
       state.quizOrder = shuffle(quizPoolIndices()).slice(0, QUIZ_ROUND_SIZE);
       state.quizIndex = 0;
       renderQuiz();
@@ -433,6 +456,12 @@
         state.quizScore += state.quizPotential;
         state.quizCorrect += 1;
         state.quizStreak += 1;
+        state.quizMaxStreak = Math.max(state.quizMaxStreak || 0, state.quizStreak);
+        state.quizLastCorrectItem = item;
+        // Discovery is generous: any correct answer adds it to this explorer's Dino-Dex.
+        if (store.discover(state.playerName, item.slug)) {
+          (state.quizNewDiscoveries = state.quizNewDiscoveries || []).push(item);
+        }
         if (celebrate) {
           celebrate.sound("correct");
           celebrate.burst(state.quizStreak >= 5 ? "medium" : "small");
@@ -532,6 +561,35 @@
       state.quizRoundComplete = true;
       state.quizAnswered = true;
       state.currentItem = null;
+
+      // Progression: record the play date, award any new trophies, refresh the
+      // Dino-Dex, and stash a payload for the printable certificate.
+      let earnedBadges = [];
+      const newDiscoveries = state.quizNewDiscoveries || [];
+      if (state.playerName && progression) {
+        store.recordPlayDate(state.playerName);
+        earnedBadges = progression.evaluateRound(state.playerName, {
+          correct: state.quizCorrect,
+          roundSize: QUIZ_ROUND_SIZE,
+          hints: state.quizRoundHints,
+          accuracy,
+          maxStreak: state.quizMaxStreak || 0,
+          difficulty: state.quizDifficulty
+        });
+        const certDino = state.quizLastCorrectItem || quizItems[state.quizOrder[0]] || quizItems[0];
+        state.lastCertificate = {
+          name: state.playerName,
+          title: result.title,
+          score: state.quizScore,
+          maxScore,
+          accuracy,
+          difficulty: setting.label,
+          date: new Date().toLocaleDateString(),
+          dinoImage: certDino ? certDino.image : "assets/quiz-tyrannosaurus.png",
+          dinoName: certDino ? certDino.name : "Tyrannosaurus rex"
+        };
+      }
+
       if (celebrate) {
         celebrate.sound("fanfare");
         celebrate.burst(accuracy >= 80 ? "large" : "medium");
@@ -544,6 +602,15 @@
       el.quizTotal.textContent = QUIZ_ROUND_SIZE;
       el.quizStreak.textContent = `${accuracy}% accurate`;
       el.quizOptions.innerHTML = "";
+      const discoveryNote = newDiscoveries.length
+        ? `<div class="quiz-discoveries"><b>New for your Dino-Dex!</b><div class="discovery-row">${newDiscoveries.map((item) => `<figure><img src="${escapeHtml(item.image)}" alt=""><figcaption>${escapeHtml(item.name)}</figcaption></figure>`).join("")}</div></div>`
+        : "";
+      const badgeNote = earnedBadges.length
+        ? `<div class="quiz-new-badges"><b>Trophies earned:</b> ${earnedBadges.map((badge) => `<span title="${escapeHtml(badge.name)}">${badge.icon} ${escapeHtml(badge.name)}</span>`).join(" ")}</div>`
+        : "";
+      const certButton = state.lastCertificate
+        ? `<button class="primary-button print-certificate" id="printCertBtn" type="button">🎓 Print My Certificate</button>`
+        : "";
       el.quizFeedback.classList.add("is-revealed");
       el.quizFeedback.innerHTML = `
         <div class="quiz-results">
@@ -556,13 +623,31 @@
             <div><span>Dinosaurs</span><b>${state.quizCorrect}/${QUIZ_ROUND_SIZE}</b></div>
             <div><span>Hints used</span><b>${state.quizRoundHints}</b></div>
           </div>
+          ${badgeNote}
+          ${discoveryNote}
+          ${certButton}
           <small>${escapeHtml(setting.label)} rounds use 10 randomly selected dinosaurs. Play again for a fresh fossil lineup.</small>
         </div>
       `;
+      const certBtn = el.quizFeedback.querySelector("#printCertBtn");
+      if (certBtn) certBtn.addEventListener("click", printCertificate);
+      if (progression) {
+        progression.announceBadges(earnedBadges);
+        progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+      }
+      renderDexProgress();
+      renderLeaderboard();
       el.hintQuizBtn.disabled = true;
       el.hintQuizBtn.textContent = "Round complete";
       el.nextQuizBtn.disabled = false;
       el.nextQuizBtn.textContent = "Play Again";
+    }
+
+    function printCertificate() {
+      if (!state.lastCertificate || !progression) return;
+      progression.renderCertificate(state.lastCertificate);
+      document.body.dataset.printMode = "certificate";
+      window.print();
     }
 
     function confirmDifficultyChange(nextValue) {

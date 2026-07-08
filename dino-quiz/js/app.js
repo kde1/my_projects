@@ -95,6 +95,16 @@
     todayISO
   });
 
+  const celebrate = window.DinoCelebrate || null;
+  const progression = window.createProgression({
+    store,
+    data: window.DinoData,
+    helpers,
+    celebrate
+  });
+  ctx.store = store;
+  ctx.progression = progression;
+
   ctx.builder = window.createBuilder(ctx);
   ctx.dna = window.createDna(ctx);
   ctx.gallery = window.createGallery(ctx);
@@ -102,6 +112,7 @@
   const quizController = window.createQuizController({
     state,
     store,
+    progression,
     quizItems,
     quizChoicePools,
     getGuide,
@@ -112,7 +123,7 @@
     cleanPlayerName,
     readTextStorage,
     writeTextStorage,
-    celebrate: window.DinoCelebrate || null
+    celebrate
   });
 
   function showTab(tabName) {

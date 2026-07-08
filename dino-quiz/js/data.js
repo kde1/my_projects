@@ -734,12 +734,30 @@
     }
   };
 
+  // Trophy badges. `check(profile, round)` decides whether the badge is earned;
+  // it runs after the round's discoveries/play-date are already recorded.
+  // round = { correct, roundSize, hints, accuracy, maxStreak, difficulty }.
+  const badges = [
+    { id: "first-dig", icon: "🦴", name: "First Dig", description: "Finish your first expedition.", check: () => true },
+    { id: "perfect-10", icon: "💯", name: "Perfect 10", description: "Identify all 10 dinosaurs in a round.", check: (p, r) => r.correct >= r.roundSize },
+    { id: "no-hint-hero", icon: "🧠", name: "No-Hint Hero", description: "Score 8+ correct without any hints.", check: (p, r) => r.hints === 0 && r.correct >= 8 },
+    { id: "streak-5", icon: "🔥", name: "Streak Master", description: "Get 5 correct in a row.", check: (p, r) => r.maxStreak >= 5 },
+    { id: "streak-10", icon: "⚡", name: "Lightning Streak", description: "Get 10 correct in a row.", check: (p, r) => r.maxStreak >= 10 },
+    { id: "hard-champ", icon: "🏆", name: "Hard Mode Champion", description: "Finish a Hard round with 70%+ accuracy.", check: (p, r) => r.difficulty === "hard" && r.accuracy >= 70 },
+    { id: "dedicated-digger", icon: "⛏️", name: "Dedicated Digger", description: "Play on 5 different days.", check: (p) => (p.playDates || []).length >= 5 },
+    { id: "half-dex", icon: "🔍", name: "Field Researcher", description: "Discover 25 dinosaurs.", check: (p) => (p.discovered || []).length >= 25 },
+    { id: "full-dex", icon: "🌟", name: "Master of the Museum", description: "Discover all 50 dinosaurs.", check: (p) => (p.discovered || []).length >= 50 },
+    { id: "duelist", icon: "⚔️", name: "Duelist", description: "Win a Sibling Duel.", check: () => false }
+  ];
+
   window.DinoData = {
     slots,
     speciesLab,
     quizItems,
     quizFieldGuide,
     quizChoicePools,
-    geneGoals
+    geneGoals,
+    badges,
+    totalDinos: quizItems.length
   };
 })();

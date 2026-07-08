@@ -1,0 +1,347 @@
+/* Printable Certificate of Paleontology + trophy shelf + Dino-Dex bits. */
+
+.certificate-page {
+  display: none;
+}
+
+/* Trophy shelf on the quiz player card. */
+.trophy-shelf {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  background: rgba(20, 30, 16, .5);
+  border: 1px solid rgba(246, 196, 69, .28);
+  border-radius: 12px;
+}
+
+.trophy-shelf-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #d7c79a;
+}
+
+.trophy-shelf-head b {
+  color: #f6c445;
+}
+
+.trophy-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trophy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  font-size: 17px;
+  background: rgba(0, 0, 0, .3);
+  filter: grayscale(1) opacity(.4);
+  transition: transform .15s ease, filter .2s ease;
+}
+
+.trophy.is-earned {
+  filter: none;
+  background: rgba(246, 196, 69, .16);
+  box-shadow: inset 0 0 0 1px rgba(246, 196, 69, .4);
+}
+
+.trophy.is-earned:hover {
+  transform: translateY(-2px) scale(1.08);
+}
+
+/* Leaderboard mini badges. */
+.lb-badge {
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+/* Dino-Dex progress pill + bar. */
+.dex-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(246, 196, 69, .16);
+  color: #f6e7bd;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.dex-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .35);
+  overflow: hidden;
+  min-width: 90px;
+}
+
+.dex-bar > i {
+  position: absolute;
+  inset: 0;
+  width: var(--dex, 0%);
+  background: linear-gradient(90deg, #5fa855, #f6c445);
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+
+.dex-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.dex-filter {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dex-filter-btn {
+  border: 1px solid rgba(246, 196, 69, .3);
+  background: rgba(0, 0, 0, .25);
+  color: #e7d9ac;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dex-filter-btn.is-active {
+  background: rgba(246, 196, 69, .22);
+  color: #fff3cf;
+}
+
+/* Round-end progression notes. */
+.quiz-new-badges {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #f6e7bd;
+}
+
+.quiz-new-badges span {
+  display: inline-block;
+  margin: 2px 4px 0 0;
+  padding: 2px 8px;
+  background: rgba(246, 196, 69, .16);
+  border-radius: 999px;
+}
+
+.quiz-discoveries {
+  margin: 12px 0;
+}
+
+.quiz-discoveries > b {
+  color: #8fe08a;
+}
+
+.discovery-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.discovery-row figure {
+  margin: 0;
+  width: 92px;
+  text-align: center;
+  animation: discovery-pop .4s ease backwards;
+}
+
+.discovery-row img {
+  width: 92px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #5fa855;
+}
+
+.discovery-row figcaption {
+  font-size: 11px;
+  color: #e7d9ac;
+  margin-top: 3px;
+}
+
+@keyframes discovery-pop {
+  from { transform: scale(.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.print-certificate {
+  margin: 8px 0;
+}
+
+.gallery-empty {
+  padding: 24px;
+  color: #d7c79a;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery-row figure {
+    animation: none;
+  }
+}
+
+/* Gallery discovery states. */
+.gallery-card.is-undiscovered img {
+  filter: brightness(.16) saturate(0);
+}
+
+.gallery-card .dex-stamp {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(95, 168, 85, .92);
+  color: #10210c;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: .06em;
+  padding: 3px 7px;
+  border-radius: 7px;
+  transform: rotate(6deg);
+}
+
+.gallery-card {
+  position: relative;
+}
+
+/* Certificate document — shown only in the print view. */
+.certificate {
+  font-family: "Georgia", "Times New Roman", serif;
+  color: #2b2412;
+}
+
+.certificate-frame {
+  border: 6px double #a9812f;
+  border-radius: 10px;
+  padding: 28px 34px;
+  text-align: center;
+  background: #fdf6e3;
+  box-shadow: inset 0 0 0 2px #d9b24a;
+}
+
+.certificate-kicker {
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #8a6d2a;
+  margin: 0 0 6px;
+}
+
+.certificate h1 {
+  font-size: 34px;
+  margin: 0 0 14px;
+  color: #6b3f16;
+}
+
+.certificate-lead {
+  margin: 6px 0;
+  font-size: 15px;
+  color: #4a3d20;
+}
+
+.certificate-name {
+  font-size: 40px;
+  font-style: italic;
+  margin: 8px 0;
+  color: #3a2c10;
+  border-bottom: 2px solid #d9b24a;
+  display: inline-block;
+  padding: 0 24px 6px;
+}
+
+.certificate-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 8px 0 14px;
+  color: #93611f;
+}
+
+.certificate-figure img {
+  width: 190px;
+  max-width: 60%;
+  border-radius: 10px;
+  border: 3px solid #d9b24a;
+}
+
+.certificate-figure span {
+  display: block;
+  margin-top: 4px;
+  font-style: italic;
+  font-size: 13px;
+  color: #6b5a2e;
+}
+
+.certificate-stats {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin: 18px 0;
+  flex-wrap: wrap;
+}
+
+.certificate-stats span {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #8a6d2a;
+}
+
+.certificate-stats b {
+  font-size: 20px;
+  color: #3a2c10;
+}
+
+.certificate-badges {
+  font-size: 26px;
+  letter-spacing: 6px;
+  margin: 6px 0 14px;
+}
+
+.certificate-signatures {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 22px;
+}
+
+.certificate-signatures div {
+  border-top: 2px solid #a9812f;
+  padding-top: 6px;
+  min-width: 150px;
+}
+
+.certificate-signatures b {
+  font-size: 24px;
+  display: block;
+}
+
+.certificate-signatures span {
+  font-size: 12px;
+  color: #6b5a2e;
+}
+
+@media print {
+  body[data-print-mode="certificate"] .game-app,
+  body[data-print-mode="certificate"] .landing-page,
+  body[data-print-mode="certificate"] .app-nav {
+    display: none !important;
+  }
+
+  body[data-print-mode="certificate"] .certificate-page {
+    display: block !important;
+  }
+}
