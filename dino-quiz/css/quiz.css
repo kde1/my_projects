@@ -299,10 +299,6 @@
   object-fit: contain;
 }
 
-.quiz-image.expert-crop {
-  transition: transform .18s ease;
-}
-
 .quiz-question p {
   color: #f4e4b9;
   font-weight: 800;

@@ -16,6 +16,7 @@ function $$(selector, root = document) {
 }
 
 function titleCase(value) {
+  if (!value) return "";
   return value[0].toUpperCase() + value.slice(1);
 }
 
@@ -122,31 +123,6 @@ const geneList = $("#geneList");
 const fossilNote = $("#fossilNote");
 const challengeText = $("#challengeText");
 const badgeRow = $("#badgeRow");
-const quizImage = $("#quizImage");
-const quizOptions = $("#quizOptions");
-const quizFeedback = $("#quizFeedback");
-const quizScore = $("#quizScore");
-const quizTotal = $("#quizTotal");
-const quizStreak = $("#quizStreak");
-const quizPlayerForm = $("#quizPlayerForm");
-const quizPlayerSelect = $("#quizPlayerSelect");
-const quizPlayerName = $("#quizPlayerName");
-const quizPlayerStatus = $("#quizPlayerStatus");
-const addExplorerBtn = $("#addExplorerBtn");
-const manageExplorersBtn = $("#manageExplorersBtn");
-const explorerManager = $("#explorerManager");
-const explorerManagerList = $("#explorerManagerList");
-const quizLeaderboardList = $("#quizLeaderboardList");
-const quizLeaderboardTag = $("#quizLeaderboardTag");
-const landingLeaderboardList = $("#landingLeaderboardList");
-const landingLeaderboardTag = $("#landingLeaderboardTag");
-const nextQuizBtn = $("#nextQuizBtn");
-const quizDifficulty = $("#quizDifficulty");
-const quizPotential = $("#quizPotential");
-const hintQuizBtn = $("#hintQuizBtn");
-const quizEra = $("#quizEra");
-const quizView = $("#quizView");
-const quizPrompt = $("#quizPrompt");
 const landingPrint = $("#landingPrint");
 const galleryPrint = $("#galleryPrint");
 const galleryTabs = $("#galleryTabs");
@@ -156,8 +132,6 @@ const galleryQuizTabs = $("#galleryQuizTabs");
 const galleryQuizGrid = $("#galleryQuizGrid");
 const galleryQuizPrint = $("#galleryQuizPrint");
 const galleryQuizPrintPages = $("#galleryQuizPrintPages");
-const exportLeaderboardBtn = $("#exportLeaderboardBtn");
-const leaderboardSaveStatus = $("#leaderboardSaveStatus");
 
 function path(attrs) {
   return `<path ${attrs}></path>`;
@@ -604,49 +578,29 @@ function validateQuizData() {
   });
 }
 
+const store = window.createDinoStore({
+  cleanPlayerName,
+  readJsonStorage,
+  writeJsonStorage,
+  seed: window.DinoPlayerData || { players: [], leaderboard: [] },
+  todayDisplay: () => new Date().toLocaleDateString(),
+  todayISO: () => new Date().toISOString().slice(0, 10)
+});
+
 const quizController = window.createQuizController({
   state,
+  store,
   quizItems,
   quizChoicePools,
   getGuide,
   shuffle,
   escapeHtml,
-  queryAll: $$,
+  $,
+  $$,
   cleanPlayerName,
-  readJsonStorage,
-  writeJsonStorage,
   readTextStorage,
   writeTextStorage,
-  trackedPlayerData: window.DinoPlayerData || { players: [], leaderboard: [] },
-  elements: {
-    quizImage,
-    quizOptions,
-    quizFeedback,
-    quizScore,
-    quizTotal,
-    quizStreak,
-    quizPlayerForm,
-    quizPlayerSelect,
-    quizPlayerName,
-    quizPlayerStatus,
-    addExplorerBtn,
-    manageExplorersBtn,
-    explorerManager,
-    explorerManagerList,
-    quizLeaderboardList,
-    quizLeaderboardTag,
-    landingLeaderboardList,
-    landingLeaderboardTag,
-    exportLeaderboardBtn,
-    leaderboardSaveStatus,
-    nextQuizBtn,
-    quizDifficulty,
-    quizPotential,
-    hintQuizBtn,
-    quizEra,
-    quizView,
-    quizPrompt
-  }
+  celebrate: window.DinoCelebrate || null
 });
 function renderGallery(options = {}) {
   const quizMode = options.quizMode || false;

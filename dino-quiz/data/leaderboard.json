@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "players": [],
   "leaderboard": [
     {
@@ -10,7 +11,8 @@
       "hints": 0,
       "difficulty": "Easy",
       "title": "Expert Paleontologist",
-      "date": "7/8/2026"
+      "date": "7/8/2026",
+      "dateISO": "2026-07-08"
     }
   ]
 }
