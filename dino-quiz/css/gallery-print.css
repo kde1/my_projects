@@ -1,0 +1,470 @@
+.gallery-focus #galleryPanel {
+  padding: 18px;
+}
+
+.gallery-shell {
+  display: grid;
+  gap: 16px;
+  margin: 0 auto;
+  max-width: 1280px;
+}
+
+.gallery-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.gallery-head h2 {
+  color: #f4e4b9;
+  font-size: 1.35rem;
+  margin-bottom: 5px;
+}
+
+.gallery-head p {
+  color: #dce7d3;
+}
+
+.gallery-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+.gallery-tools {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.gallery-print-button {
+  min-height: 38px;
+  border: 0;
+  background: #d2b15f;
+  color: #17130b;
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 900;
+}
+
+.gallery-tab {
+  min-height: 38px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(244, 241, 231, .1);
+  color: #f4f1e7;
+  cursor: pointer;
+  padding: 0 12px;
+  font-weight: 800;
+}
+
+.gallery-tab.is-active {
+  border-color: #d2b15f;
+  background: #d2b15f;
+  color: #17130b;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gallery-card {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .13);
+  background: rgba(255, 255, 255, .055);
+}
+
+.gallery-quiz-card {
+  display: block;
+  width: 100%;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.gallery-quiz-card:hover {
+  border-color: rgba(210, 177, 95, .7);
+  background: rgba(210, 177, 95, .1);
+}
+
+.gallery-image-frame {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #0f130d;
+}
+
+.gallery-image-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gallery-card-copy {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
+.gallery-card-copy.is-hidden {
+  min-height: 54px;
+  place-items: center;
+  color: #fff3cf;
+  font-weight: 900;
+}
+
+.gallery-card h3 {
+  margin: 0;
+  color: #fff3cf;
+  font-size: .96rem;
+  line-height: 1.15;
+}
+
+.gallery-card p {
+  color: #aebda8;
+  font-size: .8rem;
+  font-weight: 800;
+}
+
+.gallery-card dl {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+.gallery-card dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.gallery-card dt {
+  color: #aebda8;
+  font-size: .68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.gallery-card dd {
+  margin: 0;
+  color: #e8eee0;
+  font-size: .78rem;
+  line-height: 1.25;
+}
+
+.gallery-print-pages {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  :root {
+    color-scheme: light;
+    background: #fff;
+    color: #111;
+  }
+
+  body {
+    overflow: visible;
+    background: #fff;
+  }
+
+  .workbench,
+  .app-nav,
+  .gallery-print-button,
+  .gallery-head,
+  .gallery-grid,
+  .landing-page,
+  #partsPanel,
+  #dnaPanel,
+  #quizPanel,
+  #galleryPanel,
+  #galleryQuizPanel {
+    display: none !important;
+  }
+
+  .game-app {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .game-shell,
+  .panel,
+  .tab-panel {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  body[data-print-mode="gallery"] #galleryPanel,
+  body[data-print-mode="galleryQuiz"] #galleryQuizPanel {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  body[data-print-mode="landing"] .game-app {
+    display: none !important;
+  }
+
+  body[data-print-mode="landing"] .landing-page {
+    display: grid !important;
+    width: 277mm;
+    min-height: 190mm;
+    overflow: hidden !important;
+    background: #11130f !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body[data-print-mode="landing"] .landing-content {
+    width: 170mm;
+    padding: 26mm 0 0 18mm;
+  }
+
+  body[data-print-mode="landing"] .landing-specs {
+    display: flex;
+  }
+
+  body[data-print-mode="landing"] .landing-specs span {
+    color: #f8e7b4;
+  }
+
+  body[data-print-mode="landing"] .landing-content h1 {
+    color: #fff3cf;
+    font-size: 44pt;
+  }
+
+  body[data-print-mode="landing"] .landing-copy {
+    color: #eef4e8;
+    font-size: 14pt;
+  }
+
+  body[data-print-mode="landing"] .landing-actions {
+    display: none;
+  }
+
+  body[data-print-mode="landing"] .landing-strip {
+    padding: 0 8mm 8mm;
+  }
+
+  .gallery-shell {
+    max-width: none;
+    gap: 0;
+  }
+
+  .gallery-print-pages {
+    display: block;
+  }
+
+  .gallery-print-page {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 5mm;
+    width: 277mm;
+    min-height: 190mm;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .gallery-print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .gallery-print-page header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    border-bottom: 1px solid #111;
+    padding-bottom: 3mm;
+  }
+
+  .gallery-print-page h2 {
+    margin: 0;
+    color: #111;
+    font-size: 18pt;
+  }
+
+  .gallery-print-page p {
+    margin: 0;
+    color: #333;
+    font-size: 11pt;
+    font-weight: 700;
+  }
+
+  .gallery-print-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4mm;
+  }
+
+  .gallery-print-card {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+    border: 1px solid #333;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .gallery-print-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: contain;
+  }
+
+.gallery-print-answer {
+  border-top: 1px solid #333;
+  color: #111;
+  font-size: 10pt;
+  font-weight: 700;
+  padding: 2mm 2.5mm 6mm;
+}
+
+  .gallery-print-page-with-info .gallery-print-card {
+    grid-template-rows: 1fr auto;
+  }
+
+  .gallery-print-info {
+    display: grid;
+    gap: 1mm;
+    border-top: 1px solid #333;
+    color: #111;
+    padding: 2mm;
+  }
+
+  .gallery-print-info h3 {
+    margin: 0;
+    color: #111;
+    font-size: 10pt;
+    line-height: 1.1;
+  }
+
+  .gallery-print-info p {
+    margin: 0 0 1mm;
+    color: #111;
+    font-size: 8.5pt;
+    font-weight: 700;
+  }
+
+  .gallery-print-info b {
+    color: #111;
+    font-size: 7.2pt;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .gallery-print-info span {
+    color: #111;
+    font-size: 7.4pt;
+    line-height: 1.12;
+  }
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  color: #dce7d3;
+}
+
+.toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: #d2b15f;
+}
+
+.meter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.meter i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 10px;
+  background: linear-gradient(90deg, #7ba35a var(--value), rgba(255, 255, 255, .13) var(--value));
+}
+
+.meter b {
+  color: #f4e4b9;
+}
+
+.primary-button {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  background: #d2b15f;
+  color: #17130b;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #e5c876;
+}
+
+.primary-button:disabled {
+  opacity: .52;
+  cursor: default;
+}
+
+.field-test {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 4;
+  width: min(340px, calc(100% - 36px));
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(13, 17, 12, .78);
+  padding: 14px;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+}
+
+.field-test.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.field-test h2 {
+  font-size: 1rem;
+  color: #f4e4b9;
+  margin-bottom: 6px;
+}
+
+.field-test p {
+  color: #e8eee0;
+  line-height: 1.45;
+}
+
