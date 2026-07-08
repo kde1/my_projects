@@ -14,7 +14,7 @@ body {
   min-height: 100vh;
   background:
     linear-gradient(rgba(12, 17, 10, .7), rgba(12, 17, 10, .78)),
-    url("../dino-builder/assets/prehistoric-habitat.png") center / cover fixed,
+    url("../dino-quiz/assets/prehistoric-habitat.png") center / cover fixed,
     #11150e;
 }
 
@@ -244,7 +244,7 @@ h1 {
 .rex {
   width: clamp(92px, 12vw, 150px);
   aspect-ratio: 1.35;
-  background: url("../dino-builder/assets/quiz-tyrannosaurus.png") center / contain no-repeat;
+  background: url("../dino-quiz/assets/quiz-tyrannosaurus.png") center / contain no-repeat;
   filter: drop-shadow(0 14px 14px rgba(0, 0, 0, .46));
 }
 

@@ -14,7 +14,7 @@ body {
   margin: 0;
   background:
     linear-gradient(rgba(12, 18, 12, .58), rgba(12, 18, 12, .74)),
-    url("../dino-builder/assets/prehistoric-habitat.png") center / cover fixed,
+    url("../dino-quiz/assets/prehistoric-habitat.png") center / cover fixed,
     #11150f;
 }
 
@@ -100,7 +100,7 @@ h1 {
   content: "";
   background:
     linear-gradient(rgba(255, 247, 225, .08), rgba(255, 247, 225, .08)),
-    url("../dino-builder/assets/prehistoric-habitat.png") center / cover;
+    url("../dino-quiz/assets/prehistoric-habitat.png") center / cover;
   filter: saturate(.82) contrast(1.08);
 }
 

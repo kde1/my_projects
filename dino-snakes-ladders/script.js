@@ -69,11 +69,11 @@ const jumpNames = {
 
 const playerSets = [
   [
-    { name: "Carnotaurus", mark: "C", avatar: "../dino-builder/assets/quiz-carnotaurus.png", position: 1 },
+    { name: "Carnotaurus", mark: "C", avatar: "../dino-quiz/assets/quiz-carnotaurus.png", position: 1 },
     { name: "Mosasaurus", mark: "M", avatar: "assets/avatar-mosasaurus.png", position: 1 }
   ],
   [
-    { name: "Carnotaurus", mark: "C", avatar: "../dino-builder/assets/quiz-carnotaurus.png", position: 1 },
+    { name: "Carnotaurus", mark: "C", avatar: "../dino-quiz/assets/quiz-carnotaurus.png", position: 1 },
     { name: "Mosasaurus Bot", mark: "M", avatar: "assets/avatar-mosasaurus.png", position: 1, bot: true }
   ]
 ];
@@ -113,7 +113,7 @@ function buildBoard() {
     if (jumps[square] < square) cell.classList.add("is-slide");
     cell.innerHTML = `
       <span class="num">${square}</span>
-      <img class="square-dino" src="../dino-builder/assets/${dinoImage}" alt="" aria-hidden="true">
+      <img class="square-dino" src="../dino-quiz/assets/${dinoImage}" alt="" aria-hidden="true">
     `;
     board.appendChild(cell);
   });

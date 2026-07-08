@@ -1,0 +1,158 @@
+@media (max-width: 920px) {
+  body {
+    overflow: auto;
+  }
+
+  body.landing-active {
+    overflow: auto;
+  }
+
+  .landing-page {
+    min-height: auto;
+  }
+
+  .landing-bg {
+    object-position: 68% 50%;
+  }
+
+  .landing-content {
+    width: calc(100% - 28px);
+    padding: 34px 0 28px 14px;
+  }
+
+  .landing-strip {
+    grid-template-columns: 1fr;
+    padding: 0 10px 10px;
+  }
+
+  .game-app {
+    height: auto;
+    min-height: 100vh;
+    padding: 10px;
+  }
+
+  .app-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .game-shell {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+  }
+
+  .workbench,
+  .panel {
+    height: auto;
+    min-height: auto;
+  }
+
+  .stage {
+    min-height: 58vh;
+  }
+
+  .game-shell.quiz-focus .panel,
+  .game-shell.gallery-focus .panel {
+    height: auto;
+    min-height: calc(100vh - 20px);
+  }
+
+  .quiz-focus .quiz-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topline"
+      "player"
+      "leaderboard"
+      "difficulty"
+      "meta"
+      "image"
+      "question"
+      "options"
+      "feedback"
+      "next";
+    min-height: auto;
+  }
+
+  .quiz-focus .quiz-meta {
+    justify-content: start;
+  }
+
+  .quiz-focus .quiz-image-frame {
+    min-height: 42vh;
+  }
+
+  .gallery-head {
+    display: grid;
+    align-items: start;
+  }
+
+  .gallery-tabs {
+    justify-content: start;
+  }
+
+  .gallery-tools {
+    justify-items: start;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quiz-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .landing-bg {
+    object-position: 72% 50%;
+  }
+
+  .landing-shade {
+    background:
+      linear-gradient(90deg, rgba(6, 8, 7, .95) 0%, rgba(8, 11, 8, .75) 52%, rgba(8, 11, 8, .3) 100%),
+      linear-gradient(0deg, rgba(8, 11, 8, .95) 0%, transparent 48%);
+  }
+
+  .landing-actions button {
+    flex: 1 1 145px;
+  }
+
+  .game-app {
+    padding: 10px;
+  }
+
+  .game-shell {
+    gap: 10px;
+    padding: 0;
+  }
+
+  .app-nav-button {
+    min-height: 40px;
+    padding: 0 12px;
+  }
+
+  .quiz-player-card div {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .choice-row {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
