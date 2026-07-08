@@ -38,6 +38,7 @@
       addExplorerBtn: $("#addExplorerBtn"),
       explorerManager: $("#explorerManager"),
       explorerManagerList: $("#explorerManagerList"),
+      explorerProfileHead: $("#explorerProfileHead"),
       quizLeaderboardList: $("#quizLeaderboardList"),
       quizLeaderboardTag: $("#quizLeaderboardTag"),
       landingLeaderboardList: $("#landingLeaderboardList"),
@@ -140,18 +141,25 @@
     function renderExplorerManager() {
       if (!el.explorerManagerList) return;
       const players = store.getPlayers();
+      const activeKey = (state.playerName || "").toLowerCase();
       el.explorerManagerList.innerHTML = players.length ? players.map((player) => {
+        const isActive = player.name.toLowerCase() === activeKey;
         const scoreCount = store.playerScoreCount(player.name);
+        const rankIcon = progression ? progression.rankIcon(player.name) : "";
         return `
-          <li>
-            <span>${escapeHtml(player.name)}${scoreCount ? ` (${scoreCount} score${scoreCount === 1 ? "" : "s"})` : ""}</span>
-            <button class="secondary-button" type="button" data-action="use" data-name="${escapeHtml(player.name)}">Use</button>
+          <li class="${isActive ? "is-active" : ""}">
+            <span class="explorer-name">
+              <span class="use-tick" aria-hidden="true">${isActive ? "✓" : ""}</span>
+              ${rankIcon ? `<span class="roster-rank" title="Rank">${rankIcon}</span>` : ""}
+              ${escapeHtml(player.name)}${scoreCount ? ` <small>(${scoreCount} score${scoreCount === 1 ? "" : "s"})</small>` : ""}
+            </span>
+            <button class="secondary-button" type="button" data-action="use" data-name="${escapeHtml(player.name)}" ${isActive ? "disabled" : ""}>${isActive ? "In use" : "Use"}</button>
             <button class="secondary-button" type="button" data-action="forget" data-name="${escapeHtml(player.name)}">Remove</button>
             <button class="secondary-button" type="button" data-action="clear" data-name="${escapeHtml(player.name)}">Clear Scores</button>
           </li>
         `;
       }).join("") : `
-        <li class="is-empty">No explorers yet.</li>
+        <li class="is-empty">No explorers yet. Add one above to start collecting trophies.</li>
       `;
     }
 
@@ -198,7 +206,8 @@
     }
 
     // Refresh only the progression displays (coins, rank, dex, trophies) without
-    // rebuilding the explorer chooser — used when returning to the Quiz tab.
+    // rebuilding the explorer chooser — used when returning to the Quiz tab and
+    // when opening the Leaderboard tab (where the profile now lives).
     function refreshPlayerCard() {
       if (progression) {
         progression.renderTrophyShelf(el.trophyShelf, state.playerName);
@@ -206,6 +215,11 @@
       }
       renderDexProgress();
       renderCoins();
+      if (el.explorerProfileHead) {
+        el.explorerProfileHead.textContent = state.playerName
+          ? `${state.playerName}'s field badge`
+          : "Pick an explorer to see their field badge.";
+      }
     }
 
     function setActivePlayer(name, { start = true } = {}) {
@@ -276,10 +290,12 @@
       renderLeaderboardTarget(el.landingLeaderboardList, el.landingLeaderboardTag, scopedEntries("all"), "all");
     }
 
-    // Render everything the dedicated Leaderboard tab shows.
+    // Render everything the dedicated Leaderboard tab shows: the champs board,
+    // the explorer roster, and the in-use explorer's field badge (rank/dex/trophies).
     function renderLeaderboardTab() {
       renderLeaderboard();
       renderExplorerManager();
+      refreshPlayerCard();
     }
 
     function savePlayerName() {
@@ -832,6 +848,15 @@
       }
       if (el.addExplorerBtn) {
         el.addExplorerBtn.addEventListener("click", addExplorer);
+      }
+      if (el.quizPlayerName) {
+        // The add-explorer input lives outside a form now, so wire Enter to add.
+        el.quizPlayerName.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            addExplorer();
+          }
+        });
       }
       if (el.explorerManagerList) {
         el.explorerManagerList.addEventListener("click", (event) => {

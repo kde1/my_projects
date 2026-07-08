@@ -183,47 +183,139 @@
   color: #dce7d3;
 }
 
-/* Dedicated Leaderboard tab: leaderboard + explorer management side by side. */
+/* Dedicated Leaderboard tab: Manage Explorers on top, Dino Champs below. */
 .board-shell {
   width: 100%;
-  max-width: 1040px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 20px 18px;
-}
-
-.board-columns {
+  padding: 22px 18px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 18px;
-  align-items: start;
+  gap: 20px;
+  font-size: 1.05rem;
 }
 
 .board-card {
-  border: 1px solid rgba(255, 243, 207, .18);
-  background: rgba(0, 0, 0, .2);
-  border-radius: 14px;
-  padding: 16px;
+  border: 1px solid rgba(255, 243, 207, .2);
+  background: rgba(0, 0, 0, .22);
+  border-radius: 16px;
+  padding: 20px;
 }
 
-.board-card > div:first-child {
-  margin-bottom: 12px;
+.board-card-head {
+  margin-bottom: 16px;
 }
 
-.explorer-manage h3 {
+.board-card-head h3 {
   color: #fff3cf;
   font-weight: 900;
-  margin: 0;
+  margin: 0 0 2px;
+  font-size: 1.5rem;
 }
 
-.explorer-manage > div span {
+.board-card-head span {
   color: #cbbd92;
-  font-size: 13px;
+  font-size: .95rem;
+}
+
+/* Add-explorer row on the Leaderboard tab. */
+#explorerAddRow {
+  margin-bottom: 16px;
+}
+
+#explorerAddRow input {
+  min-height: 46px;
+  font-size: 1.05rem;
+}
+
+/* In-use explorer's field badge (rank / dex / trophies). */
+.explorer-profile {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .05);
+}
+
+.explorer-profile-head {
+  color: #fff3cf;
+  font-weight: 900;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
 }
 
 .board-card .explorer-manager {
   border: 0;
   background: transparent;
   padding: 0;
+}
+
+/* Roster rows: bigger text, active row highlighted with a tick. */
+#leaderboardPanel .explorer-manager li {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 1.05rem;
+}
+
+#leaderboardPanel .explorer-manager li.is-active {
+  background: rgba(150, 197, 111, .18);
+  box-shadow: inset 0 0 0 1px rgba(150, 197, 111, .5);
+}
+
+.explorer-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.explorer-name small {
+  color: #cbbd92;
+  font-weight: 700;
+}
+
+.use-tick {
+  display: inline-flex;
+  justify-content: center;
+  width: 18px;
+  color: #8fe08a;
+  font-weight: 900;
+}
+
+.roster-rank {
+  font-size: 1.15rem;
+}
+
+#leaderboardPanel .explorer-manager button {
+  min-height: 36px;
+  font-size: .85rem;
+}
+
+#leaderboardPanel .explorer-manager li.is-active button[data-action="use"] {
+  opacity: .6;
+}
+
+/* Bigger champs board on the dedicated tab. */
+#leaderboardPanel .quiz-leaderboard h3 {
+  font-size: 1.5rem;
+}
+
+#leaderboardPanel .quiz-leaderboard li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 1.05rem;
+}
+
+#leaderboardPanel .quiz-leaderboard li small {
+  font-size: .9rem;
+}
+
+#leaderboardPanel .lb-scope-btn {
+  font-size: .9rem;
+  padding: 5px 14px;
+}
+
+#leaderboardPanel .leaderboard-export {
+  min-height: 44px;
+  font-size: 1rem;
 }
 
 .explorer-manager button {
@@ -236,6 +328,11 @@
 .quiz-leaderboard span,
 .quiz-leaderboard small {
   color: #dce7d3;
+}
+
+.quiz-player-hint {
+  font-size: .82rem;
+  color: #a9b89e;
 }
 
 .quiz-player-card.is-registered {
