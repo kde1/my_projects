@@ -251,6 +251,11 @@
                 <div class="quiz-score"><span id="quizScore">0</span> pts / <span id="quizTotal">0</span> fossils</div>
               </div>
             </div>
+            <div class="quiz-mode-toggle" id="quizModeToggle" role="group" aria-label="Quiz mode">
+              <button class="quiz-mode-btn is-active" type="button" data-mode="solo">Solo</button>
+              <button class="quiz-mode-btn" type="button" data-mode="duel">Sibling Duel</button>
+            </div>
+            <div class="solo-mode" id="soloMode">
             <form class="quiz-player-card" id="quizPlayerForm">
               <label for="quizPlayerSelect">Explorer name</label>
               <div class="quiz-player-chooser">
@@ -318,6 +323,47 @@
             <div class="quiz-actions">
               <button class="hint-button" id="hintQuizBtn" type="button">Get Hint</button>
               <button class="primary-button" id="nextQuizBtn" type="button">Next Fossil</button>
+            </div>
+            </div>
+
+            <div class="duel-mode" id="duelMode" hidden>
+              <div class="duel-setup" id="duelSetup">
+                <h3>Sibling Duel</h3>
+                <p class="duel-intro">Two explorers, taking turns. Each plays at their own difficulty, so an 8-year-old can fairly beat a 13-year-old!</p>
+                <div class="duel-player-setup">
+                  <label>Player 1<select id="duelP1Name"></select></label>
+                  <label>Level<select id="duelP1Diff" class="duel-diff">
+                    <option value="easy">Easy (10 pts)</option>
+                    <option value="medium">Medium (15 pts)</option>
+                    <option value="hard">Hard (25 pts)</option>
+                  </select></label>
+                </div>
+                <div class="duel-player-setup">
+                  <label>Player 2<select id="duelP2Name"></select></label>
+                  <label>Level<select id="duelP2Diff" class="duel-diff">
+                    <option value="easy">Easy (10 pts)</option>
+                    <option value="medium">Medium (15 pts)</option>
+                    <option value="hard">Hard (25 pts)</option>
+                  </select></label>
+                </div>
+                <button class="primary-button" id="duelStartBtn" type="button">Start Duel</button>
+                <p class="duel-setup-msg" id="duelSetupMsg"></p>
+              </div>
+              <div class="duel-play" id="duelPlay" hidden>
+                <div class="duel-scoreboard">
+                  <div class="duel-side" id="duelSide1"><b id="duelName1"></b><span class="duel-score" id="duelScore1">0</span></div>
+                  <div class="duel-versus">VS</div>
+                  <div class="duel-side" id="duelSide2"><b id="duelName2"></b><span class="duel-score" id="duelScore2">0</span></div>
+                </div>
+                <div class="duel-turn-banner" id="duelTurnBanner"></div>
+                <div class="quiz-image-frame">
+                  <img id="duelImage" class="quiz-image" src="" alt="Dinosaur duel specimen">
+                </div>
+                <div class="quiz-options" id="duelOptions"></div>
+                <div class="quiz-feedback" id="duelFeedback" aria-live="polite"></div>
+                <button class="primary-button" id="duelNextBtn" type="button" disabled>Next</button>
+              </div>
+              <div class="duel-results" id="duelResults" hidden></div>
             </div>
           </section>
         </div>
@@ -394,6 +440,7 @@
     <script src="js/builder.js"></script>
     <script src="js/dna.js"></script>
     <script src="js/gallery.js"></script>
+    <script src="js/duel.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

@@ -785,6 +785,31 @@
     { id: "rainbow-palette", name: "Rainbow Skin", cost: 40, type: "palette", value: ["#6a4fd0", "#f2c14e"], icon: "🌈" }
   ];
 
+  // Shared difficulty configuration (used by the solo quiz and the duel).
+  const quizDifficulties = {
+    easy: {
+      label: "Easy",
+      points: 10,
+      hintCost: 3,
+      choiceCount: 4,
+      slugs: ["tyrannosaurus", "triceratops", "stegosaurus", "velociraptor", "brachiosaurus", "spinosaurus", "ankylosaurus", "parasaurolophus", "allosaurus", "archaeopteryx"]
+    },
+    medium: {
+      label: "Medium",
+      points: 15,
+      hintCost: 4,
+      choiceCount: 4,
+      slugs: ["tyrannosaurus", "triceratops", "spinosaurus", "parasaurolophus", "allosaurus", "brachiosaurus", "stegosaurus", "ankylosaurus", "velociraptor", "carnotaurus", "dilophosaurus", "gallimimus", "pachycephalosaurus", "iguanodon", "diplodocus", "apatosaurus", "deinonychus", "microraptor", "archaeopteryx", "therizinosaurus", "oviraptor", "corythosaurus", "lambeosaurus", "edmontosaurus"]
+    },
+    hard: {
+      label: "Hard",
+      points: 25,
+      hintCost: 6,
+      choiceCount: 6,
+      slugs: null
+    }
+  };
+
   // Daily themed expeditions. A theme matches by era and/or fossil group; the
   // active one rotates by day-of-year so it is stable for a whole day.
   const expeditions = [
@@ -810,6 +835,7 @@
     rankForXp,
     builderUnlocks,
     expeditions,
+    quizDifficulties,
     totalDinos: quizItems.length
   };
 })();

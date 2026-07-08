@@ -127,6 +127,14 @@
     celebrate
   });
 
+  const duelController = window.createDuel({
+    store,
+    progression,
+    data: window.DinoData,
+    helpers,
+    celebrate
+  });
+
   function showTab(tabName) {
     document.body.classList.remove("landing-active");
     $(".game-shell").classList.toggle("quiz-focus", tabName === "quiz");
@@ -190,6 +198,7 @@
     ctx.builder.bindBuilderControls();
     ctx.dna.bindDnaControls();
     quizController.bindQuizControls();
+    duelController.bindDuelControls();
     bindPrintControls();
   }
 

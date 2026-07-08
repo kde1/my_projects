@@ -72,65 +72,7 @@
 
     state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY) || "");
 
-    const quizDifficultySettings = {
-      easy: {
-        label: "Easy",
-        points: 10,
-        hintCost: 3,
-        choiceCount: 4,
-        slugs: [
-          "tyrannosaurus",
-          "triceratops",
-          "stegosaurus",
-          "velociraptor",
-          "brachiosaurus",
-          "spinosaurus",
-          "ankylosaurus",
-          "parasaurolophus",
-          "allosaurus",
-          "archaeopteryx"
-        ]
-      },
-      medium: {
-        label: "Medium",
-        points: 15,
-        hintCost: 4,
-        choiceCount: 4,
-        slugs: [
-          "tyrannosaurus",
-          "triceratops",
-          "spinosaurus",
-          "parasaurolophus",
-          "allosaurus",
-          "brachiosaurus",
-          "stegosaurus",
-          "ankylosaurus",
-          "velociraptor",
-          "carnotaurus",
-          "dilophosaurus",
-          "gallimimus",
-          "pachycephalosaurus",
-          "iguanodon",
-          "diplodocus",
-          "apatosaurus",
-          "deinonychus",
-          "microraptor",
-          "archaeopteryx",
-          "therizinosaurus",
-          "oviraptor",
-          "corythosaurus",
-          "lambeosaurus",
-          "edmontosaurus"
-        ]
-      },
-      hard: {
-        label: "Hard",
-        points: 25,
-        hintCost: 6,
-        choiceCount: 6,
-        slugs: null
-      }
-    };
+    const quizDifficultySettings = (window.DinoData && window.DinoData.quizDifficulties) || {};
 
     const QUIZ_ROUND_SIZE = 10;
 
