@@ -2,236 +2,134 @@
   "use strict";
 
   const PLAYER_STORAGE_KEY = "dinoQuizPlayerName";
-  const LEADERBOARD_STORAGE_KEY = "dinoQuizLeaderboard";
-  const PLAYER_REGISTRY_STORAGE_KEY = "dinoQuizPlayers";
   const LEADERBOARD_LIMIT = 5;
-  const SAVED_RESULT_LIMIT = 25;
 
   window.createQuizController = function createQuizController(deps) {
     const {
       state,
+      store,
+      progression,
       quizItems,
       quizChoicePools,
       getGuide,
       shuffle,
       escapeHtml,
-      queryAll,
+      $,
+      $$,
       cleanPlayerName,
-      readJsonStorage,
-      writeJsonStorage,
       readTextStorage,
       writeTextStorage,
-      trackedPlayerData,
-      elements
+      isoWeek,
+      celebrate
     } = deps;
-    const {
-      quizImage,
-      quizOptions,
-      quizFeedback,
-      quizScore,
-      quizTotal,
-      quizStreak,
-      quizPlayerForm,
-      quizPlayerSelect,
-      quizPlayerName,
-      quizPlayerStatus,
-      addExplorerBtn,
-      manageExplorersBtn,
-      explorerManager,
-      explorerManagerList,
-      quizLeaderboardList,
-      quizLeaderboardTag,
-      landingLeaderboardList,
-      landingLeaderboardTag,
-      exportLeaderboardBtn,
-      leaderboardSaveStatus,
-      nextQuizBtn,
-      quizDifficulty,
-      quizPotential,
-      hintQuizBtn,
-      quizEra,
-      quizView,
-      quizPrompt
-    } = elements;
 
-    let permanentPlayerData = normalizePlayerData(trackedPlayerData);
-
-    state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY));
-
-    const quizDifficultySettings = {
-      easy: {
-        label: "Easy",
-        points: 10,
-        hintCost: 3,
-        choiceCount: 4,
-        slugs: [
-          "tyrannosaurus",
-          "triceratops",
-          "stegosaurus",
-          "velociraptor",
-          "brachiosaurus",
-          "spinosaurus",
-          "ankylosaurus",
-          "parasaurolophus",
-          "allosaurus",
-          "archaeopteryx"
-        ]
-      },
-      medium: {
-        label: "Medium",
-        points: 15,
-        hintCost: 4,
-        choiceCount: 4,
-        slugs: [
-          "tyrannosaurus",
-          "triceratops",
-          "spinosaurus",
-          "parasaurolophus",
-          "allosaurus",
-          "brachiosaurus",
-          "stegosaurus",
-          "ankylosaurus",
-          "velociraptor",
-          "carnotaurus",
-          "dilophosaurus",
-          "gallimimus",
-          "pachycephalosaurus",
-          "iguanodon",
-          "diplodocus",
-          "apatosaurus",
-          "deinonychus",
-          "microraptor",
-          "archaeopteryx",
-          "therizinosaurus",
-          "oviraptor",
-          "corythosaurus",
-          "lambeosaurus",
-          "edmontosaurus"
-        ]
-      },
-      hard: {
-        label: "Hard",
-        points: 25,
-        hintCost: 6,
-        choiceCount: 6,
-        slugs: null
-      }
+    // Quiz controller owns its own DOM lookups (no giant elements bag passed in).
+    const el = {
+      quizImage: $("#quizImage"),
+      quizOptions: $("#quizOptions"),
+      quizFeedback: $("#quizFeedback"),
+      quizScore: $("#quizScore"),
+      quizTotal: $("#quizTotal"),
+      quizStreak: $("#quizStreak"),
+      quizPlayerForm: $("#quizPlayerForm"),
+      quizPlayerSelect: $("#quizPlayerSelect"),
+      quizPlayerName: $("#quizPlayerName"),
+      quizPlayerStatus: $("#quizPlayerStatus"),
+      addExplorerBtn: $("#addExplorerBtn"),
+      manageExplorersBtn: $("#manageExplorersBtn"),
+      explorerManager: $("#explorerManager"),
+      explorerManagerList: $("#explorerManagerList"),
+      quizLeaderboardList: $("#quizLeaderboardList"),
+      quizLeaderboardTag: $("#quizLeaderboardTag"),
+      landingLeaderboardList: $("#landingLeaderboardList"),
+      landingLeaderboardTag: $("#landingLeaderboardTag"),
+      exportLeaderboardBtn: $("#exportLeaderboardBtn"),
+      leaderboardSaveStatus: $("#leaderboardSaveStatus"),
+      nextQuizBtn: $("#nextQuizBtn"),
+      quizDifficulty: $("#quizDifficulty"),
+      quizPotential: $("#quizPotential"),
+      hintQuizBtn: $("#hintQuizBtn"),
+      quizEra: $("#quizEra"),
+      quizView: $("#quizView"),
+      quizPrompt: $("#quizPrompt"),
+      trophyShelf: $("#trophyShelf"),
+      quizDexProgress: $("#quizDexProgress"),
+      quizDexPill: $("#quizDexPill"),
+      quizDexBar: $("#quizDexBar"),
+      quizRankBar: $("#quizRankBar"),
+      quizCoinChip: $("#quizCoinChip"),
+      quizCoinValue: $("#quizCoinValue"),
+      lbScope: $("#lbScope"),
+      expeditionCard: $("#expeditionCard"),
+      expeditionName: $("#expeditionName"),
+      expeditionBlurb: $("#expeditionBlurb"),
+      expeditionBtn: $("#expeditionBtn")
     };
-    
+
+    state.lbScope = state.lbScope || "week";
+    state.quizExpedition = state.quizExpedition || null;
+    const expeditions = (window.DinoData && window.DinoData.expeditions) || [];
+
+    state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY) || "");
+
+    const quizDifficultySettings = (window.DinoData && window.DinoData.quizDifficulties) || {};
+
     const QUIZ_ROUND_SIZE = 10;
-    
+
     function quizDifficultySetting() {
       return quizDifficultySettings[state.quizDifficulty] || quizDifficultySettings.easy;
     }
-    
-    function quizLeaderboard() {
-      const entries = readJsonStorage(LEADERBOARD_STORAGE_KEY, []);
-      const tracked = permanentPlayerData.leaderboard;
-      const local = Array.isArray(entries) ? entries : [];
-      return mergeById([...tracked, ...local])
-        .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
-        .slice(0, LEADERBOARD_LIMIT);
+
+    function dayOfYear() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      return Math.floor((now - start) / 86400000);
     }
 
-    function localLeaderboard() {
-      const entries = readJsonStorage(LEADERBOARD_STORAGE_KEY, []);
-      return Array.isArray(entries) ? entries : [];
+    // Deterministic daily theme: same all day, new one tomorrow.
+    function todaysExpedition() {
+      if (!expeditions.length) return null;
+      return expeditions[dayOfYear() % expeditions.length];
     }
 
-    function quizPlayers() {
-      const localPlayers = readJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, []);
-      const trackedPlayers = permanentPlayerData.players;
-      const leaderboardPlayers = mergeById([...permanentPlayerData.leaderboard, ...localLeaderboard()])
-        .map((entry) => ({ name: entry.name, firstSeen: entry.date || new Date().toLocaleDateString() }));
-      return mergeByName([...trackedPlayers, ...leaderboardPlayers, ...(Array.isArray(localPlayers) ? localPlayers : [])]);
+    function renderExpeditionCard() {
+      const theme = todaysExpedition();
+      if (!el.expeditionCard) return;
+      if (!theme) {
+        el.expeditionCard.hidden = true;
+        return;
+      }
+      el.expeditionCard.hidden = false;
+      const active = Boolean(state.quizExpedition);
+      el.expeditionName.textContent = `🧭 ${theme.name}`;
+      el.expeditionBlurb.textContent = active
+        ? "Expedition in progress · +50% Fossil Coins"
+        : `${theme.blurb} · +50% Fossil Coins`;
+      el.expeditionBtn.textContent = active ? "Exit Expedition" : "Start Expedition";
+      el.expeditionCard.classList.toggle("is-active", active);
     }
 
-    function normalizePlayerData(data) {
-      return {
-        players: Array.isArray(data && data.players) ? data.players : [],
-        leaderboard: Array.isArray(data && data.leaderboard) ? data.leaderboard : []
-      };
-    }
-
-    function canUsePermanentServer() {
-      return window.location.protocol === "http:" || window.location.protocol === "https:";
+    function toggleExpedition() {
+      state.quizExpedition = state.quizExpedition ? null : todaysExpedition();
+      renderExpeditionCard();
+      startQuizRound();
     }
 
     function setSaveStatus(message) {
-      if (leaderboardSaveStatus) leaderboardSaveStatus.textContent = message;
-    }
-
-    function permanentPayload() {
-      return {
-        players: quizPlayers(),
-        leaderboard: mergeById([...permanentPlayerData.leaderboard, ...quizLeaderboard(), ...localLeaderboard()])
-          .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
-          .slice(0, SAVED_RESULT_LIMIT)
-      };
+      if (el.leaderboardSaveStatus) el.leaderboardSaveStatus.textContent = message;
     }
 
     async function loadPermanentLeaderboard() {
-      if (!canUsePermanentServer()) {
-        setSaveStatus("Permanent saving needs the Dino Quiz local server.");
-        return;
-      }
-      try {
-        const response = await fetch("/api/leaderboard", { cache: "no-store" });
-        if (!response.ok) throw new Error("Leaderboard API unavailable.");
-        permanentPlayerData = normalizePlayerData(await response.json());
-        setSaveStatus("Permanent leaderboard loaded.");
-      } catch (error) {
-        setSaveStatus("Permanent saving needs the Dino Quiz local server.");
-      }
-    }
-
-    function mergeById(entries) {
-      const seen = new Set();
-      return entries.filter((entry) => {
-        const id = entry.id || `${entry.name}-${entry.score}-${entry.date}`;
-        if (seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      });
-    }
-
-    function mergeByName(players) {
-      const seen = new Set();
-      return players.filter((player) => {
-        const name = cleanPlayerName(player.name || "");
-        const key = name.toLowerCase();
-        if (!name || seen.has(key)) return false;
-        player.name = name;
-        seen.add(key);
-        return true;
-      });
-    }
-
-    function rememberPlayer(name) {
-      const players = mergeByName([...quizPlayers(), { name, firstSeen: new Date().toLocaleDateString() }]);
-      writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, players);
-    }
-
-    function writePlayers(players) {
-      const cleanPlayers = mergeByName(players);
-      permanentPlayerData = {
-        ...permanentPlayerData,
-        players: cleanPlayers
-      };
-      writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, cleanPlayers);
-    }
-
-    function playerScoreCount(name) {
-      const key = name.toLowerCase();
-      return mergeById([...permanentPlayerData.leaderboard, ...localLeaderboard()])
-        .filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() === key)
-        .length;
+      const { serverAvailable } = await store.load();
+      setSaveStatus(serverAvailable
+        ? "Permanent leaderboard loaded."
+        : "Permanent saving needs the Dino Quiz local server.");
     }
 
     function renderPlayerSelect() {
-      if (!quizPlayerSelect) return;
-      const players = quizPlayers();
-      quizPlayerSelect.innerHTML = [
+      if (!el.quizPlayerSelect) return;
+      const players = store.getPlayers();
+      el.quizPlayerSelect.innerHTML = [
         `<option value="">Choose explorer</option>`,
         ...players.map((player) => {
           const selected = player.name === state.playerName ? " selected" : "";
@@ -241,10 +139,10 @@
     }
 
     function renderExplorerManager() {
-      if (!explorerManagerList) return;
-      const players = quizPlayers();
-      explorerManagerList.innerHTML = players.length ? players.map((player) => {
-        const scoreCount = playerScoreCount(player.name);
+      if (!el.explorerManagerList) return;
+      const players = store.getPlayers();
+      el.explorerManagerList.innerHTML = players.length ? players.map((player) => {
+        const scoreCount = store.playerScoreCount(player.name);
         return `
           <li>
             <span>${escapeHtml(player.name)}${scoreCount ? ` (${scoreCount} score${scoreCount === 1 ? "" : "s"})` : ""}</span>
@@ -262,17 +160,53 @@
       renderPlayerSelect();
       renderExplorerManager();
     }
-    
-    function renderPlayerProfile() {
-      quizPlayerName.value = "";
-      refreshExplorerControls();
-      if (state.playerName) {
-        quizPlayerStatus.textContent = `${state.playerName} is checked in. ${quizPlayers().length} explorers are remembered.`;
-        quizPlayerForm.classList.add("is-registered");
-      } else {
-        quizPlayerStatus.textContent = `Register your field badge to start scoring. ${quizPlayers().length} explorers remembered.`;
-        quizPlayerForm.classList.remove("is-registered");
+
+    function renderDexProgress() {
+      if (!el.quizDexProgress) return;
+      if (!state.playerName || !progression) {
+        el.quizDexProgress.hidden = true;
+        return;
       }
+      const count = progression.dexCount(state.playerName);
+      const total = progression.totalDinos || 50;
+      el.quizDexProgress.hidden = false;
+      el.quizDexPill.textContent = `🦕 ${count}/${total} discovered`;
+      el.quizDexBar.style.setProperty("--dex", `${Math.round((count / total) * 100)}%`);
+    }
+
+    function renderCoins() {
+      if (!el.quizCoinChip) return;
+      if (!state.playerName || !progression) {
+        el.quizCoinChip.hidden = true;
+        return;
+      }
+      el.quizCoinChip.hidden = false;
+      el.quizCoinValue.textContent = progression.coinsOf(state.playerName);
+    }
+
+    function renderPlayerProfile() {
+      el.quizPlayerName.value = "";
+      refreshExplorerControls();
+      const count = store.getPlayers().length;
+      if (state.playerName) {
+        el.quizPlayerStatus.textContent = `${state.playerName} is checked in. ${count} explorers are remembered.`;
+        el.quizPlayerForm.classList.add("is-registered");
+      } else {
+        el.quizPlayerStatus.textContent = `Register your field badge to start scoring. ${count} explorers remembered.`;
+        el.quizPlayerForm.classList.remove("is-registered");
+      }
+      refreshPlayerCard();
+    }
+
+    // Refresh only the progression displays (coins, rank, dex, trophies) without
+    // rebuilding the explorer chooser — used when returning to the Quiz tab.
+    function refreshPlayerCard() {
+      if (progression) {
+        progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+        progression.renderRankBar(el.quizRankBar, state.playerName);
+      }
+      renderDexProgress();
+      renderCoins();
     }
 
     function setActivePlayer(name, { start = true } = {}) {
@@ -285,20 +219,24 @@
       }
       state.playerName = cleanName;
       writeTextStorage(PLAYER_STORAGE_KEY, cleanName);
-      rememberPlayer(cleanName);
+      store.upsertPlayer(cleanName);
       renderPlayerProfile();
       if (start) startQuizRound();
       return true;
     }
-    
+
     function leaderboardMarkup(entries) {
-      return entries.length ? entries.map((entry, index) => `
+      return entries.length ? entries.map((entry, index) => {
+        const rankIcon = progression ? progression.rankIcon(entry.name) : "";
+        const badgeIcons = progression ? progression.badgeIconsFor(entry.name, 3) : "";
+        return `
         <li class="${index === 0 ? "is-champion" : ""}">
-          <span>${escapeHtml(entry.name)}</span>
+          <span>${rankIcon ? `<span class="lb-rank" title="Rank">${rankIcon}</span>` : ""}${escapeHtml(entry.name)}<span class="lb-badges">${badgeIcons}</span></span>
           <b>${entry.score} pts</b>
-          <small>${escapeHtml(entry.difficulty)} - ${entry.accuracy}% - ${escapeHtml(entry.title || "Fossil Hunter")} - ${entry.date}</small>
+          <small>${escapeHtml(entry.difficulty)} - ${entry.accuracy}% - ${escapeHtml(entry.title || "Fossil Hunter")} - ${escapeHtml(entry.date)}</small>
         </li>
-      `).join("") : `
+      `;
+      }).join("") : `
         <li class="is-empty">
           <span>No champs yet</span>
           <small>Register your name, finish a round, and claim the fossil crown.</small>
@@ -306,55 +244,67 @@
       `;
     }
 
-    function renderLeaderboardTarget(listEl, tagEl, entries) {
+    function currentWeekKey() {
+      return isoWeek ? isoWeek(new Date()) : "";
+    }
+
+    // Weekly scope keeps only entries stamped this ISO week (legacy entries with
+    // no dateISO only ever show in the all-time Hall of Fame).
+    function scopedEntries(scope) {
+      const all = store.getLeaderboard();
+      if (scope === "week") {
+        const week = currentWeekKey();
+        return all.filter((entry) => entry.dateISO && isoWeek(entry.dateISO) === week).slice(0, LEADERBOARD_LIMIT);
+      }
+      return all.slice(0, LEADERBOARD_LIMIT);
+    }
+
+    function renderLeaderboardTarget(listEl, tagEl, entries, scope) {
       if (!listEl || !tagEl) return;
-      tagEl.textContent = entries.length ? "Top fossil hunters" : "Be the first champ";
+      if (scope === "week") {
+        tagEl.textContent = entries.length ? "This week's top hunters" : "No champs this week yet";
+      } else {
+        tagEl.textContent = entries.length ? "All-time top hunters" : "Be the first champ";
+      }
       listEl.innerHTML = leaderboardMarkup(entries);
     }
-    
+
     function renderLeaderboard() {
-      const entries = quizLeaderboard();
-      renderLeaderboardTarget(quizLeaderboardList, quizLeaderboardTag, entries);
-      renderLeaderboardTarget(landingLeaderboardList, landingLeaderboardTag, entries);
+      const scope = state.lbScope || "week";
+      const entries = scopedEntries(scope);
+      renderLeaderboardTarget(el.quizLeaderboardList, el.quizLeaderboardTag, entries, scope);
+      // The landing board always shows the all-time Hall of Fame.
+      renderLeaderboardTarget(el.landingLeaderboardList, el.landingLeaderboardTag, scopedEntries("all"), "all");
     }
-    
+
     function savePlayerName() {
-      const name = cleanPlayerName(quizPlayerSelect.value || quizPlayerName.value);
+      const name = cleanPlayerName(el.quizPlayerSelect.value || el.quizPlayerName.value);
       if (!name) {
         state.playerName = "";
-        quizPlayerSelect.value = "";
-        quizPlayerStatus.textContent = "Add your explorer name first.";
-        quizPlayerForm.classList.remove("is-registered");
+        el.quizPlayerSelect.value = "";
+        el.quizPlayerStatus.textContent = "Add your explorer name first.";
+        el.quizPlayerForm.classList.remove("is-registered");
         return;
       }
       setActivePlayer(name);
-      quizPlayerName.value = "";
+      el.quizPlayerName.value = "";
     }
 
     function addExplorer() {
-      const name = cleanPlayerName(quizPlayerName.value);
+      const name = cleanPlayerName(el.quizPlayerName.value);
       if (!name) {
-        quizPlayerStatus.textContent = "Type a new explorer name first.";
+        el.quizPlayerStatus.textContent = "Type a new explorer name first.";
         return;
       }
       setActivePlayer(name);
-      quizPlayerName.value = "";
+      el.quizPlayerName.value = "";
       setSaveStatus("Explorer added. Press Save Leaderboard when ready.");
     }
 
     function forgetExplorer(name) {
       const cleanName = cleanPlayerName(name);
-      const key = cleanName.toLowerCase();
-      writePlayers(quizPlayers().filter((player) => player.name.toLowerCase() !== key));
-      permanentPlayerData = {
-        ...permanentPlayerData,
-        leaderboard: permanentPlayerData.leaderboard.filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key)
-      };
-      writeJsonStorage(
-        LEADERBOARD_STORAGE_KEY,
-        localLeaderboard().filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key)
-      );
-      if (state.playerName.toLowerCase() === key) {
+      store.removePlayer(cleanName);
+      if (state.playerName.toLowerCase() === cleanName.toLowerCase()) {
         state.playerName = "";
         writeTextStorage(PLAYER_STORAGE_KEY, "");
       }
@@ -364,24 +314,16 @@
     }
 
     function clearExplorerScores(name) {
-      const cleanName = cleanPlayerName(name);
-      const key = cleanName.toLowerCase();
-      writePlayers([...quizPlayers(), { name: cleanName, firstSeen: new Date().toLocaleDateString() }]);
-      const keepScores = localLeaderboard().filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key);
-      const keepPermanentScores = permanentPlayerData.leaderboard.filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key);
-      permanentPlayerData = {
-        ...permanentPlayerData,
-        leaderboard: keepPermanentScores
-      };
-      writeJsonStorage(LEADERBOARD_STORAGE_KEY, keepScores);
+      store.clearScores(cleanPlayerName(name));
       renderPlayerProfile();
       renderLeaderboard();
       setSaveStatus("Explorer scores cleared here. Press Save Leaderboard when ready.");
     }
-    
+
     function saveQuizResult({ maxScore, accuracy, resultTitle }) {
       if (state.quizResultSaved || !state.playerName) return false;
       const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const now = new Date();
       const entry = {
         id,
         name: state.playerName,
@@ -391,44 +333,28 @@
         hints: state.quizRoundHints,
         difficulty: quizDifficultySetting().label,
         title: resultTitle,
-        date: new Date().toLocaleDateString()
+        date: now.toLocaleDateString(),
+        dateISO: now.toISOString().slice(0, 10)
       };
-      const entries = [...localLeaderboard(), entry]
-        .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
-        .slice(0, SAVED_RESULT_LIMIT);
-      writeJsonStorage(LEADERBOARD_STORAGE_KEY, entries);
-      state.quizResultSaved = quizLeaderboard().some((item) => item.id === id);
+      const madeBoard = store.addResult(entry);
+      state.quizResultSaved = true;
       renderLeaderboard();
-      return state.quizResultSaved;
+      // "Made the board" = ranks within the visible top slice.
+      return store.getLeaderboard(LEADERBOARD_LIMIT).some((item) => item.id === id) && madeBoard;
     }
 
     async function savePermanentLeaderboard() {
-      const payload = permanentPayload();
-      writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, payload.players);
-      writeJsonStorage(LEADERBOARD_STORAGE_KEY, payload.leaderboard);
-
-      if (!canUsePermanentServer()) {
-        setSaveStatus("Permanent saving needs the Dino Quiz local server. Your score is still saved in this browser.");
-        renderLeaderboard();
-        return;
-      }
-
       setSaveStatus("Saving leaderboard...");
-      try {
-        const response = await fetch("/api/leaderboard", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error("Save failed.");
-        permanentPlayerData = normalizePlayerData(await response.json());
-        renderLeaderboard();
+      const result = await store.save();
+      renderLeaderboard();
+      renderPlayerProfile();
+      if (result.ok) {
         setSaveStatus("Leaderboard saved to this repo. Commit and push when ready.");
-      } catch (error) {
+      } else {
         setSaveStatus("Permanent saving needs the Dino Quiz local server. Your score is still saved in this browser.");
       }
     }
-    
+
     function quizPoolIndices() {
       const setting = quizDifficultySetting();
       if (!setting.slugs) return quizItems.map((_, index) => index);
@@ -436,7 +362,74 @@
       const indices = quizItems.map((item, index) => (slugs.has(item.slug) ? index : -1)).filter((index) => index >= 0);
       return indices.length ? indices : quizItems.map((_, index) => index);
     }
-    
+
+    function matchesTheme(item, theme) {
+      if (!theme) return false;
+      if (theme.eras && theme.eras.includes(item.era)) return true;
+      if (theme.groups && theme.groups.includes(item.group)) return true;
+      return false;
+    }
+
+    // The pool a round draws from: the difficulty pool, or (in expedition mode)
+    // the theme's dinosaurs *within the chosen difficulty* so an Easy player is
+    // never handed obscure Hard-tier fossils at Easy point values. If too few
+    // on-theme dinosaurs exist at this level, pad from the rest of the same
+    // difficulty pool (keeping it age-appropriate) rather than the full set.
+    function roundPoolIndices() {
+      if (!state.quizExpedition) return quizPoolIndices();
+      const theme = state.quizExpedition;
+      const difficultyPool = quizPoolIndices();
+      const onTheme = difficultyPool.filter((index) => matchesTheme(quizItems[index], theme));
+      if (onTheme.length >= 8) return onTheme;
+      const used = new Set(onTheme);
+      const filler = shuffle(difficultyPool.filter((index) => !used.has(index)));
+      return [...onTheme, ...filler].slice(0, Math.max(8, onTheme.length));
+    }
+
+    // Boss pool = "rarer" dinosaurs (not in the easy set; on Easy, from the
+    // medium-but-not-easy set) so the final question always feels special.
+    function bossPoolIndices() {
+      const easy = new Set(quizDifficultySettings.easy.slugs);
+      const medium = new Set(quizDifficultySettings.medium.slugs);
+      let pool;
+      if (state.quizDifficulty === "easy") {
+        pool = quizItems.map((item, index) => (medium.has(item.slug) && !easy.has(item.slug) ? index : -1)).filter((index) => index >= 0);
+      } else {
+        pool = quizItems.map((item, index) => (!easy.has(item.slug) ? index : -1)).filter((index) => index >= 0);
+      }
+      return pool.length ? pool : quizItems.map((_, index) => index);
+    }
+
+    function pickBoss(usedIndices) {
+      const used = new Set(usedIndices);
+      // In expedition mode keep the boss on-theme; prefer a rarer theme member.
+      if (state.quizExpedition) {
+        const themePool = roundPoolIndices().filter((index) => !used.has(index));
+        const rareSet = new Set(bossPoolIndices());
+        const rareThemed = themePool.filter((index) => rareSet.has(index));
+        const pick = shuffle(rareThemed.length ? rareThemed : themePool);
+        return pick.length ? pick[0] : null;
+      }
+      const rare = shuffle(bossPoolIndices().filter((index) => !used.has(index)));
+      if (rare.length) return rare[0];
+      const any = shuffle(roundPoolIndices().filter((index) => !used.has(index)));
+      return any.length ? any[0] : null;
+    }
+
+    // Up to three previously-missed dinosaurs the player can re-dig this round.
+    // Re-digs are second chances, so they may appear even if the missed dinosaur
+    // is not part of the current difficulty pool.
+    function redigIndices() {
+      const player = state.playerName && store ? store.getPlayer(state.playerName) : null;
+      if (!player) return [];
+      const bySlug = new Map(quizItems.map((item, index) => [item.slug, index]));
+      return player.profile.redig
+        .filter((entry) => (Number(entry.misses) || 0) < 3)
+        .map((entry) => bySlug.get(entry.slug))
+        .filter((index) => index != null)
+        .slice(0, 3);
+    }
+
     function startQuizRound() {
       state.quizScore = 0;
       state.quizTotal = 0;
@@ -448,11 +441,25 @@
       state.quizRoundComplete = false;
       state.quizResultSaved = false;
       state.currentItem = null;
-      state.quizOrder = shuffle(quizPoolIndices()).slice(0, QUIZ_ROUND_SIZE);
+      state.quizMaxStreak = 0;
+      state.quizNewDiscoveries = [];
+      state.quizLastCorrectItem = null;
+      state.quizBossWon = false;
+      state.quizRedigCleared = 0;
+
+      const pool = roundPoolIndices();
+      // Re-dig items get first claim on the 9 non-boss slots (any missed dino).
+      const redig = redigIndices();
+      state.quizRedigSlugs = new Set(redig.map((index) => quizItems[index].slug));
+      const rest = shuffle(pool.filter((index) => !state.quizRedigSlugs.has(quizItems[index].slug)));
+      let firstNine = shuffle([...redig, ...rest].slice(0, QUIZ_ROUND_SIZE - 1));
+      const bossIndex = pickBoss(firstNine);
+      state.quizOrder = bossIndex != null ? [...firstNine, bossIndex] : shuffle(pool).slice(0, QUIZ_ROUND_SIZE);
+      state.quizBossSlug = bossIndex != null ? quizItems[bossIndex].slug : null;
       state.quizIndex = 0;
       renderQuiz();
     }
-    
+
     function currentQuizItem() {
       if (!state.quizOrder.length) {
         state.quizOrder = shuffle(quizPoolIndices()).slice(0, QUIZ_ROUND_SIZE);
@@ -461,10 +468,10 @@
       if (state.quizIndex >= state.quizOrder.length) return null;
       return quizItems[state.quizOrder[state.quizIndex]];
     }
-    
-    function quizChoices(item) {
+
+    function quizChoices(item, overrideCount) {
       const setting = quizDifficultySetting();
-      const targetCount = setting.choiceCount;
+      const targetCount = overrideCount || setting.choiceCount;
       const difficultyPool = quizPoolIndices().map((index) => quizItems[index].name);
       const groupPool = quizChoicePools[item.group] || [];
       const choices = [item.name];
@@ -477,7 +484,7 @@
       });
       return shuffle(choices);
     }
-    
+
     function renderQuiz() {
       const item = currentQuizItem();
       if (!item) {
@@ -488,39 +495,48 @@
       // (currentQuizItem() has reshuffle side effects at the order boundary).
       state.currentItem = item;
       state.quizHintsUsed = 0;
-      state.quizPotential = quizDifficultySetting().points;
-      const choices = quizChoices(item);
-      quizImage.src = item.image;
-      quizImage.alt = `Photorealistic quiz image of ${item.name}`;
-      quizImage.style.objectPosition = "50% 50%";
-      quizImage.style.transform = "scale(1)";
-      quizImage.classList.remove("expert-crop");
-      quizImage.classList.add("field-guide");
+      const setting = quizDifficultySetting();
+      const isBoss = Boolean(state.quizBossSlug) && item.slug === state.quizBossSlug;
+      const isRedig = state.quizRedigSlugs && state.quizRedigSlugs.has(item.slug);
+      state.quizBoss = isBoss;
+      state.quizPotential = isBoss ? setting.points * 2 : setting.points;
+      const choices = quizChoices(item, isBoss ? setting.choiceCount + 1 : setting.choiceCount);
+      el.quizImage.src = item.image;
+      el.quizImage.alt = `Photorealistic quiz image of ${item.name}`;
+      el.quizImage.classList.add("field-guide");
+      const frame = el.quizImage.closest(".quiz-image-frame");
+      if (frame) frame.classList.toggle("is-boss", isBoss);
       // Mark the correct option with a data flag so grading never depends on
       // re-matching display strings (robust to name collisions / stray characters).
-      quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${escapeHtml(choice)}" data-correct="${choice === item.name}">${escapeHtml(choice)}</button>`).join("");
-      quizEra.textContent = item.era;
-      quizView.textContent = `${quizDifficultySetting().label} ${state.quizIndex + 1}/${QUIZ_ROUND_SIZE}`;
-      quizPrompt.textContent = "Which dinosaur is this?";
-      quizFeedback.classList.remove("is-revealed");
+      el.quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${escapeHtml(choice)}" data-correct="${choice === item.name}">${escapeHtml(choice)}</button>`).join("");
+      el.quizEra.textContent = item.era;
+      el.quizView.textContent = `${setting.label} ${state.quizIndex + 1}/${QUIZ_ROUND_SIZE}`;
+      if (isBoss) {
+        el.quizPrompt.innerHTML = `<span class="boss-flag">⚠️ BOSS FOSSIL — double points!</span> Which dinosaur is this?`;
+        if (celebrate) celebrate.sound("drumroll");
+      } else if (isRedig) {
+        el.quizPrompt.innerHTML = `<span class="redig-flag">⛏️ Re-dig</span> Which dinosaur is this?`;
+      } else {
+        el.quizPrompt.textContent = "Which dinosaur is this?";
+      }
+      el.quizFeedback.classList.remove("is-revealed");
       const registered = Boolean(state.playerName);
-      quizFeedback.innerHTML = `<span class="quiz-intro">${registered ? "Choose carefully. Hints help, but each one lowers this fossil's point value." : "Type your explorer name and press Join Quiz to unlock the answers."}</span>`;
-      quizScore.textContent = state.quizScore;
-      quizTotal.textContent = state.quizTotal;
-      quizStreak.textContent = `Streak ${state.quizStreak}`;
-      quizDifficulty.value = state.quizDifficulty;
-      quizPotential.textContent = state.quizPotential;
-      hintQuizBtn.disabled = !registered;
-      hintQuizBtn.textContent = registered ? `Get Hint (-${quizDifficultySetting().hintCost} pts)` : "Register first";
-      nextQuizBtn.disabled = true;
-      nextQuizBtn.textContent = "Next Fossil";
+      el.quizFeedback.innerHTML = `<span class="quiz-intro">${registered ? "Choose carefully. Hints help, but each one lowers this fossil's point value." : "Type your explorer name and press Join Quiz to unlock the answers."}</span>`;
+      el.quizScore.textContent = state.quizScore;
+      el.quizTotal.textContent = state.quizTotal;
+      el.quizStreak.textContent = `Streak ${state.quizStreak}`;
+      el.quizDifficulty.value = state.quizDifficulty;
+      el.quizPotential.textContent = state.quizPotential;
+      el.hintQuizBtn.disabled = !registered;
+      el.hintQuizBtn.textContent = registered ? `Get Hint (-${quizDifficultySetting().hintCost} pts)` : "Register first";
+      el.nextQuizBtn.disabled = true;
+      el.nextQuizBtn.textContent = "Next Fossil";
       state.quizAnswered = false;
-      queryAll(".quiz-option", quizOptions).forEach((button) => {
+      $$(".quiz-option", el.quizOptions).forEach((button) => {
         button.disabled = !registered;
-        button.addEventListener("click", () => answerQuiz(button));
       });
     }
-    
+
     function revealQuizHint() {
       if (!state.playerName || state.quizAnswered || !state.currentItem) return;
       const item = state.currentItem;
@@ -529,21 +545,21 @@
       state.quizHintsUsed += 1;
       state.quizRoundHints += 1;
       state.quizPotential = Math.max(1, state.quizPotential - setting.hintCost);
-      quizPotential.textContent = state.quizPotential;
-      quizFeedback.classList.add("is-revealed");
+      el.quizPotential.textContent = state.quizPotential;
+      el.quizFeedback.classList.add("is-revealed");
       const hintText = [
         `Field clue: ${item.clue}`,
         `Habitat clue: ${guide.habitat}. Diet: ${guide.diet}.`,
         `Era clue: ${guide.lived}. Fossil family: ${item.group}.`
       ][state.quizHintsUsed - 1] || `Final clue: ${item.expertClue}`;
       if (state.quizHintsUsed === 3) {
-        const wrongOptions = shuffle(queryAll(".quiz-option", quizOptions).filter((button) => button.dataset.correct !== "true" && !button.disabled));
+        const wrongOptions = shuffle($$(".quiz-option", el.quizOptions).filter((button) => button.dataset.correct !== "true" && !button.disabled));
         wrongOptions.slice(0, 2).forEach((button) => {
           button.disabled = true;
           button.classList.add("is-eliminated");
         });
       }
-      quizFeedback.innerHTML = `
+      el.quizFeedback.innerHTML = `
         <div class="quiz-hint">
           <b>Hint ${state.quizHintsUsed}</b>
           <span>${escapeHtml(hintText)}</span>
@@ -551,11 +567,11 @@
         </div>
       `;
       if (state.quizHintsUsed >= 4 || state.quizPotential <= 1) {
-        hintQuizBtn.disabled = true;
-        hintQuizBtn.textContent = "Hints used";
+        el.hintQuizBtn.disabled = true;
+        el.hintQuizBtn.textContent = "Hints used";
       }
     }
-    
+
     function answerQuiz(clicked) {
       if (!state.playerName || state.quizAnswered) return;
       const item = state.currentItem;
@@ -566,24 +582,43 @@
         state.quizScore += state.quizPotential;
         state.quizCorrect += 1;
         state.quizStreak += 1;
+        state.quizMaxStreak = Math.max(state.quizMaxStreak || 0, state.quizStreak);
+        state.quizLastCorrectItem = item;
+        if (state.quizBoss) state.quizBossWon = true;
+        // Clear a re-dig if this was one of the second-chance dinosaurs.
+        if (state.quizRedigSlugs && state.quizRedigSlugs.has(item.slug)) {
+          store.dequeueRedig(state.playerName, item.slug);
+          state.quizRedigCleared = (state.quizRedigCleared || 0) + 1;
+        }
+        // Discovery is generous: any correct answer adds it to this explorer's Dino-Dex.
+        if (store.discover(state.playerName, item.slug)) {
+          (state.quizNewDiscoveries = state.quizNewDiscoveries || []).push(item);
+        }
+        if (celebrate) {
+          celebrate.sound("correct");
+          celebrate.burst(state.quizBoss || state.quizStreak >= 5 ? "medium" : "small");
+        }
       } else {
         state.quizStreak = 0;
+        // Missed dinosaurs go into the re-dig queue for a future round.
+        store.enqueueRedig(state.playerName, item.slug);
+        if (celebrate) celebrate.sound("wrong");
       }
-      hintQuizBtn.disabled = true;
-      hintQuizBtn.textContent = "Hint closed";
-      nextQuizBtn.disabled = false;
-      queryAll(".quiz-option", quizOptions).forEach((button) => {
+      el.hintQuizBtn.disabled = true;
+      el.hintQuizBtn.textContent = "Hint closed";
+      el.nextQuizBtn.disabled = false;
+      $$(".quiz-option", el.quizOptions).forEach((button) => {
         button.disabled = true;
         button.classList.toggle("correct", button.dataset.correct === "true");
         button.classList.toggle("wrong", button === clicked && !correct);
       });
-      quizScore.textContent = state.quizScore;
-      quizTotal.textContent = state.quizTotal;
-      quizStreak.textContent = `Streak ${state.quizStreak}`;
-      nextQuizBtn.textContent = state.quizTotal >= QUIZ_ROUND_SIZE ? "See Results" : "Next Fossil";
+      el.quizScore.textContent = state.quizScore;
+      el.quizTotal.textContent = state.quizTotal;
+      el.quizStreak.textContent = `Streak ${state.quizStreak}`;
+      el.nextQuizBtn.textContent = state.quizTotal >= QUIZ_ROUND_SIZE ? "See Results" : "Next Fossil";
       renderQuizFeedback(item, correct);
     }
-    
+
     function nextQuiz() {
       if (state.quizRoundComplete) {
         startQuizRound();
@@ -597,13 +632,13 @@
       state.quizIndex += 1;
       renderQuiz();
     }
-    
+
     function renderQuizFeedback(item, correct) {
       const guide = getGuide(item.slug);
       const earned = correct ? state.quizPotential : 0;
       const streakNote = state.quizStreak >= 3 ? ` Hot streak: ${state.quizStreak} correct in a row.` : "";
-      quizFeedback.classList.add("is-revealed");
-      quizFeedback.innerHTML = `
+      el.quizFeedback.classList.add("is-revealed");
+      el.quizFeedback.innerHTML = `
         <div class="quiz-result ${correct ? "correct" : "wrong"}">${correct ? `Correct. +${earned} points.${streakNote}` : `Good try. The answer is ${escapeHtml(item.name)}.`}</div>
         <div class="dino-guide">
           <h3>${escapeHtml(item.name)}</h3>
@@ -618,7 +653,7 @@
         </div>
       `;
     }
-    
+
     function quizExpertiseResult(percent, accuracy, hints) {
       if (percent >= 90 && accuracy >= 90 && hints <= 3) {
         return {
@@ -649,7 +684,7 @@
         note: "Every expert starts with dusty boots. Visit the gallery, study a few silhouettes, and try again."
       };
     }
-    
+
     function renderQuizResults() {
       const setting = quizDifficultySetting();
       const maxScore = setting.points * QUIZ_ROUND_SIZE;
@@ -660,16 +695,74 @@
       state.quizRoundComplete = true;
       state.quizAnswered = true;
       state.currentItem = null;
-      quizEra.textContent = `${setting.label} round complete`;
-      quizView.textContent = `${state.quizCorrect}/${QUIZ_ROUND_SIZE} identified`;
-      quizPrompt.textContent = "Expedition results";
-      quizPotential.textContent = maxScore;
-      quizScore.textContent = state.quizScore;
-      quizTotal.textContent = QUIZ_ROUND_SIZE;
-      quizStreak.textContent = `${accuracy}% accurate`;
-      quizOptions.innerHTML = "";
-      quizFeedback.classList.add("is-revealed");
-      quizFeedback.innerHTML = `
+
+      // Progression: record the play date, award any new trophies, refresh the
+      // Dino-Dex, and stash a payload for the printable certificate.
+      let earnedBadges = [];
+      let rewards = { coinsEarned: 0, rankedUp: false };
+      const newDiscoveries = state.quizNewDiscoveries || [];
+      if (state.playerName && progression) {
+        store.recordPlayDate(state.playerName);
+        const perCorrect = { easy: 1, medium: 2, hard: 3 }[state.quizDifficulty] || 1;
+        const roundData = {
+          correct: state.quizCorrect,
+          roundSize: QUIZ_ROUND_SIZE,
+          score: state.quizScore,
+          hints: state.quizRoundHints,
+          accuracy,
+          maxStreak: state.quizMaxStreak || 0,
+          difficulty: state.quizDifficulty,
+          // Boss win doubles that fossil's coins; expeditions add a +50% bonus.
+          bossBonusCoins: state.quizBossWon ? perCorrect : 0,
+          coinMultiplier: state.quizExpedition ? 1.5 : 1
+        };
+        // Award XP + coins first so rank/badge checks see the updated profile.
+        rewards = progression.awardRoundRewards(state.playerName, roundData);
+        earnedBadges = progression.evaluateRound(state.playerName, roundData);
+        if (state.quizExpedition) store.recordExpedition(state.playerName, state.quizExpedition.id);
+        const certDino = state.quizLastCorrectItem || quizItems[state.quizOrder[0]] || quizItems[0];
+        state.lastCertificate = {
+          name: state.playerName,
+          title: result.title,
+          score: state.quizScore,
+          maxScore,
+          accuracy,
+          difficulty: setting.label,
+          date: new Date().toLocaleDateString(),
+          dinoImage: certDino ? certDino.image : "assets/quiz-tyrannosaurus.png",
+          dinoName: certDino ? certDino.name : "Tyrannosaurus rex"
+        };
+      }
+
+      if (celebrate) {
+        celebrate.sound("fanfare");
+        celebrate.burst(accuracy >= 80 ? "large" : "medium");
+      }
+      el.quizEra.textContent = `${setting.label} round complete`;
+      el.quizView.textContent = `${state.quizCorrect}/${QUIZ_ROUND_SIZE} identified`;
+      el.quizPrompt.textContent = "Expedition results";
+      el.quizPotential.textContent = maxScore;
+      el.quizScore.textContent = state.quizScore;
+      el.quizTotal.textContent = QUIZ_ROUND_SIZE;
+      el.quizStreak.textContent = `${accuracy}% accurate`;
+      el.quizOptions.innerHTML = "";
+      const discoveryNote = newDiscoveries.length
+        ? `<div class="quiz-discoveries"><b>New for your Dino-Dex!</b><div class="discovery-row">${newDiscoveries.map((item) => `<figure><img src="${escapeHtml(item.image)}" alt=""><figcaption>${escapeHtml(item.name)}</figcaption></figure>`).join("")}</div></div>`
+        : "";
+      const badgeNote = earnedBadges.length
+        ? `<div class="quiz-new-badges"><b>Trophies earned:</b> ${earnedBadges.map((badge) => `<span title="${escapeHtml(badge.name)}">${badge.icon} ${escapeHtml(badge.name)}</span>`).join(" ")}</div>`
+        : "";
+      const rewardNote = (rewards.coinsEarned || state.quizScore) && state.playerName
+        ? `<div class="quiz-rewards"><span>🪙 +${rewards.coinsEarned} Fossil Coins${state.quizExpedition ? " (expedition +50%)" : ""}</span><span>⭐ +${state.quizScore} XP${rewards.rankedUp ? ` — new rank: ${escapeHtml(rewards.newRank.icon + " " + rewards.newRank.name)}!` : ""}</span></div>`
+        : "";
+      const redigNote = state.quizRedigCleared
+        ? `<div class="quiz-redig-note">⛏️ Got it this time! You re-dug ${state.quizRedigCleared} tricky fossil${state.quizRedigCleared === 1 ? "" : "s"}.</div>`
+        : "";
+      const certButton = state.lastCertificate
+        ? `<button class="primary-button print-certificate" id="printCertBtn" type="button">🎓 Print My Certificate</button>`
+        : "";
+      el.quizFeedback.classList.add("is-revealed");
+      el.quizFeedback.innerHTML = `
         <div class="quiz-results">
           <span class="quiz-results-kicker">Round complete</span>
           <h3>${escapeHtml(state.playerName)}, ${escapeHtml(result.title)}</h3>
@@ -680,38 +773,71 @@
             <div><span>Dinosaurs</span><b>${state.quizCorrect}/${QUIZ_ROUND_SIZE}</b></div>
             <div><span>Hints used</span><b>${state.quizRoundHints}</b></div>
           </div>
+          ${rewardNote}
+          ${redigNote}
+          ${badgeNote}
+          ${discoveryNote}
+          ${certButton}
           <small>${escapeHtml(setting.label)} rounds use 10 randomly selected dinosaurs. Play again for a fresh fossil lineup.</small>
         </div>
       `;
-      hintQuizBtn.disabled = true;
-      hintQuizBtn.textContent = "Round complete";
-      nextQuizBtn.disabled = false;
-      nextQuizBtn.textContent = "Play Again";
+      const certBtn = el.quizFeedback.querySelector("#printCertBtn");
+      if (certBtn) certBtn.addEventListener("click", printCertificate);
+      if (progression) {
+        progression.announceBadges(earnedBadges);
+        progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+        progression.renderRankBar(el.quizRankBar, state.playerName);
+      }
+      renderDexProgress();
+      renderCoins();
+      renderLeaderboard();
+      el.hintQuizBtn.disabled = true;
+      el.hintQuizBtn.textContent = "Round complete";
+      el.nextQuizBtn.disabled = false;
+      el.nextQuizBtn.textContent = "Play Again";
+    }
+
+    function printCertificate() {
+      if (!state.lastCertificate || !progression) return;
+      progression.renderCertificate(state.lastCertificate);
+      document.body.dataset.printMode = "certificate";
+      window.print();
+    }
+
+    function confirmDifficultyChange(nextValue) {
+      // Changing difficulty mid-round would silently wipe the running score.
+      const midRound = state.quizTotal > 0 && !state.quizRoundComplete;
+      if (midRound && !window.confirm("Switching difficulty starts a new round. Switch now?")) {
+        el.quizDifficulty.value = state.quizDifficulty;
+        return;
+      }
+      state.quizDifficulty = nextValue;
+      startQuizRound();
     }
 
     function bindQuizControls() {
-      quizPlayerForm.addEventListener("submit", (event) => {
+      el.quizPlayerForm.addEventListener("submit", (event) => {
         event.preventDefault();
         savePlayerName();
       });
-      if (quizPlayerSelect) {
-        quizPlayerSelect.addEventListener("change", () => {
-          if (quizPlayerSelect.value) setActivePlayer(quizPlayerSelect.value);
+      if (el.quizPlayerSelect) {
+        el.quizPlayerSelect.addEventListener("change", () => {
+          if (el.quizPlayerSelect.value) setActivePlayer(el.quizPlayerSelect.value);
         });
       }
-      if (addExplorerBtn) {
-        addExplorerBtn.addEventListener("click", addExplorer);
+      if (el.addExplorerBtn) {
+        el.addExplorerBtn.addEventListener("click", addExplorer);
       }
-      if (manageExplorersBtn && explorerManager) {
-        manageExplorersBtn.addEventListener("click", () => {
-          const isOpen = explorerManager.hidden;
-          explorerManager.hidden = !isOpen;
-          manageExplorersBtn.setAttribute("aria-expanded", String(isOpen));
+      if (el.manageExplorersBtn && el.explorerManager) {
+        el.manageExplorersBtn.addEventListener("click", () => {
+          const isOpen = el.explorerManager.hidden;
+          el.explorerManager.hidden = !isOpen;
+          el.manageExplorersBtn.setAttribute("aria-expanded", String(isOpen));
           if (isOpen) renderExplorerManager();
         });
       }
-      if (explorerManagerList) {
-        explorerManagerList.addEventListener("click", (event) => {
+      if (el.explorerManagerList) {
+        el.explorerManagerList.addEventListener("click", (event) => {
           const button = event.target.closest("button[data-action]");
           if (!button) return;
           const name = button.dataset.name || "";
@@ -720,14 +846,31 @@
           if (button.dataset.action === "clear") clearExplorerScores(name);
         });
       }
-      nextQuizBtn.addEventListener("click", nextQuiz);
-      hintQuizBtn.addEventListener("click", revealQuizHint);
-      if (exportLeaderboardBtn) {
-        exportLeaderboardBtn.addEventListener("click", savePermanentLeaderboard);
+      // One delegated listener instead of re-binding every option button per render.
+      el.quizOptions.addEventListener("click", (event) => {
+        const button = event.target.closest(".quiz-option");
+        if (button && !button.disabled) answerQuiz(button);
+      });
+      if (el.lbScope) {
+        el.lbScope.addEventListener("click", (event) => {
+          const button = event.target.closest(".lb-scope-btn");
+          if (!button) return;
+          state.lbScope = button.dataset.scope;
+          $$(".lb-scope-btn", el.lbScope).forEach((btn) => btn.classList.toggle("is-active", btn === button));
+          renderLeaderboard();
+        });
       }
-      quizDifficulty.addEventListener("change", (event) => {
-        state.quizDifficulty = event.target.value;
-        startQuizRound();
+      if (el.expeditionBtn) {
+        el.expeditionBtn.addEventListener("click", toggleExpedition);
+      }
+      renderExpeditionCard();
+      el.nextQuizBtn.addEventListener("click", nextQuiz);
+      el.hintQuizBtn.addEventListener("click", revealQuizHint);
+      if (el.exportLeaderboardBtn) {
+        el.exportLeaderboardBtn.addEventListener("click", savePermanentLeaderboard);
+      }
+      el.quizDifficulty.addEventListener("change", (event) => {
+        confirmDifficultyChange(event.target.value);
       });
     }
 
@@ -736,6 +879,7 @@
       loadPermanentLeaderboard,
       renderLeaderboard,
       renderPlayerProfile,
+      refreshPlayerCard,
       startQuizRound
     };
   };

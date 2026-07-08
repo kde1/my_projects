@@ -1,0 +1,10 @@
+{
+  "name": "dino-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isaac's Dino Quiz — a dinosaur identification game for kids.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node smoke-test.js"
+  }
+}

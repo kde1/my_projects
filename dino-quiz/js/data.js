@@ -1,15 +1,13 @@
 (function () {
   "use strict";
 
-  function q(name, slug, era, group, view, position, scale, trait, expertClue) {
+  function q(name, slug, era, group, trait, expertClue) {
     return {
       name,
       slug,
       image: `assets/quiz-${slug}.png`,
       era,
       group,
-      view,
-      crop: { position, scale },
       fact: `${name} is identified by ${trait}.`,
       clue: `Look for ${trait}.`,
       expertClue
@@ -147,56 +145,56 @@
   ];
   
   const quizItems = [
-    q("Tyrannosaurus rex", "tyrannosaurus", "Late Cretaceous", "tyrannosaur", "skull and torso crop", "66% 45%", 1.55, "huge skull, deep jaws, tiny two-fingered arms, and powerful hind legs", "Deep tyrannosaur skull, heavy jaw, reduced forelimbs."),
-    q("Triceratops", "triceratops", "Late Cretaceous", "ceratopsian", "frill and horn crop", "70% 37%", 1.65, "three facial horns and a large protective frill", "Brow horns plus nasal horn; broad solid-looking frill."),
-    q("Spinosaurus", "spinosaurus", "Late Cretaceous", "spinosaurid", "sail and snout crop", "55% 42%", 1.5, "a long crocodile-like snout and a tall sail on its back", "Spinosaurid snout with a tall neural-spine sail."),
-    q("Parasaurolophus", "parasaurolophus", "Late Cretaceous", "hadrosaur", "crest and shoulder crop", "72% 34%", 1.7, "a long backward-curving crest probably useful for sound and display", "Hadrosaur body with a long backward-projecting tubular crest."),
-    q("Allosaurus", "allosaurus", "Late Jurassic", "allosauroid", "skull and forelimb crop", "62% 42%", 1.55, "a lighter skull than T. rex, brow ridges, and three-fingered hands", "Large Jurassic theropod with brow ridges and three usable fingers."),
-    q("Brachiosaurus", "brachiosaurus", "Late Jurassic", "sauropod", "neck and shoulder crop", "47% 38%", 1.45, "very high shoulders, long front legs, and a towering neck", "Sauropod with high shoulders and forelimbs longer than hind limbs."),
-    q("Stegosaurus", "stegosaurus", "Late Jurassic", "stegosaur", "plate and tail crop", "51% 43%", 1.55, "tall back plates and a spiked tail called a thagomizer", "Alternating plates along the back and tail spikes."),
-    q("Ankylosaurus", "ankylosaurus", "Late Cretaceous", "ankylosaur", "armor and tail crop", "52% 48%", 1.5, "heavy body armor and a large tail club", "Low armored body with osteoderms and a tail club."),
-    q("Velociraptor", "velociraptor", "Late Cretaceous", "dromaeosaur", "head and sickle claw crop", "58% 46%", 1.7, "a small feathered predator with a sickle claw and narrow snout", "Small feathered dromaeosaur, much smaller than movie versions."),
-    q("Carnotaurus", "carnotaurus", "Late Cretaceous", "abelisaurid", "horned skull crop", "66% 42%", 1.6, "a short deep skull, tiny arms, and bull-like horns over the eyes", "Abelisaurid with brow horns and extremely reduced arms."),
-    q("Dilophosaurus", "dilophosaurus", "Early Jurassic", "theropod", "double crest crop", "61% 39%", 1.55, "paired head crests and a slim Early Jurassic theropod build", "Twin cranial crests; no movie-style neck frill."),
-    q("Gallimimus", "gallimimus", "Late Cretaceous", "ornithomimid", "leg and body crop", "54% 44%", 1.55, "an ostrich-like body with long legs, long neck, and toothless beak", "Fast ornithomimid with long cursorial legs."),
-    q("Pachycephalosaurus", "pachycephalosaurus", "Late Cretaceous", "pachycephalosaur", "dome skull crop", "66% 39%", 1.75, "a thick domed skull with knobs and small spikes around the back", "Dome-headed ornithischian with skull ornamentation."),
-    q("Iguanodon", "iguanodon", "Early Cretaceous", "ornithopod", "hand and head crop", "58% 47%", 1.55, "a robust ornithopod with thumb spikes and a beaked mouth", "Look for the thumb spike and heavy ornithopod body."),
-    q("Diplodocus", "diplodocus", "Late Jurassic", "sauropod", "tail and neck crop", "48% 47%", 1.4, "a very long, low body with a whip-like tail and small head", "Long low diplodocid with a horizontal neck and whip tail."),
-    q("Apatosaurus", "apatosaurus", "Late Jurassic", "sauropod", "thick neck crop", "48% 42%", 1.45, "a heavy sauropod with a thick neck, robust body, and long tail", "Chunkier sauropod build than Diplodocus."),
-    q("Deinonychus", "deinonychus", "Early Cretaceous", "dromaeosaur", "sickle claw crop", "57% 47%", 1.6, "a feathered raptor larger than Velociraptor with a strong sickle claw", "Dromaeosaur with strong grasping arms and killing claw."),
-    q("Microraptor", "microraptor", "Early Cretaceous", "paravian", "wing feather crop", "54% 42%", 1.75, "a tiny four-winged feathered dinosaur with feathers on arms and legs", "Small paravian with long feathers on both forelimbs and hindlimbs."),
-    q("Archaeopteryx", "archaeopteryx", "Late Jurassic", "paravian", "wing and tail crop", "55% 41%", 1.75, "birdlike wings, a long bony feathered tail, clawed fingers, and teeth", "Early avialan with wings, teeth, and a long bony tail."),
-    q("Therizinosaurus", "therizinosaurus", "Late Cretaceous", "therizinosaur", "claw and torso crop", "57% 44%", 1.55, "enormous scythe-like hand claws, a pot-bellied body, and feathers", "Bizarre theropod with gigantic hand claws."),
-    q("Oviraptor", "oviraptor", "Late Cretaceous", "oviraptorid", "beak and crest crop", "58% 39%", 1.7, "a feathered oviraptorid with a short beaked skull and birdlike body", "Short beak, crest, and feathered arms."),
-    q("Corythosaurus", "corythosaurus", "Late Cretaceous", "hadrosaur", "helmet crest crop", "66% 36%", 1.65, "a tall rounded helmet-like crest and duck-billed snout", "Rounded helmet crest on a lambeosaurine hadrosaur."),
-    q("Lambeosaurus", "lambeosaurus", "Late Cretaceous", "hadrosaur", "hatchet crest crop", "65% 36%", 1.65, "a hatchet-shaped crest projecting upward and forward", "Hadrosaur with a hatchet-like crest shape."),
-    q("Edmontosaurus", "edmontosaurus", "Late Cretaceous", "hadrosaur", "duck-bill crop", "64% 43%", 1.55, "a large duck-billed hadrosaur without a tall hollow crest", "Broad hadrosaur beak but no tall cranial crest."),
-    q("Styracosaurus", "styracosaurus", "Late Cretaceous", "ceratopsian", "spiked frill crop", "69% 38%", 1.65, "a long nasal horn and many long spikes around the frill", "Ceratopsian with dramatic frill spikes."),
-    q("Protoceratops", "protoceratops", "Late Cretaceous", "ceratopsian", "small frill crop", "63% 43%", 1.55, "a small ceratopsian with a beak, modest frill, and no large brow horns", "Small hornless ceratopsian with a parrot-like beak."),
-    q("Giganotosaurus", "giganotosaurus", "Late Cretaceous", "carcharodontosaur", "long skull crop", "63% 43%", 1.55, "a giant theropod with a long low skull and three-fingered arms", "Carcharodontosaurid with long skull, unlike deep tyrannosaur skulls."),
-    q("Baryonyx", "baryonyx", "Early Cretaceous", "spinosaurid", "snout and claw crop", "61% 43%", 1.6, "a long crocodile-like snout and large hand claws, but no tall Spinosaurus sail", "Fish-eating spinosaurid with big thumb claw."),
-    q("Suchomimus", "suchomimus", "Early Cretaceous", "spinosaurid", "snout and back crop", "59% 43%", 1.55, "a crocodile-like snout, large claws, and a low ridge along the back", "Spinosaurid with long narrow snout and lower back ridge."),
-    q("Acrocanthosaurus", "acrocanthosaurus", "Early Cretaceous", "carcharodontosaur", "back ridge crop", "55% 40%", 1.55, "high neural spines forming a ridge along the back", "Large theropod with raised neural-spine ridge."),
-    q("Ceratosaurus", "ceratosaurus", "Late Jurassic", "theropod", "nasal horn crop", "64% 39%", 1.65, "a nasal horn on the snout, small brow horns, and a deep tail", "Jurassic theropod with a distinctive horn on the snout."),
-    q("Maiasaura", "maiasaura", "Late Cretaceous", "hadrosaur", "low crest crop", "64% 39%", 1.55, "a duck-billed hadrosaur with a low crest above the eyes", "Hadrosaur with a gentle low cranial crest."),
-    q("Kentrosaurus", "kentrosaurus", "Late Jurassic", "stegosaur", "spikes and plates crop", "54% 43%", 1.6, "a smaller stegosaur with plates near the shoulders and long paired spikes toward the hips and tail", "Stegosaur with more dramatic rear-body spikes than Stegosaurus."),
-    q("Utahraptor", "utahraptor", "Early Cretaceous", "dromaeosaur", "large raptor crop", "57% 45%", 1.6, "a large feathered dromaeosaur with sickle claws and powerful arms", "Much larger dromaeosaur than Velociraptor."),
-    q("Tarbosaurus", "tarbosaurus", "Late Cretaceous", "tyrannosaur", "skull and jaw crop", "65% 43%", 1.6, "a deep tyrannosaur skull, powerful jaws, and reduced two-fingered arms", "Asian tyrannosaur with a T. rex-like deep skull and tiny forelimbs."),
-    q("Torosaurus", "torosaurus", "Late Cretaceous", "ceratopsian", "huge frill crop", "70% 37%", 1.65, "a very large frill, long brow horns, and a Triceratops-like body", "Ceratopsian with an especially long frill and paired brow horns."),
-    q("Pachyrhinosaurus", "pachyrhinosaurus", "Late Cretaceous", "ceratopsian", "boss and frill crop", "69% 38%", 1.65, "a thick bony nasal boss instead of a long nose horn", "Ceratopsian with a blunt nasal boss rather than a tall nasal horn."),
-    q("Carcharodontosaurus", "carcharodontosaurus", "Late Cretaceous", "carcharodontosaur", "toothed skull crop", "63% 43%", 1.55, "a giant long skull with blade-like serrated teeth", "Carcharodontosaurid with long jaws and shark-tooth-like serrations."),
-    q("Mapusaurus", "mapusaurus", "Late Cretaceous", "carcharodontosaur", "long predator crop", "62% 43%", 1.55, "a long low skull, three-fingered arms, and giant predator build", "South American carcharodontosaur closely related to Giganotosaurus."),
-    q("Camarasaurus", "camarasaurus", "Late Jurassic", "sauropod", "boxy skull crop", "48% 39%", 1.45, "a shorter boxy skull, sturdy neck, and compact sauropod body", "Sauropod with a boxier head and sturdier proportions than Diplodocus."),
-    q("Brontosaurus", "brontosaurus", "Late Jurassic", "sauropod", "heavy neck crop", "47% 42%", 1.45, "a massive body, strong neck, and long whip-like tail", "Heavy diplodocid sauropod with a robust neck and long tail."),
-    q("Sauropelta", "sauropelta", "Early Cretaceous", "ankylosaur", "shoulder spike crop", "54% 45%", 1.55, "armor plates and large shoulder spikes along a low body", "Nodosaur with prominent shoulder spikes and no tail club."),
-    q("Nodosaurus", "nodosaurus", "Late Cretaceous", "ankylosaur", "armor plate crop", "53% 46%", 1.55, "a low armored body covered in bony plates but no tail club", "Armored nodosaur body with osteoderms and a clubless tail."),
-    q("Struthiomimus", "struthiomimus", "Late Cretaceous", "ornithomimid", "runner body crop", "54% 44%", 1.55, "an ostrich-like runner with long legs, long arms, and a toothless beak", "Slender ornithomimid with long grasping arms and cursorial legs."),
-    q("Ornithomimus", "ornithomimus", "Late Cretaceous", "ornithomimid", "beak and legs crop", "55% 44%", 1.55, "a lightweight ostrich-mimic body with a small head and fast legs", "Classic ostrich-mimic dinosaur with toothless beak and long legs."),
-    q("Ouranosaurus", "ouranosaurus", "Early Cretaceous", "ornithopod", "sail back crop", "56% 42%", 1.55, "an Iguanodon-like body with tall spines forming a back sail", "Ornithopod with thumb spikes and a high-spined back sail."),
-    q("Dryosaurus", "dryosaurus", "Late Jurassic", "ornithopod", "small runner crop", "57% 45%", 1.6, "a small fast ornithopod with long hind legs and a stiff tail", "Light Jurassic plant-eater built for quick running."),
-    q("Citipati", "citipati", "Late Cretaceous", "oviraptorid", "crest and beak crop", "58% 39%", 1.7, "a tall head crest, short beak, and feathered oviraptorid body", "Oviraptorid with a high rounded crest and birdlike posture."),
-    q("Majungasaurus", "majungasaurus", "Late Cretaceous", "abelisaurid", "short skull crop", "65% 42%", 1.6, "a short deep skull, rough skull ornament, and very tiny arms", "Abelisaurid with a blunt skull and extremely reduced forelimbs."),
-    q("Coelophysis", "coelophysis", "Late Triassic", "theropod", "slender body crop", "60% 42%", 1.6, "a slim early theropod body, long neck, and narrow jaws", "Early lightweight theropod with a long neck and narrow skull.")
+    q("Tyrannosaurus rex", "tyrannosaurus", "Late Cretaceous", "tyrannosaur", "huge skull, deep jaws, tiny two-fingered arms, and powerful hind legs", "Deep tyrannosaur skull, heavy jaw, reduced forelimbs."),
+    q("Triceratops", "triceratops", "Late Cretaceous", "ceratopsian", "three facial horns and a large protective frill", "Brow horns plus nasal horn; broad solid-looking frill."),
+    q("Spinosaurus", "spinosaurus", "Late Cretaceous", "spinosaurid", "a long crocodile-like snout and a tall sail on its back", "Spinosaurid snout with a tall neural-spine sail."),
+    q("Parasaurolophus", "parasaurolophus", "Late Cretaceous", "hadrosaur", "a long backward-curving crest probably useful for sound and display", "Hadrosaur body with a long backward-projecting tubular crest."),
+    q("Allosaurus", "allosaurus", "Late Jurassic", "allosauroid", "a lighter skull than T. rex, brow ridges, and three-fingered hands", "Large Jurassic theropod with brow ridges and three usable fingers."),
+    q("Brachiosaurus", "brachiosaurus", "Late Jurassic", "sauropod", "very high shoulders, long front legs, and a towering neck", "Sauropod with high shoulders and forelimbs longer than hind limbs."),
+    q("Stegosaurus", "stegosaurus", "Late Jurassic", "stegosaur", "tall back plates and a spiked tail called a thagomizer", "Alternating plates along the back and tail spikes."),
+    q("Ankylosaurus", "ankylosaurus", "Late Cretaceous", "ankylosaur", "heavy body armor and a large tail club", "Low armored body with osteoderms and a tail club."),
+    q("Velociraptor", "velociraptor", "Late Cretaceous", "dromaeosaur", "a small feathered predator with a sickle claw and narrow snout", "Small feathered dromaeosaur, much smaller than movie versions."),
+    q("Carnotaurus", "carnotaurus", "Late Cretaceous", "abelisaurid", "a short deep skull, tiny arms, and bull-like horns over the eyes", "Abelisaurid with brow horns and extremely reduced arms."),
+    q("Dilophosaurus", "dilophosaurus", "Early Jurassic", "theropod", "paired head crests and a slim Early Jurassic theropod build", "Twin cranial crests; no movie-style neck frill."),
+    q("Gallimimus", "gallimimus", "Late Cretaceous", "ornithomimid", "an ostrich-like body with long legs, long neck, and toothless beak", "Fast ornithomimid with long cursorial legs."),
+    q("Pachycephalosaurus", "pachycephalosaurus", "Late Cretaceous", "pachycephalosaur", "a thick domed skull with knobs and small spikes around the back", "Dome-headed ornithischian with skull ornamentation."),
+    q("Iguanodon", "iguanodon", "Early Cretaceous", "ornithopod", "a robust ornithopod with thumb spikes and a beaked mouth", "Look for the thumb spike and heavy ornithopod body."),
+    q("Diplodocus", "diplodocus", "Late Jurassic", "sauropod", "a very long, low body with a whip-like tail and small head", "Long low diplodocid with a horizontal neck and whip tail."),
+    q("Apatosaurus", "apatosaurus", "Late Jurassic", "sauropod", "a heavy sauropod with a thick neck, robust body, and long tail", "Chunkier sauropod build than Diplodocus."),
+    q("Deinonychus", "deinonychus", "Early Cretaceous", "dromaeosaur", "a feathered raptor larger than Velociraptor with a strong sickle claw", "Dromaeosaur with strong grasping arms and killing claw."),
+    q("Microraptor", "microraptor", "Early Cretaceous", "paravian", "a tiny four-winged feathered dinosaur with feathers on arms and legs", "Small paravian with long feathers on both forelimbs and hindlimbs."),
+    q("Archaeopteryx", "archaeopteryx", "Late Jurassic", "paravian", "birdlike wings, a long bony feathered tail, clawed fingers, and teeth", "Early avialan with wings, teeth, and a long bony tail."),
+    q("Therizinosaurus", "therizinosaurus", "Late Cretaceous", "therizinosaur", "enormous scythe-like hand claws, a pot-bellied body, and feathers", "Bizarre theropod with gigantic hand claws."),
+    q("Oviraptor", "oviraptor", "Late Cretaceous", "oviraptorid", "a feathered oviraptorid with a short beaked skull and birdlike body", "Short beak, crest, and feathered arms."),
+    q("Corythosaurus", "corythosaurus", "Late Cretaceous", "hadrosaur", "a tall rounded helmet-like crest and duck-billed snout", "Rounded helmet crest on a lambeosaurine hadrosaur."),
+    q("Lambeosaurus", "lambeosaurus", "Late Cretaceous", "hadrosaur", "a hatchet-shaped crest projecting upward and forward", "Hadrosaur with a hatchet-like crest shape."),
+    q("Edmontosaurus", "edmontosaurus", "Late Cretaceous", "hadrosaur", "a large duck-billed hadrosaur without a tall hollow crest", "Broad hadrosaur beak but no tall cranial crest."),
+    q("Styracosaurus", "styracosaurus", "Late Cretaceous", "ceratopsian", "a long nasal horn and many long spikes around the frill", "Ceratopsian with dramatic frill spikes."),
+    q("Protoceratops", "protoceratops", "Late Cretaceous", "ceratopsian", "a small ceratopsian with a beak, modest frill, and no large brow horns", "Small hornless ceratopsian with a parrot-like beak."),
+    q("Giganotosaurus", "giganotosaurus", "Late Cretaceous", "carcharodontosaur", "a giant theropod with a long low skull and three-fingered arms", "Carcharodontosaurid with long skull, unlike deep tyrannosaur skulls."),
+    q("Baryonyx", "baryonyx", "Early Cretaceous", "spinosaurid", "a long crocodile-like snout and large hand claws, but no tall Spinosaurus sail", "Fish-eating spinosaurid with big thumb claw."),
+    q("Suchomimus", "suchomimus", "Early Cretaceous", "spinosaurid", "a crocodile-like snout, large claws, and a low ridge along the back", "Spinosaurid with long narrow snout and lower back ridge."),
+    q("Acrocanthosaurus", "acrocanthosaurus", "Early Cretaceous", "carcharodontosaur", "high neural spines forming a ridge along the back", "Large theropod with raised neural-spine ridge."),
+    q("Ceratosaurus", "ceratosaurus", "Late Jurassic", "theropod", "a nasal horn on the snout, small brow horns, and a deep tail", "Jurassic theropod with a distinctive horn on the snout."),
+    q("Maiasaura", "maiasaura", "Late Cretaceous", "hadrosaur", "a duck-billed hadrosaur with a low crest above the eyes", "Hadrosaur with a gentle low cranial crest."),
+    q("Kentrosaurus", "kentrosaurus", "Late Jurassic", "stegosaur", "a smaller stegosaur with plates near the shoulders and long paired spikes toward the hips and tail", "Stegosaur with more dramatic rear-body spikes than Stegosaurus."),
+    q("Utahraptor", "utahraptor", "Early Cretaceous", "dromaeosaur", "a large feathered dromaeosaur with sickle claws and powerful arms", "Much larger dromaeosaur than Velociraptor."),
+    q("Tarbosaurus", "tarbosaurus", "Late Cretaceous", "tyrannosaur", "a deep tyrannosaur skull, powerful jaws, and reduced two-fingered arms", "Asian tyrannosaur with a T. rex-like deep skull and tiny forelimbs."),
+    q("Torosaurus", "torosaurus", "Late Cretaceous", "ceratopsian", "a very large frill, long brow horns, and a Triceratops-like body", "Ceratopsian with an especially long frill and paired brow horns."),
+    q("Pachyrhinosaurus", "pachyrhinosaurus", "Late Cretaceous", "ceratopsian", "a thick bony nasal boss instead of a long nose horn", "Ceratopsian with a blunt nasal boss rather than a tall nasal horn."),
+    q("Carcharodontosaurus", "carcharodontosaurus", "Late Cretaceous", "carcharodontosaur", "a giant long skull with blade-like serrated teeth", "Carcharodontosaurid with long jaws and shark-tooth-like serrations."),
+    q("Mapusaurus", "mapusaurus", "Late Cretaceous", "carcharodontosaur", "a long low skull, three-fingered arms, and giant predator build", "South American carcharodontosaur closely related to Giganotosaurus."),
+    q("Camarasaurus", "camarasaurus", "Late Jurassic", "sauropod", "a shorter boxy skull, sturdy neck, and compact sauropod body", "Sauropod with a boxier head and sturdier proportions than Diplodocus."),
+    q("Brontosaurus", "brontosaurus", "Late Jurassic", "sauropod", "a massive body, strong neck, and long whip-like tail", "Heavy diplodocid sauropod with a robust neck and long tail."),
+    q("Sauropelta", "sauropelta", "Early Cretaceous", "ankylosaur", "armor plates and large shoulder spikes along a low body", "Nodosaur with prominent shoulder spikes and no tail club."),
+    q("Nodosaurus", "nodosaurus", "Late Cretaceous", "ankylosaur", "a low armored body covered in bony plates but no tail club", "Armored nodosaur body with osteoderms and a clubless tail."),
+    q("Struthiomimus", "struthiomimus", "Late Cretaceous", "ornithomimid", "an ostrich-like runner with long legs, long arms, and a toothless beak", "Slender ornithomimid with long grasping arms and cursorial legs."),
+    q("Ornithomimus", "ornithomimus", "Late Cretaceous", "ornithomimid", "a lightweight ostrich-mimic body with a small head and fast legs", "Classic ostrich-mimic dinosaur with toothless beak and long legs."),
+    q("Ouranosaurus", "ouranosaurus", "Early Cretaceous", "ornithopod", "an Iguanodon-like body with tall spines forming a back sail", "Ornithopod with thumb spikes and a high-spined back sail."),
+    q("Dryosaurus", "dryosaurus", "Late Jurassic", "ornithopod", "a small fast ornithopod with long hind legs and a stiff tail", "Light Jurassic plant-eater built for quick running."),
+    q("Citipati", "citipati", "Late Cretaceous", "oviraptorid", "a tall head crest, short beak, and feathered oviraptorid body", "Oviraptorid with a high rounded crest and birdlike posture."),
+    q("Majungasaurus", "majungasaurus", "Late Cretaceous", "abelisaurid", "a short deep skull, rough skull ornament, and very tiny arms", "Abelisaurid with a blunt skull and extremely reduced forelimbs."),
+    q("Coelophysis", "coelophysis", "Late Triassic", "theropod", "a slim early theropod body, long neck, and narrow jaws", "Early lightweight theropod with a long neck and narrow skull.")
   ];
   
   const quizFieldGuide = {
@@ -736,12 +734,108 @@
     }
   };
 
+  // Trophy badges. `check(profile, round)` decides whether the badge is earned;
+  // it runs after the round's discoveries/play-date are already recorded.
+  // round = { correct, roundSize, hints, accuracy, maxStreak, difficulty }.
+  const badges = [
+    { id: "first-dig", icon: "🦴", name: "First Dig", description: "Finish your first expedition.", check: () => true },
+    { id: "perfect-10", icon: "💯", name: "Perfect 10", description: "Identify all 10 dinosaurs in a round.", check: (p, r) => r.correct >= r.roundSize },
+    { id: "no-hint-hero", icon: "🧠", name: "No-Hint Hero", description: "Score 8+ correct without any hints.", check: (p, r) => r.hints === 0 && r.correct >= 8 },
+    { id: "streak-5", icon: "🔥", name: "Streak Master", description: "Get 5 correct in a row.", check: (p, r) => r.maxStreak >= 5 },
+    { id: "streak-10", icon: "⚡", name: "Lightning Streak", description: "Get 10 correct in a row.", check: (p, r) => r.maxStreak >= 10 },
+    { id: "hard-champ", icon: "🏆", name: "Hard Mode Champion", description: "Finish a Hard round with 70%+ accuracy.", check: (p, r) => r.difficulty === "hard" && r.accuracy >= 70 },
+    { id: "dedicated-digger", icon: "⛏️", name: "Dedicated Digger", description: "Play on 5 different days.", check: (p) => (p.playDates || []).length >= 5 },
+    { id: "half-dex", icon: "🔍", name: "Field Researcher", description: "Discover 25 dinosaurs.", check: (p) => (p.discovered || []).length >= 25 },
+    { id: "full-dex", icon: "🌟", name: "Master of the Museum", description: "Discover all 50 dinosaurs.", check: (p) => (p.discovered || []).length >= 50 },
+    { id: "duelist", icon: "⚔️", name: "Duelist", description: "Win a Sibling Duel.", check: () => false }
+  ];
+
+  // Lifetime rank ladder (XP only ever grows). rankForXp() picks the highest
+  // rank whose threshold the explorer has passed.
+  const ranks = [
+    { name: "Museum Intern", xp: 0, icon: "🧹" },
+    { name: "Junior Bone Hunter", xp: 150, icon: "🦴" },
+    { name: "Fossil Scout", xp: 400, icon: "🔦" },
+    { name: "Dino Detective", xp: 800, icon: "🔍" },
+    { name: "Fossil Field Captain", xp: 1400, icon: "🧭" },
+    { name: "Expert Paleontologist", xp: 2200, icon: "🎓" },
+    { name: "Legendary Paleontologist", xp: 3500, icon: "🌋" }
+  ];
+
+  function rankForXp(xp) {
+    const value = Number(xp) || 0;
+    let current = ranks[0];
+    let next = null;
+    for (let i = 0; i < ranks.length; i += 1) {
+      if (value >= ranks[i].xp) {
+        current = ranks[i];
+        next = ranks[i + 1] || null;
+      }
+    }
+    return { current, next };
+  }
+
+  // Fossil Coin shop. Only cosmetics are ever locked — never anything playable.
+  const builderUnlocks = [
+    { id: "lava-pattern", name: "Lava Pattern", cost: 15, type: "pattern", value: "lava", icon: "🌋" },
+    { id: "spots-pattern", name: "Spot Pattern", cost: 15, type: "pattern", value: "spots", icon: "🐆" },
+    { id: "golden-palette", name: "Golden Skin", cost: 25, type: "palette", value: ["#d4af37", "#f6e6a8"], icon: "✨" },
+    { id: "midnight-palette", name: "Midnight Skin", cost: 25, type: "palette", value: ["#33406e", "#9aa9d8"], icon: "🌙" },
+    { id: "candy-palette", name: "Candy Skin", cost: 25, type: "palette", value: ["#c85a9c", "#f3c6de"], icon: "🍬" },
+    { id: "rainbow-palette", name: "Rainbow Skin", cost: 40, type: "palette", value: ["#6a4fd0", "#f2c14e"], icon: "🌈" }
+  ];
+
+  // Shared difficulty configuration (used by the solo quiz and the duel).
+  const quizDifficulties = {
+    easy: {
+      label: "Easy",
+      points: 10,
+      hintCost: 3,
+      choiceCount: 4,
+      slugs: ["tyrannosaurus", "triceratops", "stegosaurus", "velociraptor", "brachiosaurus", "spinosaurus", "ankylosaurus", "parasaurolophus", "allosaurus", "archaeopteryx"]
+    },
+    medium: {
+      label: "Medium",
+      points: 15,
+      hintCost: 4,
+      choiceCount: 4,
+      slugs: ["tyrannosaurus", "triceratops", "spinosaurus", "parasaurolophus", "allosaurus", "brachiosaurus", "stegosaurus", "ankylosaurus", "velociraptor", "carnotaurus", "dilophosaurus", "gallimimus", "pachycephalosaurus", "iguanodon", "diplodocus", "apatosaurus", "deinonychus", "microraptor", "archaeopteryx", "therizinosaurus", "oviraptor", "corythosaurus", "lambeosaurus", "edmontosaurus"]
+    },
+    hard: {
+      label: "Hard",
+      points: 25,
+      hintCost: 6,
+      choiceCount: 6,
+      slugs: null
+    }
+  };
+
+  // Daily themed expeditions. A theme matches by era and/or fossil group; the
+  // active one rotates by day-of-year so it is stable for a whole day.
+  const expeditions = [
+    { id: "late-cretaceous", name: "Late Cretaceous Dig", blurb: "Only dinosaurs from the Late Cretaceous.", eras: ["Late Cretaceous"] },
+    { id: "jurassic", name: "Jurassic Journey", blurb: "Giants and hunters of the Jurassic.", eras: ["Late Jurassic", "Early Jurassic"] },
+    { id: "early-cretaceous", name: "Early Cretaceous Trek", blurb: "Specimens from the Early Cretaceous.", eras: ["Early Cretaceous"] },
+    { id: "spiky", name: "Spiky Specialists", blurb: "Plated and armored plant-eaters.", groups: ["stegosaur", "ankylosaur"] },
+    { id: "giants", name: "Giant Sauropods", blurb: "The long-necked giants.", groups: ["sauropod"] },
+    { id: "hunters", name: "Fierce Hunters", blurb: "The apex predators.", groups: ["tyrannosaur", "carcharodontosaur", "abelisaurid", "dromaeosaur", "allosauroid", "spinosaurid"] },
+    { id: "crested", name: "Crested Callers", blurb: "Crested duck-bills and egg-tenders.", groups: ["hadrosaur", "oviraptorid"] },
+    { id: "runners", name: "Ostrich Runners", blurb: "Speedy ostrich-mimics and little sprinters.", groups: ["ornithomimid", "ornithopod"] }
+  ];
+
   window.DinoData = {
     slots,
     speciesLab,
     quizItems,
     quizFieldGuide,
     quizChoicePools,
-    geneGoals
+    geneGoals,
+    badges,
+    ranks,
+    rankForXp,
+    builderUnlocks,
+    expeditions,
+    quizDifficulties,
+    totalDinos: quizItems.length
   };
 })();

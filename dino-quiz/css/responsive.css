@@ -63,15 +63,17 @@
     grid-template-columns: 1fr;
     grid-template-areas:
       "topline"
+      "mode"
       "player"
-      "leaderboard"
-      "difficulty"
       "meta"
       "image"
       "question"
       "options"
+      "next"
       "feedback"
-      "next";
+      "difficulty"
+      "expedition"
+      "leaderboard";
     min-height: auto;
   }
 

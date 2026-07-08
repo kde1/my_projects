@@ -1,0 +1,246 @@
+/* Ranks, Fossil Coins, leaderboard scope, and the Builder shop. */
+
+.quiz-topline-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(246, 196, 69, .18);
+  color: #f6e7bd;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* Rank bar on the player card. */
+.rank-progress {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  background: rgba(20, 30, 16, .5);
+  border: 1px solid rgba(95, 168, 85, .3);
+  border-radius: 12px;
+}
+
+.rank-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.rank-name {
+  font-weight: 800;
+  color: #f6e7bd;
+}
+
+.rank-next {
+  font-size: 11px;
+  color: #cdbf95;
+}
+
+.rank-bar {
+  position: relative;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .35);
+  overflow: hidden;
+}
+
+.rank-bar > i {
+  position: absolute;
+  inset: 0;
+  width: var(--rank, 0%);
+  background: linear-gradient(90deg, #4f9bd8, #5fa855);
+  border-radius: 999px;
+  transition: width .5s ease;
+}
+
+/* Leaderboard rank icon + scope tabs. */
+.lb-rank {
+  margin-right: 4px;
+}
+
+.lb-scope {
+  display: inline-flex;
+  gap: 4px;
+  margin: 4px 0 8px;
+}
+
+.lb-scope-btn {
+  border: 1px solid rgba(246, 196, 69, .3);
+  background: rgba(0, 0, 0, .25);
+  color: #e7d9ac;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lb-scope-btn.is-active {
+  background: rgba(246, 196, 69, .22);
+  color: #fff3cf;
+}
+
+/* Round-end reward note. */
+.quiz-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 10px 0;
+  font-weight: 800;
+  color: #f6e7bd;
+}
+
+/* Builder Fossil Shop. */
+.shop-coins {
+  font-weight: 800;
+  color: #f6c445;
+}
+
+.shop-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #cbbd92;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.shop-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(246, 196, 69, .22);
+  background: rgba(0, 0, 0, .28);
+  color: #ede0b8;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .2s ease;
+}
+
+.shop-item:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(246, 196, 69, .55);
+}
+
+.shop-item:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.shop-item.is-owned {
+  border-color: rgba(95, 168, 85, .5);
+}
+
+.shop-item.is-applied {
+  background: rgba(95, 168, 85, .22);
+  box-shadow: inset 0 0 0 1px rgba(95, 168, 85, .6);
+}
+
+.shop-icon {
+  font-size: 22px;
+}
+
+.shop-name {
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.shop-tag {
+  font-size: 11px;
+  color: #f6c445;
+  font-weight: 800;
+}
+
+.shop-item.is-owned .shop-tag {
+  color: #8fe08a;
+}
+
+/* Expeditions, boss fossils, and re-dig (M4). */
+.expedition-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(79, 155, 216, .18), rgba(95, 168, 85, .16));
+  border: 1px solid rgba(79, 155, 216, .35);
+}
+
+.expedition-card.is-active {
+  border-color: rgba(246, 196, 69, .6);
+  background: linear-gradient(135deg, rgba(246, 196, 69, .2), rgba(232, 104, 60, .14));
+}
+
+.expedition-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expedition-info b {
+  color: #f6e7bd;
+  font-size: 14px;
+}
+
+.expedition-info span {
+  font-size: 12px;
+  color: #cbdbe8;
+}
+
+.boss-flag {
+  display: inline-block;
+  background: linear-gradient(135deg, #b3261e, #e8683c);
+  color: #fff;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 7px;
+  margin-right: 6px;
+  animation: boss-pulse 1s ease-in-out infinite;
+}
+
+.redig-flag {
+  display: inline-block;
+  background: rgba(140, 110, 60, .7);
+  color: #ffe9c2;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 7px;
+  margin-right: 6px;
+}
+
+.quiz-image-frame.is-boss {
+  box-shadow: 0 0 0 3px #e8683c, 0 0 26px rgba(232, 104, 60, .6);
+  filter: saturate(1.05) contrast(1.05) brightness(.92);
+}
+
+.quiz-redig-note {
+  margin: 8px 0;
+  color: #ffcf8a;
+  font-weight: 700;
+}
+
+@keyframes boss-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boss-flag { animation: none; }
+}
