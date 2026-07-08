@@ -66,12 +66,16 @@ assert.deepStrictEqual(
 const scriptOrder = [
   'src="js/data.js"',
   'src="js/player-data.js"',
+  'src="js/helpers.js"',
   'src="js/store.js"',
   'src="js/quiz.js"',
-  'src="script.js"'
+  'src="js/builder.js"',
+  'src="js/dna.js"',
+  'src="js/gallery.js"',
+  'src="js/app.js"'
 ].map((needle) => html.indexOf(needle));
 if (scriptOrder.some((index) => index < 0) || scriptOrder.join() !== [...scriptOrder].sort((a, b) => a - b).join()) {
-  throw new Error("Expected script load order: js/data.js, js/player-data.js, js/store.js, js/quiz.js, script.js.");
+  throw new Error("Expected script load order: data, player-data, helpers, store, quiz, builder, dna, gallery, app.");
 }
 
 const cssManifest = fs.readFileSync(path.join(root, "styles.css"), "utf8");
