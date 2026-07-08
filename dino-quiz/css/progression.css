@@ -169,3 +169,78 @@
 .shop-item.is-owned .shop-tag {
   color: #8fe08a;
 }
+
+/* Expeditions, boss fossils, and re-dig (M4). */
+.expedition-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(79, 155, 216, .18), rgba(95, 168, 85, .16));
+  border: 1px solid rgba(79, 155, 216, .35);
+}
+
+.expedition-card.is-active {
+  border-color: rgba(246, 196, 69, .6);
+  background: linear-gradient(135deg, rgba(246, 196, 69, .2), rgba(232, 104, 60, .14));
+}
+
+.expedition-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expedition-info b {
+  color: #f6e7bd;
+  font-size: 14px;
+}
+
+.expedition-info span {
+  font-size: 12px;
+  color: #cbdbe8;
+}
+
+.boss-flag {
+  display: inline-block;
+  background: linear-gradient(135deg, #b3261e, #e8683c);
+  color: #fff;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 7px;
+  margin-right: 6px;
+  animation: boss-pulse 1s ease-in-out infinite;
+}
+
+.redig-flag {
+  display: inline-block;
+  background: rgba(140, 110, 60, .7);
+  color: #ffe9c2;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 7px;
+  margin-right: 6px;
+}
+
+.quiz-image-frame.is-boss {
+  box-shadow: 0 0 0 3px #e8683c, 0 0 26px rgba(232, 104, 60, .6);
+  filter: saturate(1.05) contrast(1.05) brightness(.92);
+}
+
+.quiz-redig-note {
+  margin: 8px 0;
+  color: #ffcf8a;
+  font-weight: 700;
+}
+
+@keyframes boss-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boss-flag { animation: none; }
+}

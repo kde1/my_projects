@@ -785,6 +785,19 @@
     { id: "rainbow-palette", name: "Rainbow Skin", cost: 40, type: "palette", value: ["#6a4fd0", "#f2c14e"], icon: "🌈" }
   ];
 
+  // Daily themed expeditions. A theme matches by era and/or fossil group; the
+  // active one rotates by day-of-year so it is stable for a whole day.
+  const expeditions = [
+    { id: "late-cretaceous", name: "Late Cretaceous Dig", blurb: "Only dinosaurs from the Late Cretaceous.", eras: ["Late Cretaceous"] },
+    { id: "jurassic", name: "Jurassic Journey", blurb: "Giants and hunters of the Jurassic.", eras: ["Late Jurassic", "Early Jurassic"] },
+    { id: "early-cretaceous", name: "Early Cretaceous Trek", blurb: "Specimens from the Early Cretaceous.", eras: ["Early Cretaceous"] },
+    { id: "spiky", name: "Spiky Specialists", blurb: "Plated and armored plant-eaters.", groups: ["stegosaur", "ankylosaur"] },
+    { id: "giants", name: "Giant Sauropods", blurb: "The long-necked giants.", groups: ["sauropod"] },
+    { id: "hunters", name: "Fierce Hunters", blurb: "The apex predators.", groups: ["tyrannosaur", "carcharodontosaur", "abelisaurid", "dromaeosaur", "allosauroid", "spinosaurid"] },
+    { id: "crested", name: "Crested Callers", blurb: "Crested duck-bills and egg-tenders.", groups: ["hadrosaur", "oviraptorid"] },
+    { id: "runners", name: "Ostrich Runners", blurb: "Speedy ostrich-mimics and little sprinters.", groups: ["ornithomimid", "ornithopod"] }
+  ];
+
   window.DinoData = {
     slots,
     speciesLab,
@@ -796,6 +809,7 @@
     ranks,
     rankForXp,
     builderUnlocks,
+    expeditions,
     totalDinos: quizItems.length
   };
 })();

@@ -59,10 +59,16 @@
       quizRankBar: $("#quizRankBar"),
       quizCoinChip: $("#quizCoinChip"),
       quizCoinValue: $("#quizCoinValue"),
-      lbScope: $("#lbScope")
+      lbScope: $("#lbScope"),
+      expeditionCard: $("#expeditionCard"),
+      expeditionName: $("#expeditionName"),
+      expeditionBlurb: $("#expeditionBlurb"),
+      expeditionBtn: $("#expeditionBtn")
     };
 
     state.lbScope = state.lbScope || "week";
+    state.quizExpedition = state.quizExpedition || null;
+    const expeditions = (window.DinoData && window.DinoData.expeditions) || [];
 
     state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY) || "");
 
@@ -130,6 +136,41 @@
 
     function quizDifficultySetting() {
       return quizDifficultySettings[state.quizDifficulty] || quizDifficultySettings.easy;
+    }
+
+    function dayOfYear() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      return Math.floor((now - start) / 86400000);
+    }
+
+    // Deterministic daily theme: same all day, new one tomorrow.
+    function todaysExpedition() {
+      if (!expeditions.length) return null;
+      return expeditions[dayOfYear() % expeditions.length];
+    }
+
+    function renderExpeditionCard() {
+      const theme = todaysExpedition();
+      if (!el.expeditionCard) return;
+      if (!theme) {
+        el.expeditionCard.hidden = true;
+        return;
+      }
+      el.expeditionCard.hidden = false;
+      const active = Boolean(state.quizExpedition);
+      el.expeditionName.textContent = `🧭 ${theme.name}`;
+      el.expeditionBlurb.textContent = active
+        ? "Expedition in progress · +50% Fossil Coins"
+        : `${theme.blurb} · +50% Fossil Coins`;
+      el.expeditionBtn.textContent = active ? "Exit Expedition" : "Start Expedition";
+      el.expeditionCard.classList.toggle("is-active", active);
+    }
+
+    function toggleExpedition() {
+      state.quizExpedition = state.quizExpedition ? null : todaysExpedition();
+      renderExpeditionCard();
+      startQuizRound();
     }
 
     function setSaveStatus(message) {
@@ -374,6 +415,70 @@
       return indices.length ? indices : quizItems.map((_, index) => index);
     }
 
+    function matchesTheme(item, theme) {
+      if (!theme) return false;
+      if (theme.eras && theme.eras.includes(item.era)) return true;
+      if (theme.groups && theme.groups.includes(item.group)) return true;
+      return false;
+    }
+
+    // The pool a round draws from: the difficulty pool, or (in expedition mode)
+    // every dinosaur matching today's theme, padded from the full set if scarce.
+    function roundPoolIndices() {
+      if (!state.quizExpedition) return quizPoolIndices();
+      const theme = state.quizExpedition;
+      let pool = quizItems.map((item, index) => (matchesTheme(item, theme) ? index : -1)).filter((index) => index >= 0);
+      if (pool.length < 8) {
+        const used = new Set(pool);
+        const extra = shuffle(quizItems.map((_, index) => index).filter((index) => !used.has(index)));
+        pool = [...pool, ...extra].slice(0, 8);
+      }
+      return pool;
+    }
+
+    // Boss pool = "rarer" dinosaurs (not in the easy set; on Easy, from the
+    // medium-but-not-easy set) so the final question always feels special.
+    function bossPoolIndices() {
+      const easy = new Set(quizDifficultySettings.easy.slugs);
+      const medium = new Set(quizDifficultySettings.medium.slugs);
+      let pool;
+      if (state.quizDifficulty === "easy") {
+        pool = quizItems.map((item, index) => (medium.has(item.slug) && !easy.has(item.slug) ? index : -1)).filter((index) => index >= 0);
+      } else {
+        pool = quizItems.map((item, index) => (!easy.has(item.slug) ? index : -1)).filter((index) => index >= 0);
+      }
+      return pool.length ? pool : quizItems.map((_, index) => index);
+    }
+
+    function pickBoss(usedIndices) {
+      const used = new Set(usedIndices);
+      // In expedition mode keep the boss on-theme; prefer a rarer theme member.
+      if (state.quizExpedition) {
+        const themePool = roundPoolIndices().filter((index) => !used.has(index));
+        const rareSet = new Set(bossPoolIndices());
+        const rareThemed = themePool.filter((index) => rareSet.has(index));
+        const pick = shuffle(rareThemed.length ? rareThemed : themePool);
+        return pick.length ? pick[0] : null;
+      }
+      const rare = shuffle(bossPoolIndices().filter((index) => !used.has(index)));
+      if (rare.length) return rare[0];
+      const any = shuffle(roundPoolIndices().filter((index) => !used.has(index)));
+      return any.length ? any[0] : null;
+    }
+
+    // Up to three previously-missed dinosaurs the player can re-dig this round.
+    // Re-digs are second chances, so they may appear even if the missed dinosaur
+    // is not part of the current difficulty pool.
+    function redigIndices() {
+      const player = state.playerName && store ? store.getPlayer(state.playerName) : null;
+      if (!player) return [];
+      const bySlug = new Map(quizItems.map((item, index) => [item.slug, index]));
+      return player.profile.redig
+        .map((entry) => bySlug.get(entry.slug))
+        .filter((index) => index != null)
+        .slice(0, 3);
+    }
+
     function startQuizRound() {
       state.quizScore = 0;
       state.quizTotal = 0;
@@ -388,7 +493,18 @@
       state.quizMaxStreak = 0;
       state.quizNewDiscoveries = [];
       state.quizLastCorrectItem = null;
-      state.quizOrder = shuffle(quizPoolIndices()).slice(0, QUIZ_ROUND_SIZE);
+      state.quizBossWon = false;
+      state.quizRedigCleared = 0;
+
+      const pool = roundPoolIndices();
+      // Re-dig items get first claim on the 9 non-boss slots (any missed dino).
+      const redig = redigIndices();
+      state.quizRedigSlugs = new Set(redig.map((index) => quizItems[index].slug));
+      const rest = shuffle(pool.filter((index) => !state.quizRedigSlugs.has(quizItems[index].slug)));
+      let firstNine = shuffle([...redig, ...rest].slice(0, QUIZ_ROUND_SIZE - 1));
+      const bossIndex = pickBoss(firstNine);
+      state.quizOrder = bossIndex != null ? [...firstNine, bossIndex] : shuffle(pool).slice(0, QUIZ_ROUND_SIZE);
+      state.quizBossSlug = bossIndex != null ? quizItems[bossIndex].slug : null;
       state.quizIndex = 0;
       renderQuiz();
     }
@@ -402,9 +518,9 @@
       return quizItems[state.quizOrder[state.quizIndex]];
     }
 
-    function quizChoices(item) {
+    function quizChoices(item, overrideCount) {
       const setting = quizDifficultySetting();
-      const targetCount = setting.choiceCount;
+      const targetCount = overrideCount || setting.choiceCount;
       const difficultyPool = quizPoolIndices().map((index) => quizItems[index].name);
       const groupPool = quizChoicePools[item.group] || [];
       const choices = [item.name];
@@ -428,17 +544,30 @@
       // (currentQuizItem() has reshuffle side effects at the order boundary).
       state.currentItem = item;
       state.quizHintsUsed = 0;
-      state.quizPotential = quizDifficultySetting().points;
-      const choices = quizChoices(item);
+      const setting = quizDifficultySetting();
+      const isBoss = Boolean(state.quizBossSlug) && item.slug === state.quizBossSlug;
+      const isRedig = state.quizRedigSlugs && state.quizRedigSlugs.has(item.slug);
+      state.quizBoss = isBoss;
+      state.quizPotential = isBoss ? setting.points * 2 : setting.points;
+      const choices = quizChoices(item, isBoss ? setting.choiceCount + 1 : setting.choiceCount);
       el.quizImage.src = item.image;
       el.quizImage.alt = `Photorealistic quiz image of ${item.name}`;
       el.quizImage.classList.add("field-guide");
+      const frame = el.quizImage.closest(".quiz-image-frame");
+      if (frame) frame.classList.toggle("is-boss", isBoss);
       // Mark the correct option with a data flag so grading never depends on
       // re-matching display strings (robust to name collisions / stray characters).
       el.quizOptions.innerHTML = choices.map((choice) => `<button class="quiz-option" type="button" data-answer="${escapeHtml(choice)}" data-correct="${choice === item.name}">${escapeHtml(choice)}</button>`).join("");
       el.quizEra.textContent = item.era;
-      el.quizView.textContent = `${quizDifficultySetting().label} ${state.quizIndex + 1}/${QUIZ_ROUND_SIZE}`;
-      el.quizPrompt.textContent = "Which dinosaur is this?";
+      el.quizView.textContent = `${setting.label} ${state.quizIndex + 1}/${QUIZ_ROUND_SIZE}`;
+      if (isBoss) {
+        el.quizPrompt.innerHTML = `<span class="boss-flag">⚠️ BOSS FOSSIL — double points!</span> Which dinosaur is this?`;
+        if (celebrate) celebrate.sound("drumroll");
+      } else if (isRedig) {
+        el.quizPrompt.innerHTML = `<span class="redig-flag">⛏️ Re-dig</span> Which dinosaur is this?`;
+      } else {
+        el.quizPrompt.textContent = "Which dinosaur is this?";
+      }
       el.quizFeedback.classList.remove("is-revealed");
       const registered = Boolean(state.playerName);
       el.quizFeedback.innerHTML = `<span class="quiz-intro">${registered ? "Choose carefully. Hints help, but each one lowers this fossil's point value." : "Type your explorer name and press Join Quiz to unlock the answers."}</span>`;
@@ -504,16 +633,24 @@
         state.quizStreak += 1;
         state.quizMaxStreak = Math.max(state.quizMaxStreak || 0, state.quizStreak);
         state.quizLastCorrectItem = item;
+        if (state.quizBoss) state.quizBossWon = true;
+        // Clear a re-dig if this was one of the second-chance dinosaurs.
+        if (state.quizRedigSlugs && state.quizRedigSlugs.has(item.slug)) {
+          store.dequeueRedig(state.playerName, item.slug);
+          state.quizRedigCleared = (state.quizRedigCleared || 0) + 1;
+        }
         // Discovery is generous: any correct answer adds it to this explorer's Dino-Dex.
         if (store.discover(state.playerName, item.slug)) {
           (state.quizNewDiscoveries = state.quizNewDiscoveries || []).push(item);
         }
         if (celebrate) {
           celebrate.sound("correct");
-          celebrate.burst(state.quizStreak >= 5 ? "medium" : "small");
+          celebrate.burst(state.quizBoss || state.quizStreak >= 5 ? "medium" : "small");
         }
       } else {
         state.quizStreak = 0;
+        // Missed dinosaurs go into the re-dig queue for a future round.
+        store.enqueueRedig(state.playerName, item.slug);
         if (celebrate) celebrate.sound("wrong");
       }
       el.hintQuizBtn.disabled = true;
@@ -615,6 +752,7 @@
       const newDiscoveries = state.quizNewDiscoveries || [];
       if (state.playerName && progression) {
         store.recordPlayDate(state.playerName);
+        const perCorrect = { easy: 1, medium: 2, hard: 3 }[state.quizDifficulty] || 1;
         const roundData = {
           correct: state.quizCorrect,
           roundSize: QUIZ_ROUND_SIZE,
@@ -622,11 +760,15 @@
           hints: state.quizRoundHints,
           accuracy,
           maxStreak: state.quizMaxStreak || 0,
-          difficulty: state.quizDifficulty
+          difficulty: state.quizDifficulty,
+          // Boss win doubles that fossil's coins; expeditions add a +50% bonus.
+          bossBonusCoins: state.quizBossWon ? perCorrect : 0,
+          coinMultiplier: state.quizExpedition ? 1.5 : 1
         };
         // Award XP + coins first so rank/badge checks see the updated profile.
         rewards = progression.awardRoundRewards(state.playerName, roundData);
         earnedBadges = progression.evaluateRound(state.playerName, roundData);
+        if (state.quizExpedition) store.recordExpedition(state.playerName, state.quizExpedition.id);
         const certDino = state.quizLastCorrectItem || quizItems[state.quizOrder[0]] || quizItems[0];
         state.lastCertificate = {
           name: state.playerName,
@@ -660,7 +802,10 @@
         ? `<div class="quiz-new-badges"><b>Trophies earned:</b> ${earnedBadges.map((badge) => `<span title="${escapeHtml(badge.name)}">${badge.icon} ${escapeHtml(badge.name)}</span>`).join(" ")}</div>`
         : "";
       const rewardNote = (rewards.coinsEarned || state.quizScore) && state.playerName
-        ? `<div class="quiz-rewards"><span>🪙 +${rewards.coinsEarned} Fossil Coins</span><span>⭐ +${state.quizScore} XP${rewards.rankedUp ? ` — new rank: ${escapeHtml(rewards.newRank.icon + " " + rewards.newRank.name)}!` : ""}</span></div>`
+        ? `<div class="quiz-rewards"><span>🪙 +${rewards.coinsEarned} Fossil Coins${state.quizExpedition ? " (expedition +50%)" : ""}</span><span>⭐ +${state.quizScore} XP${rewards.rankedUp ? ` — new rank: ${escapeHtml(rewards.newRank.icon + " " + rewards.newRank.name)}!` : ""}</span></div>`
+        : "";
+      const redigNote = state.quizRedigCleared
+        ? `<div class="quiz-redig-note">⛏️ Got it this time! You re-dug ${state.quizRedigCleared} tricky fossil${state.quizRedigCleared === 1 ? "" : "s"}.</div>`
         : "";
       const certButton = state.lastCertificate
         ? `<button class="primary-button print-certificate" id="printCertBtn" type="button">🎓 Print My Certificate</button>`
@@ -678,6 +823,7 @@
             <div><span>Hints used</span><b>${state.quizRoundHints}</b></div>
           </div>
           ${rewardNote}
+          ${redigNote}
           ${badgeNote}
           ${discoveryNote}
           ${certButton}
@@ -763,6 +909,10 @@
           renderLeaderboard();
         });
       }
+      if (el.expeditionBtn) {
+        el.expeditionBtn.addEventListener("click", toggleExpedition);
+      }
+      renderExpeditionCard();
       el.nextQuizBtn.addEventListener("click", nextQuiz);
       el.hintQuizBtn.addEventListener("click", revealQuizHint);
       if (el.exportLeaderboardBtn) {

@@ -77,6 +77,8 @@
       let coins = round.correct * perCorrect;
       if (round.correct >= round.roundSize) coins += 5;
       if (round.hints === 0) coins += 2;
+      coins += round.bossBonusCoins || 0;
+      if (round.coinMultiplier && round.coinMultiplier !== 1) coins = Math.round(coins * round.coinMultiplier);
       store.addCoins(name, coins);
       const after = rankInfo(name);
       const rankedUp = after.current.name !== before.current.name;
