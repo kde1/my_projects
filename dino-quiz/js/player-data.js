@@ -2,7 +2,19 @@
   "use strict";
 
   window.DinoPlayerData = {
-    players: [],
-    leaderboard: []
+    "players": [],
+    "leaderboard": [
+      {
+        "id": "1783492285672-4f3502acfbee88",
+        "name": "Papi",
+        "score": 90,
+        "maxScore": 100,
+        "accuracy": 90,
+        "hints": 0,
+        "difficulty": "Easy",
+        "title": "Expert Paleontologist",
+        "date": "7/8/2026"
+      }
+    ]
   };
 })();
