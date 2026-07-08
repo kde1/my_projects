@@ -36,7 +36,6 @@
       quizPlayerName: $("#quizPlayerName"),
       quizPlayerStatus: $("#quizPlayerStatus"),
       addExplorerBtn: $("#addExplorerBtn"),
-      manageExplorersBtn: $("#manageExplorersBtn"),
       explorerManager: $("#explorerManager"),
       explorerManagerList: $("#explorerManagerList"),
       quizLeaderboardList: $("#quizLeaderboardList"),
@@ -275,6 +274,12 @@
       renderLeaderboardTarget(el.quizLeaderboardList, el.quizLeaderboardTag, entries, scope);
       // The landing board always shows the all-time Hall of Fame.
       renderLeaderboardTarget(el.landingLeaderboardList, el.landingLeaderboardTag, scopedEntries("all"), "all");
+    }
+
+    // Render everything the dedicated Leaderboard tab shows.
+    function renderLeaderboardTab() {
+      renderLeaderboard();
+      renderExplorerManager();
     }
 
     function savePlayerName() {
@@ -828,14 +833,6 @@
       if (el.addExplorerBtn) {
         el.addExplorerBtn.addEventListener("click", addExplorer);
       }
-      if (el.manageExplorersBtn && el.explorerManager) {
-        el.manageExplorersBtn.addEventListener("click", () => {
-          const isOpen = el.explorerManager.hidden;
-          el.explorerManager.hidden = !isOpen;
-          el.manageExplorersBtn.setAttribute("aria-expanded", String(isOpen));
-          if (isOpen) renderExplorerManager();
-        });
-      }
       if (el.explorerManagerList) {
         el.explorerManagerList.addEventListener("click", (event) => {
           const button = event.target.closest("button[data-action]");
@@ -878,6 +875,7 @@
       bindQuizControls,
       loadPermanentLeaderboard,
       renderLeaderboard,
+      renderLeaderboardTab,
       renderPlayerProfile,
       refreshPlayerCard,
       startQuizRound

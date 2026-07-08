@@ -21,7 +21,7 @@
     "image difficulty"
     "image expedition"
     "feedback feedback"
-    "player leaderboard";
+    "player player";
   align-items: start;
   margin: 0 auto;
   max-width: 1280px;
@@ -51,10 +51,6 @@
 
 .quiz-focus .quiz-player-card {
   grid-area: player;
-}
-
-.quiz-focus .quiz-leaderboard {
-  grid-area: leaderboard;
 }
 
 .quiz-focus .compact-control {
@@ -185,6 +181,49 @@
 .explorer-manager li.is-empty {
   display: block;
   color: #dce7d3;
+}
+
+/* Dedicated Leaderboard tab: leaderboard + explorer management side by side. */
+.board-shell {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 18px;
+}
+
+.board-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.board-card {
+  border: 1px solid rgba(255, 243, 207, .18);
+  background: rgba(0, 0, 0, .2);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.board-card > div:first-child {
+  margin-bottom: 12px;
+}
+
+.explorer-manage h3 {
+  color: #fff3cf;
+  font-weight: 900;
+  margin: 0;
+}
+
+.explorer-manage > div span {
+  color: #cbbd92;
+  font-size: 13px;
+}
+
+.board-card .explorer-manager {
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .explorer-manager button {
