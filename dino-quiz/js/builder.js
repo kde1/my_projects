@@ -4,6 +4,9 @@
   window.createBuilder = function createBuilder(ctx) {
     const { state, slots } = ctx;
     const { $, $$, titleCase } = ctx.helpers;
+    const store = ctx.store;
+    const celebrate = window.DinoCelebrate || null;
+    const builderUnlocks = (window.DinoData && window.DinoData.builderUnlocks) || [];
 
     const layers = {
       body: $("#bodyLayer"),
@@ -258,13 +261,20 @@
       return `<g class="part" data-part="${part}" transform="translate(${offset.x} ${offset.y})">${markup}</g>`;
     }
 
+    const patternFills = {
+      scales: "url(#scalePattern)",
+      stripes: "url(#stripePattern)",
+      lava: "url(#lavaPattern)",
+      spots: "url(#spotsPattern)"
+    };
+
     function setPattern() {
       const patternEls = $$(".patternFill");
       patternEls.forEach((patternEl) => {
         if (state.pattern === "plain") {
           patternEl.setAttribute("fill", "transparent");
         } else {
-          patternEl.setAttribute("fill", state.pattern === "stripes" ? "url(#stripePattern)" : "url(#scalePattern)");
+          patternEl.setAttribute("fill", patternFills[state.pattern] || patternFills.scales);
         }
       });
       document.documentElement.style.setProperty("--pattern-opacity", state.pattern === "plain" ? "0" : ".55");
@@ -528,7 +538,83 @@
       });
     }
 
+    function isUnlockApplied(unlock) {
+      if (unlock.type === "pattern") return state.pattern === unlock.value;
+      if (unlock.type === "palette") return state.baseColor === unlock.value[0] && state.bellyColor === unlock.value[1];
+      return false;
+    }
+
+    function applyUnlock(unlock) {
+      if (unlock.type === "pattern") {
+        state.pattern = unlock.value;
+      } else if (unlock.type === "palette") {
+        state.baseColor = unlock.value[0];
+        state.bellyColor = unlock.value[1];
+      }
+      syncInputs();
+      renderDino();
+      renderShop();
+    }
+
+    function playerProfile() {
+      return state.playerName && store ? store.getPlayer(state.playerName) : null;
+    }
+
+    function renderShop() {
+      const shop = $("#builderShop");
+      if (!shop) return;
+      const coinsEl = $("#shopCoins");
+      const hint = $("#shopHint");
+      const player = playerProfile();
+      const coins = player ? player.profile.coins : 0;
+      if (coinsEl) coinsEl.textContent = `🪙 ${coins}`;
+      if (hint) {
+        hint.textContent = state.playerName
+          ? "Tap a locked look to buy it, or an unlocked one to wear it."
+          : "Join the Quiz as an explorer to earn and spend Fossil Coins.";
+      }
+      shop.innerHTML = builderUnlocks.map((unlock) => {
+        const owned = player ? player.profile.unlocks.includes(unlock.id) : false;
+        const applied = owned && isUnlockApplied(unlock);
+        const affordable = coins >= unlock.cost;
+        const disabled = !owned && (!state.playerName || !affordable);
+        const tag = owned ? (applied ? "Applied" : "Apply") : `🔒 ${unlock.cost}🪙`;
+        return `
+          <button class="shop-item ${owned ? "is-owned" : ""} ${applied ? "is-applied" : ""}" type="button" data-id="${unlock.id}" ${disabled ? "disabled" : ""} title="${unlock.name}">
+            <span class="shop-icon">${unlock.icon}</span>
+            <span class="shop-name">${unlock.name}</span>
+            <span class="shop-tag">${tag}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function handleShopClick(event) {
+      const button = event.target.closest(".shop-item");
+      if (!button) return;
+      const unlock = builderUnlocks.find((item) => item.id === button.dataset.id);
+      if (!unlock || !state.playerName || !store) return;
+      const player = store.getPlayer(state.playerName);
+      const owned = player && player.profile.unlocks.includes(unlock.id);
+      if (owned) {
+        applyUnlock(unlock);
+        return;
+      }
+      if (store.spendCoins(state.playerName, unlock.cost)) {
+        store.unlock(state.playerName, unlock.id);
+        if (celebrate) {
+          celebrate.sound("unlock");
+          celebrate.burst("small");
+          celebrate.toast(`<span class="toast-icon">${unlock.icon}</span>Unlocked ${unlock.name}!`);
+        }
+        applyUnlock(unlock);
+      }
+    }
+
     function bindBuilderControls() {
+      const shop = $("#builderShop");
+      if (shop) shop.addEventListener("click", handleShopClick);
+      renderShop();
       $("#baseColor").addEventListener("input", (event) => {
         state.baseColor = event.target.value;
         renderDino();
@@ -568,6 +654,7 @@
       randomize,
       runFieldTest,
       mixColor,
+      renderShop,
       bindBuilderControls
     };
   };

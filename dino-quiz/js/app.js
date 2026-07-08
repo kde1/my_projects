@@ -2,7 +2,7 @@
   "use strict";
 
   const helpers = window.DinoHelpers;
-  const { $, $$, shuffle, escapeHtml, cleanPlayerName, readJsonStorage, writeJsonStorage, readTextStorage, writeTextStorage, todayDisplay, todayISO } = helpers;
+  const { $, $$, shuffle, escapeHtml, cleanPlayerName, readJsonStorage, writeJsonStorage, readTextStorage, writeTextStorage, todayDisplay, todayISO, isoWeek } = helpers;
 
   const { slots, speciesLab, quizItems, quizFieldGuide, quizChoicePools, geneGoals } = window.DinoData;
 
@@ -123,6 +123,7 @@
     cleanPlayerName,
     readTextStorage,
     writeTextStorage,
+    isoWeek,
     celebrate
   });
 
@@ -132,6 +133,7 @@
     $(".game-shell").classList.toggle("gallery-focus", tabName === "gallery" || tabName === "galleryQuiz");
     if (tabName === "gallery") ctx.gallery.renderGallery();
     if (tabName === "galleryQuiz") ctx.gallery.renderGallery({ quizMode: true });
+    if (tabName === "parts") ctx.builder.renderShop();
     $$(".app-nav-button").forEach((item) => {
       item.classList.remove("is-active");
       item.removeAttribute("aria-current");

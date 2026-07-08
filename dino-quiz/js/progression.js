@@ -10,6 +10,7 @@
     const { $, escapeHtml } = helpers;
     const badges = data.badges || [];
     const totalDinos = data.totalDinos || (data.quizItems ? data.quizItems.length : 0);
+    const rankForXp = data.rankForXp || (() => ({ current: { name: "Explorer", icon: "🦖", xp: 0 }, next: null }));
 
     function profileOf(name) {
       const player = store.getPlayer(name);
@@ -24,6 +25,67 @@
     function badgeCount(name) {
       const profile = profileOf(name);
       return profile ? Object.keys(profile.badges).length : 0;
+    }
+
+    function rankInfo(name) {
+      const profile = profileOf(name);
+      const xp = profile ? profile.xp : 0;
+      const { current, next } = rankForXp(xp);
+      const span = next ? next.xp - current.xp : 1;
+      const into = next ? xp - current.xp : 1;
+      const percent = next ? Math.max(0, Math.min(100, Math.round((into / span) * 100))) : 100;
+      return { xp, current, next, percent };
+    }
+
+    function rankLabel(name) {
+      const info = rankInfo(name);
+      return `${info.current.icon} ${info.current.name}`;
+    }
+
+    function coinsOf(name) {
+      const profile = profileOf(name);
+      return profile ? profile.coins : 0;
+    }
+
+    function renderRankBar(container, name) {
+      if (!container) return;
+      const profile = profileOf(name);
+      if (!name || !profile) {
+        container.hidden = true;
+        container.innerHTML = "";
+        return;
+      }
+      container.hidden = false;
+      const info = rankInfo(name);
+      const nextNote = info.next
+        ? `${info.xp}/${info.next.xp} XP to ${escapeHtml(info.next.name)}`
+        : `Max rank reached — ${info.xp} XP`;
+      container.innerHTML = `
+        <div class="rank-head">
+          <span class="rank-name">${info.current.icon} ${escapeHtml(info.current.name)}</span>
+          <span class="rank-next">${nextNote}</span>
+        </div>
+        <div class="rank-bar"><i style="--rank:${info.percent}%"></i></div>
+      `;
+    }
+
+    // Award round XP + coins. Returns { rankedUp, newRank, coinsEarned }.
+    function awardRoundRewards(name, round) {
+      const before = rankInfo(name);
+      store.addXp(name, round.score);
+      const perCorrect = { easy: 1, medium: 2, hard: 3 }[round.difficulty] || 1;
+      let coins = round.correct * perCorrect;
+      if (round.correct >= round.roundSize) coins += 5;
+      if (round.hints === 0) coins += 2;
+      store.addCoins(name, coins);
+      const after = rankInfo(name);
+      const rankedUp = after.current.name !== before.current.name;
+      if (rankedUp && celebrate) {
+        celebrate.burst("large");
+        celebrate.sound("fanfare");
+        celebrate.toast(`<span class="toast-icon">${after.current.icon}</span>New rank: ${escapeHtml(after.current.name)}!`);
+      }
+      return { rankedUp, newRank: after.current, coinsEarned: coins };
     }
 
     // Award any newly-qualified badges for a finished round. Returns the list of
@@ -116,6 +178,12 @@
       `;
     }
 
+    function rankIcon(name) {
+      const profile = profileOf(name);
+      if (!profile) return "";
+      return rankForXp(profile.xp).current.icon;
+    }
+
     return {
       dexCount,
       badgeCount,
@@ -124,7 +192,13 @@
       announceBadges,
       badgeIconsFor,
       renderTrophyShelf,
-      renderCertificate
+      renderCertificate,
+      rankInfo,
+      rankLabel,
+      rankIcon,
+      coinsOf,
+      renderRankBar,
+      awardRoundRewards
     };
   };
 })();

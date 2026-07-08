@@ -750,6 +750,41 @@
     { id: "duelist", icon: "⚔️", name: "Duelist", description: "Win a Sibling Duel.", check: () => false }
   ];
 
+  // Lifetime rank ladder (XP only ever grows). rankForXp() picks the highest
+  // rank whose threshold the explorer has passed.
+  const ranks = [
+    { name: "Museum Intern", xp: 0, icon: "🧹" },
+    { name: "Junior Bone Hunter", xp: 150, icon: "🦴" },
+    { name: "Fossil Scout", xp: 400, icon: "🔦" },
+    { name: "Dino Detective", xp: 800, icon: "🔍" },
+    { name: "Fossil Field Captain", xp: 1400, icon: "🧭" },
+    { name: "Expert Paleontologist", xp: 2200, icon: "🎓" },
+    { name: "Legendary Paleontologist", xp: 3500, icon: "🌋" }
+  ];
+
+  function rankForXp(xp) {
+    const value = Number(xp) || 0;
+    let current = ranks[0];
+    let next = null;
+    for (let i = 0; i < ranks.length; i += 1) {
+      if (value >= ranks[i].xp) {
+        current = ranks[i];
+        next = ranks[i + 1] || null;
+      }
+    }
+    return { current, next };
+  }
+
+  // Fossil Coin shop. Only cosmetics are ever locked — never anything playable.
+  const builderUnlocks = [
+    { id: "lava-pattern", name: "Lava Pattern", cost: 15, type: "pattern", value: "lava", icon: "🌋" },
+    { id: "spots-pattern", name: "Spot Pattern", cost: 15, type: "pattern", value: "spots", icon: "🐆" },
+    { id: "golden-palette", name: "Golden Skin", cost: 25, type: "palette", value: ["#d4af37", "#f6e6a8"], icon: "✨" },
+    { id: "midnight-palette", name: "Midnight Skin", cost: 25, type: "palette", value: ["#33406e", "#9aa9d8"], icon: "🌙" },
+    { id: "candy-palette", name: "Candy Skin", cost: 25, type: "palette", value: ["#c85a9c", "#f3c6de"], icon: "🍬" },
+    { id: "rainbow-palette", name: "Rainbow Skin", cost: 40, type: "palette", value: ["#6a4fd0", "#f2c14e"], icon: "🌈" }
+  ];
+
   window.DinoData = {
     slots,
     speciesLab,
@@ -758,6 +793,9 @@
     quizChoicePools,
     geneGoals,
     badges,
+    ranks,
+    rankForXp,
+    builderUnlocks,
     totalDinos: quizItems.length
   };
 })();

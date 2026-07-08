@@ -77,6 +77,18 @@
     return new Date().toISOString().slice(0, 10);
   }
 
+  // ISO-8601 week key like "2026-W28" from a YYYY-MM-DD string (or Date).
+  function isoWeek(dateInput) {
+    const date = dateInput instanceof Date ? new Date(dateInput.getTime()) : new Date(`${dateInput}T00:00:00Z`);
+    if (isNaN(date.getTime())) return "";
+    // Shift to Thursday of the current week (ISO weeks belong to the year of their Thursday).
+    const day = (date.getUTCDay() + 6) % 7;
+    date.setUTCDate(date.getUTCDate() - day + 3);
+    const firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+    const week = 1 + Math.round(((date - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+    return `${date.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+  }
+
   window.DinoHelpers = {
     escapeHtml,
     $,
@@ -89,6 +101,7 @@
     writeTextStorage,
     cleanPlayerName,
     todayDisplay,
-    todayISO
+    todayISO,
+    isoWeek
   };
 })();

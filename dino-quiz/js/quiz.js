@@ -19,6 +19,7 @@
       cleanPlayerName,
       readTextStorage,
       writeTextStorage,
+      isoWeek,
       celebrate
     } = deps;
 
@@ -54,8 +55,14 @@
       trophyShelf: $("#trophyShelf"),
       quizDexProgress: $("#quizDexProgress"),
       quizDexPill: $("#quizDexPill"),
-      quizDexBar: $("#quizDexBar")
+      quizDexBar: $("#quizDexBar"),
+      quizRankBar: $("#quizRankBar"),
+      quizCoinChip: $("#quizCoinChip"),
+      quizCoinValue: $("#quizCoinValue"),
+      lbScope: $("#lbScope")
     };
+
+    state.lbScope = state.lbScope || "week";
 
     state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY) || "");
 
@@ -184,6 +191,16 @@
       el.quizDexBar.style.setProperty("--dex", `${Math.round((count / total) * 100)}%`);
     }
 
+    function renderCoins() {
+      if (!el.quizCoinChip) return;
+      if (!state.playerName || !progression) {
+        el.quizCoinChip.hidden = true;
+        return;
+      }
+      el.quizCoinChip.hidden = false;
+      el.quizCoinValue.textContent = progression.coinsOf(state.playerName);
+    }
+
     function renderPlayerProfile() {
       el.quizPlayerName.value = "";
       refreshExplorerControls();
@@ -195,8 +212,12 @@
         el.quizPlayerStatus.textContent = `Register your field badge to start scoring. ${count} explorers remembered.`;
         el.quizPlayerForm.classList.remove("is-registered");
       }
-      if (progression) progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+      if (progression) {
+        progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+        progression.renderRankBar(el.quizRankBar, state.playerName);
+      }
       renderDexProgress();
+      renderCoins();
     }
 
     function setActivePlayer(name, { start = true } = {}) {
@@ -216,13 +237,17 @@
     }
 
     function leaderboardMarkup(entries) {
-      return entries.length ? entries.map((entry, index) => `
+      return entries.length ? entries.map((entry, index) => {
+        const rankIcon = progression ? progression.rankIcon(entry.name) : "";
+        const badgeIcons = progression ? progression.badgeIconsFor(entry.name, 3) : "";
+        return `
         <li class="${index === 0 ? "is-champion" : ""}">
-          <span>${escapeHtml(entry.name)}<span class="lb-badges">${progression ? progression.badgeIconsFor(entry.name, 3) : ""}</span></span>
+          <span>${rankIcon ? `<span class="lb-rank" title="Rank">${rankIcon}</span>` : ""}${escapeHtml(entry.name)}<span class="lb-badges">${badgeIcons}</span></span>
           <b>${entry.score} pts</b>
           <small>${escapeHtml(entry.difficulty)} - ${entry.accuracy}% - ${escapeHtml(entry.title || "Fossil Hunter")} - ${escapeHtml(entry.date)}</small>
         </li>
-      `).join("") : `
+      `;
+      }).join("") : `
         <li class="is-empty">
           <span>No champs yet</span>
           <small>Register your name, finish a round, and claim the fossil crown.</small>
@@ -230,16 +255,37 @@
       `;
     }
 
-    function renderLeaderboardTarget(listEl, tagEl, entries) {
+    function currentWeekKey() {
+      return isoWeek ? isoWeek(new Date()) : "";
+    }
+
+    // Weekly scope keeps only entries stamped this ISO week (legacy entries with
+    // no dateISO only ever show in the all-time Hall of Fame).
+    function scopedEntries(scope) {
+      const all = store.getLeaderboard();
+      if (scope === "week") {
+        const week = currentWeekKey();
+        return all.filter((entry) => entry.dateISO && isoWeek(entry.dateISO) === week).slice(0, LEADERBOARD_LIMIT);
+      }
+      return all.slice(0, LEADERBOARD_LIMIT);
+    }
+
+    function renderLeaderboardTarget(listEl, tagEl, entries, scope) {
       if (!listEl || !tagEl) return;
-      tagEl.textContent = entries.length ? "Top fossil hunters" : "Be the first champ";
+      if (scope === "week") {
+        tagEl.textContent = entries.length ? "This week's top hunters" : "No champs this week yet";
+      } else {
+        tagEl.textContent = entries.length ? "All-time top hunters" : "Be the first champ";
+      }
       listEl.innerHTML = leaderboardMarkup(entries);
     }
 
     function renderLeaderboard() {
-      const entries = store.getLeaderboard(LEADERBOARD_LIMIT);
-      renderLeaderboardTarget(el.quizLeaderboardList, el.quizLeaderboardTag, entries);
-      renderLeaderboardTarget(el.landingLeaderboardList, el.landingLeaderboardTag, entries);
+      const scope = state.lbScope || "week";
+      const entries = scopedEntries(scope);
+      renderLeaderboardTarget(el.quizLeaderboardList, el.quizLeaderboardTag, entries, scope);
+      // The landing board always shows the all-time Hall of Fame.
+      renderLeaderboardTarget(el.landingLeaderboardList, el.landingLeaderboardTag, scopedEntries("all"), "all");
     }
 
     function savePlayerName() {
@@ -565,17 +611,22 @@
       // Progression: record the play date, award any new trophies, refresh the
       // Dino-Dex, and stash a payload for the printable certificate.
       let earnedBadges = [];
+      let rewards = { coinsEarned: 0, rankedUp: false };
       const newDiscoveries = state.quizNewDiscoveries || [];
       if (state.playerName && progression) {
         store.recordPlayDate(state.playerName);
-        earnedBadges = progression.evaluateRound(state.playerName, {
+        const roundData = {
           correct: state.quizCorrect,
           roundSize: QUIZ_ROUND_SIZE,
+          score: state.quizScore,
           hints: state.quizRoundHints,
           accuracy,
           maxStreak: state.quizMaxStreak || 0,
           difficulty: state.quizDifficulty
-        });
+        };
+        // Award XP + coins first so rank/badge checks see the updated profile.
+        rewards = progression.awardRoundRewards(state.playerName, roundData);
+        earnedBadges = progression.evaluateRound(state.playerName, roundData);
         const certDino = state.quizLastCorrectItem || quizItems[state.quizOrder[0]] || quizItems[0];
         state.lastCertificate = {
           name: state.playerName,
@@ -608,6 +659,9 @@
       const badgeNote = earnedBadges.length
         ? `<div class="quiz-new-badges"><b>Trophies earned:</b> ${earnedBadges.map((badge) => `<span title="${escapeHtml(badge.name)}">${badge.icon} ${escapeHtml(badge.name)}</span>`).join(" ")}</div>`
         : "";
+      const rewardNote = (rewards.coinsEarned || state.quizScore) && state.playerName
+        ? `<div class="quiz-rewards"><span>🪙 +${rewards.coinsEarned} Fossil Coins</span><span>⭐ +${state.quizScore} XP${rewards.rankedUp ? ` — new rank: ${escapeHtml(rewards.newRank.icon + " " + rewards.newRank.name)}!` : ""}</span></div>`
+        : "";
       const certButton = state.lastCertificate
         ? `<button class="primary-button print-certificate" id="printCertBtn" type="button">🎓 Print My Certificate</button>`
         : "";
@@ -623,6 +677,7 @@
             <div><span>Dinosaurs</span><b>${state.quizCorrect}/${QUIZ_ROUND_SIZE}</b></div>
             <div><span>Hints used</span><b>${state.quizRoundHints}</b></div>
           </div>
+          ${rewardNote}
           ${badgeNote}
           ${discoveryNote}
           ${certButton}
@@ -634,8 +689,10 @@
       if (progression) {
         progression.announceBadges(earnedBadges);
         progression.renderTrophyShelf(el.trophyShelf, state.playerName);
+        progression.renderRankBar(el.quizRankBar, state.playerName);
       }
       renderDexProgress();
+      renderCoins();
       renderLeaderboard();
       el.hintQuizBtn.disabled = true;
       el.hintQuizBtn.textContent = "Round complete";
@@ -697,6 +754,15 @@
         const button = event.target.closest(".quiz-option");
         if (button && !button.disabled) answerQuiz(button);
       });
+      if (el.lbScope) {
+        el.lbScope.addEventListener("click", (event) => {
+          const button = event.target.closest(".lb-scope-btn");
+          if (!button) return;
+          state.lbScope = button.dataset.scope;
+          $$(".lb-scope-btn", el.lbScope).forEach((btn) => btn.classList.toggle("is-active", btn === button));
+          renderLeaderboard();
+        });
+      }
       el.nextQuizBtn.addEventListener("click", nextQuiz);
       el.hintQuizBtn.addEventListener("click", revealQuizHint);
       if (el.exportLeaderboardBtn) {

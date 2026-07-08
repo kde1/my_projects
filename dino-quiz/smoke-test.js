@@ -79,7 +79,7 @@ if (scriptOrder.some((index) => index < 0) || scriptOrder.join() !== [...scriptO
 }
 
 const cssManifest = fs.readFileSync(path.join(root, "styles.css"), "utf8");
-["base-landing", "app-builder", "quiz", "gallery-print", "responsive", "celebrate", "certificate", "focus"].forEach((name) => {
+["base-landing", "app-builder", "quiz", "gallery-print", "responsive", "celebrate", "certificate", "progression", "focus"].forEach((name) => {
   if (!cssManifest.includes(`css/${name}.css`)) throw new Error(`Missing CSS import for ${name}.`);
 });
 
