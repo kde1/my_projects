@@ -5,7 +5,44 @@
   window.DinoPlayerData =
   {
     "version": 2,
-    "players": [],
+    "players": [
+      {
+        "name": "Papi",
+        "firstSeen": "7/8/2026",
+        "profile": {
+          "xp": 0,
+          "coins": 0,
+          "unlocks": [],
+          "badges": {},
+          "discovered": [],
+          "redig": [],
+          "playDates": [],
+          "expeditions": {},
+          "duels": {
+            "won": 0,
+            "played": 0
+          }
+        }
+      },
+      {
+        "name": "Summer",
+        "firstSeen": "7/8/2026",
+        "profile": {
+          "xp": 0,
+          "coins": 0,
+          "unlocks": [],
+          "badges": {},
+          "discovered": [],
+          "redig": [],
+          "playDates": [],
+          "expeditions": {},
+          "duels": {
+            "won": 0,
+            "played": 0
+          }
+        }
+      }
+    ],
     "leaderboard": [
       {
         "id": "1783492285672-4f3502acfbee88",
