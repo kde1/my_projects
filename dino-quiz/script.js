@@ -129,8 +129,13 @@ const quizScore = $("#quizScore");
 const quizTotal = $("#quizTotal");
 const quizStreak = $("#quizStreak");
 const quizPlayerForm = $("#quizPlayerForm");
+const quizPlayerSelect = $("#quizPlayerSelect");
 const quizPlayerName = $("#quizPlayerName");
 const quizPlayerStatus = $("#quizPlayerStatus");
+const addExplorerBtn = $("#addExplorerBtn");
+const manageExplorersBtn = $("#manageExplorersBtn");
+const explorerManager = $("#explorerManager");
+const explorerManagerList = $("#explorerManagerList");
 const quizLeaderboardList = $("#quizLeaderboardList");
 const quizLeaderboardTag = $("#quizLeaderboardTag");
 const landingLeaderboardList = $("#landingLeaderboardList");
@@ -152,6 +157,7 @@ const galleryQuizGrid = $("#galleryQuizGrid");
 const galleryQuizPrint = $("#galleryQuizPrint");
 const galleryQuizPrintPages = $("#galleryQuizPrintPages");
 const exportLeaderboardBtn = $("#exportLeaderboardBtn");
+const leaderboardSaveStatus = $("#leaderboardSaveStatus");
 
 function path(attrs) {
   return `<path ${attrs}></path>`;
@@ -620,13 +626,19 @@ const quizController = window.createQuizController({
     quizTotal,
     quizStreak,
     quizPlayerForm,
+    quizPlayerSelect,
     quizPlayerName,
     quizPlayerStatus,
+    addExplorerBtn,
+    manageExplorersBtn,
+    explorerManager,
+    explorerManagerList,
     quizLeaderboardList,
     quizLeaderboardTag,
     landingLeaderboardList,
     landingLeaderboardTag,
     exportLeaderboardBtn,
+    leaderboardSaveStatus,
     nextQuizBtn,
     quizDifficulty,
     quizPotential,
@@ -1066,11 +1078,12 @@ function bindAppEvents() {
   bindPrintControls();
 }
 
-function initializeApp() {
+async function initializeApp() {
   validateQuizData();
   buildControls();
   buildDnaLab();
   bindAppEvents();
+  await quizController.loadPermanentLeaderboard();
   quizController.renderPlayerProfile();
   quizController.renderLeaderboard();
   quizController.startQuizRound();

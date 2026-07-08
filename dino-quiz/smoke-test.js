@@ -5,9 +5,11 @@ const vm = require("vm");
 const root = __dirname;
 const dataPath = path.join(root, "js", "data.js");
 const playerDataPath = path.join(root, "js", "player-data.js");
+const leaderboardPath = path.join(root, "data", "leaderboard.json");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const dataCode = fs.readFileSync(dataPath, "utf8");
 const playerDataCode = fs.readFileSync(playerDataPath, "utf8");
+const leaderboardData = JSON.parse(fs.readFileSync(leaderboardPath, "utf8"));
 const context = { window: {} };
 
 vm.createContext(context);
@@ -34,6 +36,17 @@ const playerData = context.window.DinoPlayerData;
 if (!playerData) throw new Error("DinoPlayerData was not exposed on window.");
 if (!Array.isArray(playerData.players)) throw new Error("DinoPlayerData.players must be an array.");
 if (!Array.isArray(playerData.leaderboard)) throw new Error("DinoPlayerData.leaderboard must be an array.");
+if (!Array.isArray(leaderboardData.players)) throw new Error("data/leaderboard.json players must be an array.");
+if (!Array.isArray(leaderboardData.leaderboard)) throw new Error("data/leaderboard.json leaderboard must be an array.");
+
+[
+  'id="quizPlayerSelect"',
+  'id="addExplorerBtn"',
+  'id="manageExplorersBtn"',
+  'id="explorerManagerList"'
+].forEach((needle) => {
+  if (!html.includes(needle)) throw new Error(`Missing explorer control: ${needle}.`);
+});
 
 const scriptOrder = [
   'src="js/data.js"',

@@ -106,19 +106,65 @@
   font-weight: 900;
 }
 
-.quiz-player-card div {
+.quiz-player-chooser,
+.quiz-player-add {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
 }
 
-.quiz-player-card input {
+.quiz-player-card input,
+.quiz-player-card select {
   min-height: 42px;
   border: 1px solid rgba(255, 255, 255, .18);
   background: rgba(255, 255, 255, .92);
   color: #17130b;
   padding: 0 10px;
   font-weight: 900;
+}
+
+.explorer-manage-toggle {
+  justify-self: start;
+}
+
+.explorer-manager {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(255, 243, 207, .16);
+  background: rgba(0, 0, 0, .12);
+  padding: 8px;
+}
+
+.explorer-manager[hidden] {
+  display: none;
+}
+
+.explorer-manager ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.explorer-manager li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 6px;
+  align-items: center;
+  color: #fff3cf;
+  font-weight: 900;
+  list-style: none;
+}
+
+.explorer-manager li.is-empty {
+  display: block;
+  color: #dce7d3;
+}
+
+.explorer-manager button {
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: .72rem;
 }
 
 .quiz-player-card span,
@@ -200,6 +246,14 @@
   justify-self: start;
   min-height: 36px;
   font-size: .82rem;
+}
+
+.leaderboard-save-status {
+  display: block;
+  min-height: 18px;
+  color: #f4e4b9;
+  font-size: .76rem;
+  font-weight: 800;
 }
 
 .compact-control {

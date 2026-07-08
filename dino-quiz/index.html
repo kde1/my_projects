@@ -229,10 +229,18 @@
               <div class="quiz-score"><span id="quizScore">0</span> pts / <span id="quizTotal">0</span> fossils</div>
             </div>
             <form class="quiz-player-card" id="quizPlayerForm">
-              <label for="quizPlayerName">Explorer name</label>
-              <div>
-                <input id="quizPlayerName" type="text" maxlength="18" autocomplete="nickname" placeholder="Type your name">
+              <label for="quizPlayerSelect">Explorer name</label>
+              <div class="quiz-player-chooser">
+                <select id="quizPlayerSelect"></select>
                 <button class="secondary-button" type="submit">Join Quiz</button>
+              </div>
+              <div class="quiz-player-add">
+                <input id="quizPlayerName" type="text" maxlength="18" autocomplete="nickname" placeholder="Add new explorer">
+                <button class="secondary-button" id="addExplorerBtn" type="button">Add Explorer</button>
+              </div>
+              <button class="secondary-button explorer-manage-toggle" id="manageExplorersBtn" type="button" aria-expanded="false">Manage Explorers</button>
+              <div class="explorer-manager" id="explorerManager" hidden>
+                <ol id="explorerManagerList"></ol>
               </div>
               <span id="quizPlayerStatus">Register your field badge to start scoring.</span>
             </form>
@@ -243,6 +251,7 @@
               </div>
               <ol id="quizLeaderboardList"></ol>
               <button class="secondary-button leaderboard-export" id="exportLeaderboardBtn" type="button">Save Leaderboard</button>
+              <span class="leaderboard-save-status" id="leaderboardSaveStatus" aria-live="polite"></span>
             </aside>
             <label class="control compact-control">
               <span>Difficulty</span>

@@ -32,13 +32,19 @@
       quizTotal,
       quizStreak,
       quizPlayerForm,
+      quizPlayerSelect,
       quizPlayerName,
       quizPlayerStatus,
+      addExplorerBtn,
+      manageExplorersBtn,
+      explorerManager,
+      explorerManagerList,
       quizLeaderboardList,
       quizLeaderboardTag,
       landingLeaderboardList,
       landingLeaderboardTag,
       exportLeaderboardBtn,
+      leaderboardSaveStatus,
       nextQuizBtn,
       quizDifficulty,
       quizPotential,
@@ -47,6 +53,8 @@
       quizView,
       quizPrompt
     } = elements;
+
+    let permanentPlayerData = normalizePlayerData(trackedPlayerData);
 
     state.playerName = cleanPlayerName(readTextStorage(PLAYER_STORAGE_KEY));
 
@@ -118,7 +126,7 @@
     
     function quizLeaderboard() {
       const entries = readJsonStorage(LEADERBOARD_STORAGE_KEY, []);
-      const tracked = Array.isArray(trackedPlayerData.leaderboard) ? trackedPlayerData.leaderboard : [];
+      const tracked = permanentPlayerData.leaderboard;
       const local = Array.isArray(entries) ? entries : [];
       return mergeById([...tracked, ...local])
         .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
@@ -132,8 +140,49 @@
 
     function quizPlayers() {
       const localPlayers = readJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, []);
-      const trackedPlayers = Array.isArray(trackedPlayerData.players) ? trackedPlayerData.players : [];
-      return mergeByName([...trackedPlayers, ...(Array.isArray(localPlayers) ? localPlayers : [])]);
+      const trackedPlayers = permanentPlayerData.players;
+      const leaderboardPlayers = mergeById([...permanentPlayerData.leaderboard, ...localLeaderboard()])
+        .map((entry) => ({ name: entry.name, firstSeen: entry.date || new Date().toLocaleDateString() }));
+      return mergeByName([...trackedPlayers, ...leaderboardPlayers, ...(Array.isArray(localPlayers) ? localPlayers : [])]);
+    }
+
+    function normalizePlayerData(data) {
+      return {
+        players: Array.isArray(data && data.players) ? data.players : [],
+        leaderboard: Array.isArray(data && data.leaderboard) ? data.leaderboard : []
+      };
+    }
+
+    function canUsePermanentServer() {
+      return window.location.protocol === "http:" || window.location.protocol === "https:";
+    }
+
+    function setSaveStatus(message) {
+      if (leaderboardSaveStatus) leaderboardSaveStatus.textContent = message;
+    }
+
+    function permanentPayload() {
+      return {
+        players: quizPlayers(),
+        leaderboard: mergeById([...permanentPlayerData.leaderboard, ...quizLeaderboard(), ...localLeaderboard()])
+          .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
+          .slice(0, SAVED_RESULT_LIMIT)
+      };
+    }
+
+    async function loadPermanentLeaderboard() {
+      if (!canUsePermanentServer()) {
+        setSaveStatus("Permanent saving needs the Dino Quiz local server.");
+        return;
+      }
+      try {
+        const response = await fetch("/api/leaderboard", { cache: "no-store" });
+        if (!response.ok) throw new Error("Leaderboard API unavailable.");
+        permanentPlayerData = normalizePlayerData(await response.json());
+        setSaveStatus("Permanent leaderboard loaded.");
+      } catch (error) {
+        setSaveStatus("Permanent saving needs the Dino Quiz local server.");
+      }
     }
 
     function mergeById(entries) {
@@ -162,9 +211,61 @@
       const players = mergeByName([...quizPlayers(), { name, firstSeen: new Date().toLocaleDateString() }]);
       writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, players);
     }
+
+    function writePlayers(players) {
+      const cleanPlayers = mergeByName(players);
+      permanentPlayerData = {
+        ...permanentPlayerData,
+        players: cleanPlayers
+      };
+      writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, cleanPlayers);
+    }
+
+    function playerScoreCount(name) {
+      const key = name.toLowerCase();
+      return mergeById([...permanentPlayerData.leaderboard, ...localLeaderboard()])
+        .filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() === key)
+        .length;
+    }
+
+    function renderPlayerSelect() {
+      if (!quizPlayerSelect) return;
+      const players = quizPlayers();
+      quizPlayerSelect.innerHTML = [
+        `<option value="">Choose explorer</option>`,
+        ...players.map((player) => {
+          const selected = player.name === state.playerName ? " selected" : "";
+          return `<option value="${escapeHtml(player.name)}"${selected}>${escapeHtml(player.name)}</option>`;
+        })
+      ].join("");
+    }
+
+    function renderExplorerManager() {
+      if (!explorerManagerList) return;
+      const players = quizPlayers();
+      explorerManagerList.innerHTML = players.length ? players.map((player) => {
+        const scoreCount = playerScoreCount(player.name);
+        return `
+          <li>
+            <span>${escapeHtml(player.name)}${scoreCount ? ` (${scoreCount} score${scoreCount === 1 ? "" : "s"})` : ""}</span>
+            <button class="secondary-button" type="button" data-action="use" data-name="${escapeHtml(player.name)}">Use</button>
+            <button class="secondary-button" type="button" data-action="forget" data-name="${escapeHtml(player.name)}">Remove</button>
+            <button class="secondary-button" type="button" data-action="clear" data-name="${escapeHtml(player.name)}">Clear Scores</button>
+          </li>
+        `;
+      }).join("") : `
+        <li class="is-empty">No explorers yet.</li>
+      `;
+    }
+
+    function refreshExplorerControls() {
+      renderPlayerSelect();
+      renderExplorerManager();
+    }
     
     function renderPlayerProfile() {
-      quizPlayerName.value = state.playerName;
+      quizPlayerName.value = "";
+      refreshExplorerControls();
       if (state.playerName) {
         quizPlayerStatus.textContent = `${state.playerName} is checked in. ${quizPlayers().length} explorers are remembered.`;
         quizPlayerForm.classList.add("is-registered");
@@ -172,6 +273,22 @@
         quizPlayerStatus.textContent = `Register your field badge to start scoring. ${quizPlayers().length} explorers remembered.`;
         quizPlayerForm.classList.remove("is-registered");
       }
+    }
+
+    function setActivePlayer(name, { start = true } = {}) {
+      const cleanName = cleanPlayerName(name);
+      if (!cleanName) {
+        state.playerName = "";
+        writeTextStorage(PLAYER_STORAGE_KEY, "");
+        renderPlayerProfile();
+        return false;
+      }
+      state.playerName = cleanName;
+      writeTextStorage(PLAYER_STORAGE_KEY, cleanName);
+      rememberPlayer(cleanName);
+      renderPlayerProfile();
+      if (start) startQuizRound();
+      return true;
     }
     
     function leaderboardMarkup(entries) {
@@ -202,19 +319,64 @@
     }
     
     function savePlayerName() {
-      const name = cleanPlayerName(quizPlayerName.value);
+      const name = cleanPlayerName(quizPlayerSelect.value || quizPlayerName.value);
       if (!name) {
         state.playerName = "";
-        quizPlayerName.value = "";
+        quizPlayerSelect.value = "";
         quizPlayerStatus.textContent = "Add your explorer name first.";
         quizPlayerForm.classList.remove("is-registered");
         return;
       }
-      state.playerName = name;
-      writeTextStorage(PLAYER_STORAGE_KEY, name);
-      rememberPlayer(name);
+      setActivePlayer(name);
+      quizPlayerName.value = "";
+    }
+
+    function addExplorer() {
+      const name = cleanPlayerName(quizPlayerName.value);
+      if (!name) {
+        quizPlayerStatus.textContent = "Type a new explorer name first.";
+        return;
+      }
+      setActivePlayer(name);
+      quizPlayerName.value = "";
+      setSaveStatus("Explorer added. Press Save Leaderboard when ready.");
+    }
+
+    function forgetExplorer(name) {
+      const cleanName = cleanPlayerName(name);
+      const key = cleanName.toLowerCase();
+      writePlayers(quizPlayers().filter((player) => player.name.toLowerCase() !== key));
+      permanentPlayerData = {
+        ...permanentPlayerData,
+        leaderboard: permanentPlayerData.leaderboard.filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key)
+      };
+      writeJsonStorage(
+        LEADERBOARD_STORAGE_KEY,
+        localLeaderboard().filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key)
+      );
+      if (state.playerName.toLowerCase() === key) {
+        state.playerName = "";
+        writeTextStorage(PLAYER_STORAGE_KEY, "");
+      }
       renderPlayerProfile();
-      startQuizRound();
+      renderLeaderboard();
+      setSaveStatus("Explorer list updated. Press Save Leaderboard when ready.");
+    }
+
+    function clearExplorerScores(name) {
+      const cleanName = cleanPlayerName(name);
+      const key = cleanName.toLowerCase();
+      writePlayers([...quizPlayers(), { name: cleanName, firstSeen: new Date().toLocaleDateString() }]);
+      const keepScores = localLeaderboard().filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key);
+      const keepPermanentScores = permanentPlayerData.leaderboard.filter((entry) => cleanPlayerName(entry.name || "").toLowerCase() !== key);
+      permanentPlayerData = {
+        ...permanentPlayerData,
+        leaderboard: keepPermanentScores
+      };
+      writeJsonStorage(LEADERBOARD_STORAGE_KEY, keepScores);
+      renderPlayerProfile();
+      renderLeaderboard();
+      setSaveStatus("Explorer scores cleared here. Press Save Leaderboard when ready.");
     }
     
     function saveQuizResult({ maxScore, accuracy, resultTitle }) {
@@ -240,21 +402,31 @@
       return state.quizResultSaved;
     }
 
-    function exportGitPlayerData() {
-      const payload = {
-        players: quizPlayers(),
-        leaderboard: mergeById([...quizLeaderboard(), ...localLeaderboard()])
-          .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
-          .slice(0, SAVED_RESULT_LIMIT)
-      };
-      const content = `(function () {\n  "use strict";\n\n  window.DinoPlayerData = ${JSON.stringify(payload, null, 2).replace(/\n/g, "\n  ")};\n})();\n`;
-      const blob = new Blob([content], { type: "text/javascript;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "player-data.js";
-      link.click();
-      URL.revokeObjectURL(url);
+    async function savePermanentLeaderboard() {
+      const payload = permanentPayload();
+      writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, payload.players);
+      writeJsonStorage(LEADERBOARD_STORAGE_KEY, payload.leaderboard);
+
+      if (!canUsePermanentServer()) {
+        setSaveStatus("Permanent saving needs the Dino Quiz local server. Your score is still saved in this browser.");
+        renderLeaderboard();
+        return;
+      }
+
+      setSaveStatus("Saving leaderboard...");
+      try {
+        const response = await fetch("/api/leaderboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error("Save failed.");
+        permanentPlayerData = normalizePlayerData(await response.json());
+        renderLeaderboard();
+        setSaveStatus("Leaderboard saved to this repo. Commit and push when ready.");
+      } catch (error) {
+        setSaveStatus("Permanent saving needs the Dino Quiz local server. Your score is still saved in this browser.");
+      }
     }
     
     function quizPoolIndices() {
@@ -522,10 +694,36 @@
         event.preventDefault();
         savePlayerName();
       });
+      if (quizPlayerSelect) {
+        quizPlayerSelect.addEventListener("change", () => {
+          if (quizPlayerSelect.value) setActivePlayer(quizPlayerSelect.value);
+        });
+      }
+      if (addExplorerBtn) {
+        addExplorerBtn.addEventListener("click", addExplorer);
+      }
+      if (manageExplorersBtn && explorerManager) {
+        manageExplorersBtn.addEventListener("click", () => {
+          const isOpen = explorerManager.hidden;
+          explorerManager.hidden = !isOpen;
+          manageExplorersBtn.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) renderExplorerManager();
+        });
+      }
+      if (explorerManagerList) {
+        explorerManagerList.addEventListener("click", (event) => {
+          const button = event.target.closest("button[data-action]");
+          if (!button) return;
+          const name = button.dataset.name || "";
+          if (button.dataset.action === "use") setActivePlayer(name);
+          if (button.dataset.action === "forget") forgetExplorer(name);
+          if (button.dataset.action === "clear") clearExplorerScores(name);
+        });
+      }
       nextQuizBtn.addEventListener("click", nextQuiz);
       hintQuizBtn.addEventListener("click", revealQuizHint);
       if (exportLeaderboardBtn) {
-        exportLeaderboardBtn.addEventListener("click", exportGitPlayerData);
+        exportLeaderboardBtn.addEventListener("click", savePermanentLeaderboard);
       }
       quizDifficulty.addEventListener("change", (event) => {
         state.quizDifficulty = event.target.value;
@@ -535,6 +733,7 @@
 
     return {
       bindQuizControls,
+      loadPermanentLeaderboard,
       renderLeaderboard,
       renderPlayerProfile,
       startQuizRound

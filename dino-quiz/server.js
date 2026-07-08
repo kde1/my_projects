@@ -1,0 +1,135 @@
+const fs = require("fs");
+const http = require("http");
+const path = require("path");
+const url = require("url");
+
+const root = __dirname;
+const dataPath = path.join(root, "data", "leaderboard.json");
+const startPort = Number(process.env.PORT) || 3000;
+
+const mimeTypes = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml; charset=utf-8"
+};
+
+function sendJson(res, status, payload) {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+  res.end(JSON.stringify(payload, null, 2));
+}
+
+function readLeaderboard() {
+  const raw = fs.readFileSync(dataPath, "utf8");
+  const parsed = JSON.parse(raw);
+  return {
+    players: Array.isArray(parsed.players) ? parsed.players : [],
+    leaderboard: Array.isArray(parsed.leaderboard) ? parsed.leaderboard : []
+  };
+}
+
+function writeLeaderboard(payload) {
+  const data = {
+    players: Array.isArray(payload.players) ? payload.players : [],
+    leaderboard: Array.isArray(payload.leaderboard) ? payload.leaderboard : []
+  };
+  fs.mkdirSync(path.dirname(dataPath), { recursive: true });
+  fs.writeFileSync(dataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  return data;
+}
+
+function readRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.setEncoding("utf8");
+    req.on("data", (chunk) => {
+      body += chunk;
+      if (body.length > 1024 * 1024) {
+        reject(new Error("Request body is too large."));
+        req.destroy();
+      }
+    });
+    req.on("end", () => resolve(body));
+    req.on("error", reject);
+  });
+}
+
+async function handleApi(req, res) {
+  if (req.method === "GET") {
+    try {
+      sendJson(res, 200, readLeaderboard());
+    } catch (error) {
+      sendJson(res, 500, { error: "Could not read leaderboard data." });
+    }
+    return;
+  }
+
+  if (req.method === "POST") {
+    try {
+      const body = await readRequestBody(req);
+      const saved = writeLeaderboard(JSON.parse(body || "{}"));
+      sendJson(res, 200, saved);
+    } catch (error) {
+      sendJson(res, 400, { error: "Could not save leaderboard data." });
+    }
+    return;
+  }
+
+  sendJson(res, 405, { error: "Method not allowed." });
+}
+
+function serveStatic(req, res, pathname) {
+  const requestedPath = pathname === "/" ? "/index.html" : pathname;
+  const decodedPath = decodeURIComponent(requestedPath);
+  const filePath = path.normalize(path.join(root, decodedPath));
+
+  if (!filePath.startsWith(root)) {
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Forbidden");
+    return;
+  }
+
+  fs.readFile(filePath, (error, content) => {
+    if (error) {
+      res.writeHead(error.code === "ENOENT" ? 404 : 500, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end(error.code === "ENOENT" ? "Not found" : "Server error");
+      return;
+    }
+    const type = mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream";
+    res.writeHead(200, { "Content-Type": type });
+    res.end(content);
+  });
+}
+
+function createServer() {
+  return http.createServer((req, res) => {
+    const pathname = url.parse(req.url).pathname;
+    if (pathname === "/api/leaderboard") {
+      handleApi(req, res);
+      return;
+    }
+    serveStatic(req, res, pathname);
+  });
+}
+
+function listen(port) {
+  const server = createServer();
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      listen(port + 1);
+      return;
+    }
+    console.error(error.message);
+    process.exit(1);
+  });
+  server.listen(port, () => {
+    console.log(`Dino Quiz running at http://localhost:${port}/`);
+  });
+}
+
+listen(startPort);
