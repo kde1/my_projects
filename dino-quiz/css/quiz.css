@@ -196,6 +196,12 @@
   font-weight: 800;
 }
 
+.leaderboard-export {
+  justify-self: start;
+  min-height: 36px;
+  font-size: .82rem;
+}
+
 .compact-control {
   margin-bottom: 0;
 }

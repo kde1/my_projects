@@ -3,7 +3,9 @@
 
   const PLAYER_STORAGE_KEY = "dinoQuizPlayerName";
   const LEADERBOARD_STORAGE_KEY = "dinoQuizLeaderboard";
+  const PLAYER_REGISTRY_STORAGE_KEY = "dinoQuizPlayers";
   const LEADERBOARD_LIMIT = 5;
+  const SAVED_RESULT_LIMIT = 25;
 
   window.createQuizController = function createQuizController(deps) {
     const {
@@ -19,6 +21,7 @@
       writeJsonStorage,
       readTextStorage,
       writeTextStorage,
+      trackedPlayerData,
       elements
     } = deps;
     const {
@@ -35,6 +38,7 @@
       quizLeaderboardTag,
       landingLeaderboardList,
       landingLeaderboardTag,
+      exportLeaderboardBtn,
       nextQuizBtn,
       quizDifficulty,
       quizPotential,
@@ -114,16 +118,58 @@
     
     function quizLeaderboard() {
       const entries = readJsonStorage(LEADERBOARD_STORAGE_KEY, []);
+      const tracked = Array.isArray(trackedPlayerData.leaderboard) ? trackedPlayerData.leaderboard : [];
+      const local = Array.isArray(entries) ? entries : [];
+      return mergeById([...tracked, ...local])
+        .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
+        .slice(0, LEADERBOARD_LIMIT);
+    }
+
+    function localLeaderboard() {
+      const entries = readJsonStorage(LEADERBOARD_STORAGE_KEY, []);
       return Array.isArray(entries) ? entries : [];
+    }
+
+    function quizPlayers() {
+      const localPlayers = readJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, []);
+      const trackedPlayers = Array.isArray(trackedPlayerData.players) ? trackedPlayerData.players : [];
+      return mergeByName([...trackedPlayers, ...(Array.isArray(localPlayers) ? localPlayers : [])]);
+    }
+
+    function mergeById(entries) {
+      const seen = new Set();
+      return entries.filter((entry) => {
+        const id = entry.id || `${entry.name}-${entry.score}-${entry.date}`;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    }
+
+    function mergeByName(players) {
+      const seen = new Set();
+      return players.filter((player) => {
+        const name = cleanPlayerName(player.name || "");
+        const key = name.toLowerCase();
+        if (!name || seen.has(key)) return false;
+        player.name = name;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function rememberPlayer(name) {
+      const players = mergeByName([...quizPlayers(), { name, firstSeen: new Date().toLocaleDateString() }]);
+      writeJsonStorage(PLAYER_REGISTRY_STORAGE_KEY, players);
     }
     
     function renderPlayerProfile() {
       quizPlayerName.value = state.playerName;
       if (state.playerName) {
-        quizPlayerStatus.textContent = `${state.playerName} is checked in and ready to hunt fossils.`;
+        quizPlayerStatus.textContent = `${state.playerName} is checked in. ${quizPlayers().length} explorers are remembered.`;
         quizPlayerForm.classList.add("is-registered");
       } else {
-        quizPlayerStatus.textContent = "Register your field badge to start scoring.";
+        quizPlayerStatus.textContent = `Register your field badge to start scoring. ${quizPlayers().length} explorers remembered.`;
         quizPlayerForm.classList.remove("is-registered");
       }
     }
@@ -166,6 +212,7 @@
       }
       state.playerName = name;
       writeTextStorage(PLAYER_STORAGE_KEY, name);
+      rememberPlayer(name);
       renderPlayerProfile();
       startQuizRound();
     }
@@ -184,13 +231,30 @@
         title: resultTitle,
         date: new Date().toLocaleDateString()
       };
-      const entries = [...quizLeaderboard(), entry]
+      const entries = [...localLeaderboard(), entry]
         .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
-        .slice(0, LEADERBOARD_LIMIT);
+        .slice(0, SAVED_RESULT_LIMIT);
       writeJsonStorage(LEADERBOARD_STORAGE_KEY, entries);
-      state.quizResultSaved = entries.some((item) => item.id === id);
+      state.quizResultSaved = quizLeaderboard().some((item) => item.id === id);
       renderLeaderboard();
       return state.quizResultSaved;
+    }
+
+    function exportGitPlayerData() {
+      const payload = {
+        players: quizPlayers(),
+        leaderboard: mergeById([...quizLeaderboard(), ...localLeaderboard()])
+          .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || a.hints - b.hints)
+          .slice(0, SAVED_RESULT_LIMIT)
+      };
+      const content = `(function () {\n  "use strict";\n\n  window.DinoPlayerData = ${JSON.stringify(payload, null, 2).replace(/\n/g, "\n  ")};\n})();\n`;
+      const blob = new Blob([content], { type: "text/javascript;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "player-data.js";
+      link.click();
+      URL.revokeObjectURL(url);
     }
     
     function quizPoolIndices() {
@@ -460,6 +524,9 @@
       });
       nextQuizBtn.addEventListener("click", nextQuiz);
       hintQuizBtn.addEventListener("click", revealQuizHint);
+      if (exportLeaderboardBtn) {
+        exportLeaderboardBtn.addEventListener("click", exportGitPlayerData);
+      }
       quizDifficulty.addEventListener("change", (event) => {
         state.quizDifficulty = event.target.value;
         startQuizRound();

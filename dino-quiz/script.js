@@ -151,6 +151,7 @@ const galleryQuizTabs = $("#galleryQuizTabs");
 const galleryQuizGrid = $("#galleryQuizGrid");
 const galleryQuizPrint = $("#galleryQuizPrint");
 const galleryQuizPrintPages = $("#galleryQuizPrintPages");
+const exportLeaderboardBtn = $("#exportLeaderboardBtn");
 
 function path(attrs) {
   return `<path ${attrs}></path>`;
@@ -610,6 +611,7 @@ const quizController = window.createQuizController({
   writeJsonStorage,
   readTextStorage,
   writeTextStorage,
+  trackedPlayerData: window.DinoPlayerData || { players: [], leaderboard: [] },
   elements: {
     quizImage,
     quizOptions,
@@ -624,6 +626,7 @@ const quizController = window.createQuizController({
     quizLeaderboardTag,
     landingLeaderboardList,
     landingLeaderboardTag,
+    exportLeaderboardBtn,
     nextQuizBtn,
     quizDifficulty,
     quizPotential,
