@@ -13,6 +13,7 @@
   const SAVED_RESULT_LIMIT = 25;
   const PLAY_DATES_LIMIT = 60;
   const REDIG_LIMIT = 10;
+  const REDIG_MAX_MISSES = 3;
   const DATA_STORAGE_KEY = "dinoQuizData";
 
   function defaultProfile() {
@@ -415,6 +416,11 @@
         if (existing) {
           existing.misses = (Number(existing.misses) || 0) + 1;
           existing.lastSeen = isoDate();
+          // A re-dig appears at misses 1 and 2; a third miss retires it so the
+          // queue never turns into homework the player keeps failing.
+          if (existing.misses >= REDIG_MAX_MISSES) {
+            profile.redig = profile.redig.filter((item) => item.slug !== slug);
+          }
         } else {
           profile.redig.unshift({ slug, misses: 1, lastSeen: isoDate() });
           profile.redig = profile.redig.slice(0, REDIG_LIMIT);

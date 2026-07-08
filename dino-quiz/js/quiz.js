@@ -195,6 +195,12 @@
         el.quizPlayerStatus.textContent = `Register your field badge to start scoring. ${count} explorers remembered.`;
         el.quizPlayerForm.classList.remove("is-registered");
       }
+      refreshPlayerCard();
+    }
+
+    // Refresh only the progression displays (coins, rank, dex, trophies) without
+    // rebuilding the explorer chooser — used when returning to the Quiz tab.
+    function refreshPlayerCard() {
       if (progression) {
         progression.renderTrophyShelf(el.trophyShelf, state.playerName);
         progression.renderRankBar(el.quizRankBar, state.playerName);
@@ -365,17 +371,19 @@
     }
 
     // The pool a round draws from: the difficulty pool, or (in expedition mode)
-    // every dinosaur matching today's theme, padded from the full set if scarce.
+    // the theme's dinosaurs *within the chosen difficulty* so an Easy player is
+    // never handed obscure Hard-tier fossils at Easy point values. If too few
+    // on-theme dinosaurs exist at this level, pad from the rest of the same
+    // difficulty pool (keeping it age-appropriate) rather than the full set.
     function roundPoolIndices() {
       if (!state.quizExpedition) return quizPoolIndices();
       const theme = state.quizExpedition;
-      let pool = quizItems.map((item, index) => (matchesTheme(item, theme) ? index : -1)).filter((index) => index >= 0);
-      if (pool.length < 8) {
-        const used = new Set(pool);
-        const extra = shuffle(quizItems.map((_, index) => index).filter((index) => !used.has(index)));
-        pool = [...pool, ...extra].slice(0, 8);
-      }
-      return pool;
+      const difficultyPool = quizPoolIndices();
+      const onTheme = difficultyPool.filter((index) => matchesTheme(quizItems[index], theme));
+      if (onTheme.length >= 8) return onTheme;
+      const used = new Set(onTheme);
+      const filler = shuffle(difficultyPool.filter((index) => !used.has(index)));
+      return [...onTheme, ...filler].slice(0, Math.max(8, onTheme.length));
     }
 
     // Boss pool = "rarer" dinosaurs (not in the easy set; on Easy, from the
@@ -416,6 +424,7 @@
       if (!player) return [];
       const bySlug = new Map(quizItems.map((item, index) => [item.slug, index]));
       return player.profile.redig
+        .filter((entry) => (Number(entry.misses) || 0) < 3)
         .map((entry) => bySlug.get(entry.slug))
         .filter((index) => index != null)
         .slice(0, 3);
@@ -870,6 +879,7 @@
       loadPermanentLeaderboard,
       renderLeaderboard,
       renderPlayerProfile,
+      refreshPlayerCard,
       startQuizRound
     };
   };

@@ -142,6 +142,8 @@
     if (tabName === "gallery") ctx.gallery.renderGallery();
     if (tabName === "galleryQuiz") ctx.gallery.renderGallery({ quizMode: true });
     if (tabName === "parts") ctx.builder.renderShop();
+    // Coins/unlocks can change in the Builder, so refresh the quiz player card.
+    if (tabName === "quiz") quizController.refreshPlayerCard();
     $$(".app-nav-button").forEach((item) => {
       item.classList.remove("is-active");
       item.removeAttribute("aria-current");
