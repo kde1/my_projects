@@ -139,11 +139,13 @@
     document.body.classList.remove("landing-active");
     $(".game-shell").classList.toggle("quiz-focus", tabName === "quiz");
     $(".game-shell").classList.toggle("gallery-focus", tabName === "gallery" || tabName === "galleryQuiz");
+    $(".game-shell").classList.toggle("board-focus", tabName === "leaderboard");
     if (tabName === "gallery") ctx.gallery.renderGallery();
     if (tabName === "galleryQuiz") ctx.gallery.renderGallery({ quizMode: true });
     if (tabName === "parts") ctx.builder.renderShop();
     // Coins/unlocks can change in the Builder, so refresh the quiz player card.
     if (tabName === "quiz") quizController.refreshPlayerCard();
+    if (tabName === "leaderboard") quizController.renderLeaderboardTab();
     $$(".app-nav-button").forEach((item) => {
       item.classList.remove("is-active");
       item.removeAttribute("aria-current");
@@ -161,7 +163,7 @@
 
   function showLanding() {
     document.body.classList.add("landing-active");
-    $(".game-shell").classList.remove("quiz-focus", "gallery-focus");
+    $(".game-shell").classList.remove("quiz-focus", "gallery-focus", "board-focus");
     $$(".app-nav-button").forEach((item) => {
       item.classList.remove("is-active");
       item.removeAttribute("aria-current");

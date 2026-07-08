@@ -10,13 +10,35 @@
         "name": "Papi",
         "firstSeen": "7/8/2026",
         "profile": {
-          "xp": 0,
-          "coins": 0,
+          "xp": 90,
+          "coins": 11,
           "unlocks": [],
-          "badges": {},
-          "discovered": [],
-          "redig": [],
-          "playDates": [],
+          "badges": {
+            "first-dig": "2026-07-08",
+            "no-hint-hero": "2026-07-08",
+            "streak-5": "2026-07-08"
+          },
+          "discovered": [
+            "allosaurus",
+            "tyrannosaurus",
+            "parasaurolophus",
+            "brachiosaurus",
+            "stegosaurus",
+            "ankylosaurus",
+            "spinosaurus",
+            "triceratops",
+            "archaeopteryx"
+          ],
+          "redig": [
+            {
+              "slug": "pachycephalosaurus",
+              "misses": 1,
+              "lastSeen": "2026-07-08"
+            }
+          ],
+          "playDates": [
+            "2026-07-08"
+          ],
           "expeditions": {},
           "duels": {
             "won": 0,
@@ -46,6 +68,18 @@
     "leaderboard": [
       {
         "id": "1783492285672-4f3502acfbee88",
+        "name": "Papi",
+        "score": 90,
+        "maxScore": 100,
+        "accuracy": 90,
+        "hints": 0,
+        "difficulty": "Easy",
+        "title": "Expert Paleontologist",
+        "date": "7/8/2026",
+        "dateISO": "2026-07-08"
+      },
+      {
+        "id": "1783511566192-8abd205314fa78",
         "name": "Papi",
         "score": 90,
         "maxScore": 100,

@@ -54,7 +54,8 @@
   }
 
   .game-shell.quiz-focus .panel,
-  .game-shell.gallery-focus .panel {
+  .game-shell.gallery-focus .panel,
+  .game-shell.board-focus .panel {
     height: auto;
     min-height: calc(100vh - 20px);
   }
@@ -72,8 +73,7 @@
       "next"
       "feedback"
       "difficulty"
-      "expedition"
-      "leaderboard";
+      "expedition";
     min-height: auto;
   }
 

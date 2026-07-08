@@ -12,6 +12,7 @@
       <button class="app-nav-button" type="button" data-tab="gallery">Gallery</button>
       <button class="app-nav-button" type="button" data-tab="galleryQuiz">Practice</button>
       <button class="app-nav-button" type="button" data-tab="quiz">Quiz</button>
+      <button class="app-nav-button" type="button" data-tab="leaderboard">Leaderboard</button>
       <button class="app-nav-button" type="button" data-tab="parts">Builder</button>
       <button class="app-nav-button" type="button" data-tab="dna">DNA</button>
       <button class="app-nav-button sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="Sound off">🔇</button>
@@ -257,40 +258,14 @@
             </div>
             <div class="solo-mode" id="soloMode">
             <form class="quiz-player-card" id="quizPlayerForm">
-              <label for="quizPlayerSelect">Explorer name</label>
+              <label for="quizPlayerSelect">Playing as</label>
               <div class="quiz-player-chooser">
                 <select id="quizPlayerSelect"></select>
                 <button class="secondary-button" type="submit">Join Quiz</button>
               </div>
-              <div class="quiz-player-add">
-                <input id="quizPlayerName" type="text" maxlength="18" autocomplete="nickname" placeholder="Add new explorer">
-                <button class="secondary-button" id="addExplorerBtn" type="button">Add Explorer</button>
-              </div>
-              <button class="secondary-button explorer-manage-toggle" id="manageExplorersBtn" type="button" aria-expanded="false">Manage Explorers</button>
-              <div class="explorer-manager" id="explorerManager" hidden>
-                <ol id="explorerManagerList"></ol>
-              </div>
               <span id="quizPlayerStatus">Register your field badge to start scoring.</span>
-              <div class="rank-progress" id="quizRankBar" hidden></div>
-              <div class="dex-progress" id="quizDexProgress" hidden>
-                <span class="dex-pill" id="quizDexPill">🦕 0/50 discovered</span>
-                <div class="dex-bar"><i id="quizDexBar"></i></div>
-              </div>
-              <div class="trophy-shelf" id="trophyShelf" hidden></div>
+              <span class="quiz-player-hint">Add explorers and see trophies on the Leaderboard tab.</span>
             </form>
-            <aside class="quiz-leaderboard" aria-labelledby="quizLeaderboardTitle">
-              <div>
-                <h3 id="quizLeaderboardTitle">Dino Champs</h3>
-                <span id="quizLeaderboardTag">Top fossil hunters</span>
-              </div>
-              <div class="lb-scope" id="lbScope" role="group" aria-label="Leaderboard range">
-                <button class="lb-scope-btn is-active" type="button" data-scope="week">This Week</button>
-                <button class="lb-scope-btn" type="button" data-scope="all">Hall of Fame</button>
-              </div>
-              <ol id="quizLeaderboardList"></ol>
-              <button class="secondary-button leaderboard-export" id="exportLeaderboardBtn" type="button">Save Leaderboard</button>
-              <span class="leaderboard-save-status" id="leaderboardSaveStatus" aria-live="polite"></span>
-            </aside>
             <div class="expedition-card" id="expeditionCard">
               <div class="expedition-info">
                 <b id="expeditionName">Today's Expedition</b>
@@ -365,6 +340,46 @@
               </div>
               <div class="duel-results" id="duelResults" hidden></div>
             </div>
+          </section>
+        </div>
+
+        <div class="tab-panel" id="leaderboardPanel">
+          <section class="board-shell">
+            <section class="explorer-manage board-card" aria-labelledby="explorerManageTitle">
+              <div class="board-card-head">
+                <h3 id="explorerManageTitle">Manage Explorers</h3>
+                <span>Add explorers, choose who is playing, and see their trophies.</span>
+              </div>
+              <div class="quiz-player-add" id="explorerAddRow">
+                <input id="quizPlayerName" type="text" maxlength="18" autocomplete="nickname" placeholder="New explorer name">
+                <button class="secondary-button" id="addExplorerBtn" type="button">Add Explorer</button>
+              </div>
+              <div class="explorer-profile" id="explorerProfile">
+                <div class="explorer-profile-head" id="explorerProfileHead">Pick an explorer to see their field badge.</div>
+                <div class="rank-progress" id="quizRankBar" hidden></div>
+                <div class="dex-progress" id="quizDexProgress" hidden>
+                  <span class="dex-pill" id="quizDexPill">🦕 0/50 discovered</span>
+                  <div class="dex-bar"><i id="quizDexBar"></i></div>
+                </div>
+                <div class="trophy-shelf" id="trophyShelf" hidden></div>
+              </div>
+              <div class="explorer-manager" id="explorerManager">
+                <ol id="explorerManagerList"></ol>
+              </div>
+            </section>
+            <aside class="quiz-leaderboard board-card" aria-labelledby="quizLeaderboardTitle">
+              <div class="board-card-head">
+                <h3 id="quizLeaderboardTitle">Dino Champs</h3>
+                <span id="quizLeaderboardTag">Top fossil hunters</span>
+              </div>
+              <div class="lb-scope" id="lbScope" role="group" aria-label="Leaderboard range">
+                <button class="lb-scope-btn is-active" type="button" data-scope="week">This Week</button>
+                <button class="lb-scope-btn" type="button" data-scope="all">Hall of Fame</button>
+              </div>
+              <ol id="quizLeaderboardList"></ol>
+              <button class="secondary-button leaderboard-export" id="exportLeaderboardBtn" type="button">Save Leaderboard</button>
+              <span class="leaderboard-save-status" id="leaderboardSaveStatus" aria-live="polite"></span>
+            </aside>
           </section>
         </div>
 

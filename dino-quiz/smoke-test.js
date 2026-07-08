@@ -57,7 +57,8 @@ assert.deepStrictEqual(
 [
   'id="quizPlayerSelect"',
   'id="addExplorerBtn"',
-  'id="manageExplorersBtn"',
+  'data-tab="leaderboard"',
+  'id="leaderboardPanel"',
   'id="explorerManagerList"'
 ].forEach((needle) => {
   if (!html.includes(needle)) throw new Error(`Missing explorer control: ${needle}.`);

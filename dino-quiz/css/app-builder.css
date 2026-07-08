@@ -30,17 +30,20 @@
 }
 
 .game-shell.quiz-focus,
-.game-shell.gallery-focus {
+.game-shell.gallery-focus,
+.game-shell.board-focus {
   grid-template-columns: 1fr;
 }
 
 .game-shell.quiz-focus .workbench,
-.game-shell.gallery-focus .workbench {
+.game-shell.gallery-focus .workbench,
+.game-shell.board-focus .workbench {
   display: none;
 }
 
 .game-shell.quiz-focus .panel,
-.game-shell.gallery-focus .panel {
+.game-shell.gallery-focus .panel,
+.game-shell.board-focus .panel {
   height: 100%;
   min-height: 0;
 }
