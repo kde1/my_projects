@@ -11,9 +11,9 @@
       <section class="screen setup-screen is-active" id="setupScreen" aria-label="Player setup">
         <div class="setup-hero">
           <div>
-            <p class="eyebrow">Pink closet fashion game</p>
-            <h1>Zoe's Dress Star Studio</h1>
-            <p class="intro">Pick 2 to 4 players, choose different colors, dress up for the theme, then vote for the runway winner.</p>
+            <p class="eyebrow">Walk the fashion runway</p>
+            <h1>Zoe's Dress Star Runway</h1>
+            <p class="intro">Dress like a star, walk your model down the runway, strike poses, then vote after the final catwalk.</p>
           </div>
           <div class="mini-runway" aria-hidden="true">
             <span></span><span></span><span></span>
@@ -29,7 +29,7 @@
               <button type="button" data-count="4">4</button>
             </div>
             <p class="hint">Minimum 2, maximum 4. Each color can only be used once.</p>
-            <button class="primary-action" id="startGameBtn" type="button">Start 5 minute round</button>
+            <button class="primary-action" id="startGameBtn" type="button">Enter the dressing room</button>
             <p class="error-message" id="setupError" role="alert"></p>
           </section>
 
@@ -53,20 +53,34 @@
         <div class="studio-layout">
           <aside class="player-rail" id="playerRail" aria-label="Choose player"></aside>
 
-          <section class="runway-area" aria-label="Current outfit">
+          <section class="runway-area" aria-label="Walkable runway">
             <div class="runway-card">
-              <div class="spotlight"></div>
+              <div class="audience audience-left" aria-hidden="true"></div>
+              <div class="audience audience-right" aria-hidden="true"></div>
+              <div class="runway-lane" aria-hidden="true"></div>
+              <div class="stage-lights" aria-hidden="true"></div>
               <div class="avatar" id="avatar" aria-label="Dressed player preview"></div>
+              <div class="runway-hud">
+                <span id="poseStatus">Ready to walk</span>
+                <b id="runwayScore">Style 0</b>
+              </div>
               <div class="outfit-caption">
                 <h2 id="activePlayerName">Player</h2>
-                <p id="outfitSummary">Choose pieces from the closets.</p>
+                <p id="outfitSummary">Choose pieces, then walk with arrows or WASD.</p>
               </div>
+            </div>
+            <div class="walk-controls" aria-label="Runway controls">
+              <button class="icon-action" id="walkBackBtn" type="button" aria-label="Walk back">←</button>
+              <button class="icon-action" id="walkForwardBtn" type="button" aria-label="Walk forward">→</button>
+              <button class="pose-action" id="poseTwirlBtn" type="button">Twirl</button>
+              <button class="pose-action" id="poseWaveBtn" type="button">Wave</button>
+              <button class="pose-action" id="poseFinalBtn" type="button">Final pose</button>
             </div>
           </section>
 
           <aside class="closet-area" aria-label="Pink dressing closets">
             <div class="closet-header">
-              <h2>Pink Closets</h2>
+              <h2>Dressing Room</h2>
               <button class="tiny-action" id="randomOutfitBtn" type="button">Surprise outfit</button>
             </div>
             <div class="tabs" id="categoryTabs" role="tablist" aria-label="Clothing categories"></div>
@@ -79,7 +93,7 @@
         <header class="topbar vote-topbar">
           <div>
             <p class="eyebrow">Runway vote</p>
-            <h1>Who wins?</h1>
+            <h1>Runway voting</h1>
           </div>
           <button class="secondary-action" id="newRoundBtn" type="button">New round</button>
         </header>

@@ -15,7 +15,11 @@ const themes = [
   "Magical Garden Party",
   "Rainbow Red Carpet",
   "Cozy Winter Sparkle",
-  "Beach Birthday Bash"
+  "Beach Birthday Bash",
+  "Future Pop Idol",
+  "Movie Premiere Glam",
+  "Fairy Ball Finale",
+  "School Spirit Slay"
 ];
 
 const closet = {
@@ -33,7 +37,9 @@ const closet = {
     { name: "Cloud Sweater", color: "#89bfff", accent: "#ffffff", shape: "sweater" },
     { name: "Sparkle Blouse", color: "#ffe369", accent: "#ff7cc2", shape: "sparkle" },
     { name: "Lavender Hoodie", color: "#a874ff", accent: "#e9dcff", shape: "sweater" },
-    { name: "Cherry Cardigan", color: "#dd2d4a", accent: "#ffd7ec", shape: "jacket" }
+    { name: "Cherry Cardigan", color: "#dd2d4a", accent: "#ffd7ec", shape: "jacket" },
+    { name: "Pearl Corset", color: "#fff3fb", accent: "#c42d80", shape: "corset" },
+    { name: "Runway Blazer", color: "#1f2937", accent: "#f7d34b", shape: "jacket" }
   ],
   bottoms: [
     { name: "Tutu Skirt", color: "#ff93c7", shape: "skirt" },
@@ -41,7 +47,9 @@ const closet = {
     { name: "Royal Dress", color: "#a874ff", shape: "dress" },
     { name: "Sun Dress", color: "#ffc738", shape: "dress" },
     { name: "Mint Shorts", color: "#34c989", shape: "pants" },
-    { name: "Red Carpet Skirt", color: "#dd2d4a", shape: "skirt" }
+    { name: "Red Carpet Skirt", color: "#dd2d4a", shape: "skirt" },
+    { name: "Diamond Gown", color: "#eef7ff", shape: "gown" },
+    { name: "Stage Jumpsuit", color: "#2d2530", shape: "pants" }
   ],
   shoes: [
     { name: "Glitter Boots", color: "#f84fa7", shape: "shoes" },
@@ -57,7 +65,9 @@ const closet = {
     { name: "Heart Glasses", color: "#2d2530", shape: "glasses" },
     { name: "Mini Bag", color: "#23b9b0", shape: "bag" },
     { name: "Star Crown", color: "#a874ff", shape: "crown" },
-    { name: "Candy Bow", color: "#ffc738", shape: "bow" }
+    { name: "Candy Bow", color: "#ffc738", shape: "bow" },
+    { name: "Rose Choker", color: "#dd2d4a", shape: "choker" },
+    { name: "Stage Mic", color: "#2d2530", shape: "mic" }
   ],
   extras: [
     { name: "Pearl Glow", color: "#fff4fd", accent: "#f84fa7" },
@@ -85,6 +95,13 @@ const defaultOutfit = () => ({
   extras: 0
 });
 
+const defaultWalk = () => ({
+  x: 50,
+  score: 0,
+  pose: "idle",
+  walked: false
+});
+
 const setupScreen = document.querySelector("#setupScreen");
 const gameScreen = document.querySelector("#gameScreen");
 const voteScreen = document.querySelector("#voteScreen");
@@ -101,6 +118,8 @@ const timerText = document.querySelector("#timerText");
 const voteCards = document.querySelector("#voteCards");
 const ballots = document.querySelector("#ballots");
 const winnerBox = document.querySelector("#winnerBox");
+const poseStatus = document.querySelector("#poseStatus");
+const runwayScore = document.querySelector("#runwayScore");
 
 function escapeHtml(value) {
   return String(value)
@@ -156,9 +175,11 @@ function ensurePlayer(index) {
     state.players[index] = {
       name: `Player ${index + 1}`,
       color: colors[index].value,
-      outfit: defaultOutfit()
+      outfit: defaultOutfit(),
+      walk: defaultWalk()
     };
   }
+  if (!state.players[index].walk) state.players[index].walk = defaultWalk();
   return state.players[index];
 }
 
@@ -189,7 +210,8 @@ function startGame() {
   state.players = state.players.slice(0, state.playerCount).map((player, index) => ({
     ...player,
     name: player.name || `Player ${index + 1}`,
-    outfit: player.outfit || defaultOutfit()
+    outfit: player.outfit || defaultOutfit(),
+    walk: player.walk || defaultWalk()
   }));
   state.activePlayer = 0;
   state.activeCategory = "hair";
@@ -244,6 +266,7 @@ function renderPlayerRail() {
   playerRail.querySelectorAll(".player-tab").forEach((button) => {
     button.addEventListener("click", () => {
       state.activePlayer = Number(button.dataset.player);
+      activePlayer().walk.pose = "idle";
       renderGame();
     });
   });
@@ -294,17 +317,24 @@ function renderAvatar(target, player, compact) {
   const shoes = outfitItem(player, "shoes");
   const accessory = outfitItem(player, "accessories");
   const extra = outfitItem(player, "extras");
+  const walk = player.walk || defaultWalk();
+  target.className = `avatar ${compact ? "is-compact" : ""} pose-${walk.pose || "idle"}`;
   target.style.setProperty("--hair", hair.color);
   target.style.setProperty("--top", top.color);
   target.style.setProperty("--bottom", bottom.color);
   target.style.setProperty("--shoes", shoes.color);
   target.style.setProperty("--accent", accessory.color || top.accent || player.color);
+  target.style.setProperty("--player", player.color);
+  target.style.setProperty("--walk-x", `${walk.x || 50}%`);
   target.style.background = `radial-gradient(circle at 50% 48%, ${extra.color}, transparent 58%)`;
   target.innerHTML = `
     <span class="avatar-part hair ${hair.shape}"></span>
+    <span class="avatar-part ears"></span>
     <span class="avatar-part head"></span>
+    <span class="avatar-part face"><i></i><i></i><b></b></span>
     <span class="avatar-part neck"></span>
     <span class="avatar-part arms"></span>
+    <span class="avatar-part hands"></span>
     <span class="avatar-part top ${top.shape}"></span>
     <span class="avatar-part bottom ${bottom.shape}"></span>
     <span class="avatar-part legs"></span>
@@ -312,6 +342,7 @@ function renderAvatar(target, player, compact) {
     <span class="avatar-part accessory ${accessory.shape}"></span>
   `;
   target.setAttribute("aria-label", `${player.name}'s outfit${compact ? " for voting" : ""}`);
+  if (!compact) updateRunwayHud();
 }
 
 function renderCaption() {
@@ -334,13 +365,44 @@ function randomOutfit() {
   renderGame();
 }
 
+function updateRunwayHud() {
+  const player = activePlayer();
+  const walk = player.walk || defaultWalk();
+  const labels = {
+    idle: "Walk with arrows or WASD",
+    twirl: "Twirl pose",
+    wave: "Wave to the judges",
+    final: "Final runway pose"
+  };
+  poseStatus.textContent = labels[walk.pose] || labels.idle;
+  runwayScore.textContent = `Style ${walk.score || 0}`;
+}
+
+function moveRunway(direction) {
+  const player = activePlayer();
+  player.walk = player.walk || defaultWalk();
+  player.walk.x = Math.min(88, Math.max(12, player.walk.x + direction * 8));
+  player.walk.walked = true;
+  player.walk.pose = "idle";
+  player.walk.score = Math.min(99, player.walk.score + 1);
+  renderAvatar(avatar, player, false);
+}
+
+function strikePose(pose, points) {
+  const player = activePlayer();
+  player.walk = player.walk || defaultWalk();
+  player.walk.pose = pose;
+  player.walk.score = Math.min(99, player.walk.score + points);
+  renderAvatar(avatar, player, false);
+}
+
 function renderVoting() {
   winnerBox.innerHTML = "";
   voteCards.innerHTML = "";
   state.players.forEach((player) => {
     const card = document.createElement("article");
     card.className = "vote-card";
-    card.innerHTML = `<div class="avatar"></div><h2>${escapeHtml(player.name)}</h2>`;
+    card.innerHTML = `<div class="runway-mini"><div class="avatar"></div></div><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(outfitItem(player, "bottoms").name)} runway score: ${player.walk?.score || 0}</p>`;
     renderAvatar(card.querySelector(".avatar"), player, true);
     voteCards.appendChild(card);
   });
@@ -385,9 +447,31 @@ document.querySelector("#startGameBtn").addEventListener("click", startGame);
 document.querySelector("#finishEarlyBtn").addEventListener("click", finishRound);
 document.querySelector("#randomOutfitBtn").addEventListener("click", randomOutfit);
 document.querySelector("#showWinnerBtn").addEventListener("click", showWinner);
+document.querySelector("#walkBackBtn").addEventListener("click", () => moveRunway(-1));
+document.querySelector("#walkForwardBtn").addEventListener("click", () => moveRunway(1));
+document.querySelector("#poseTwirlBtn").addEventListener("click", () => strikePose("twirl", 4));
+document.querySelector("#poseWaveBtn").addEventListener("click", () => strikePose("wave", 3));
+document.querySelector("#poseFinalBtn").addEventListener("click", () => strikePose("final", 6));
 document.querySelector("#newRoundBtn").addEventListener("click", () => {
   clearInterval(state.timerId);
   showScreen(setupScreen);
+});
+
+window.addEventListener("keydown", (event) => {
+  if (!gameScreen.classList.contains("is-active")) return;
+  const key = event.key.toLowerCase();
+  if (key === "arrowleft" || key === "a") {
+    event.preventDefault();
+    moveRunway(-1);
+  }
+  if (key === "arrowright" || key === "d") {
+    event.preventDefault();
+    moveRunway(1);
+  }
+  if (key === " " || key === "w" || key === "arrowup") {
+    event.preventDefault();
+    strikePose("final", 6);
+  }
 });
 
 setPlayerCount(2);

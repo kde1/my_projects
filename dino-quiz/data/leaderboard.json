@@ -92,8 +92,8 @@
       "name": "Isaac",
       "firstSeen": "7/8/2026",
       "profile": {
-        "xp": 2050,
-        "coins": 389,
+        "xp": 3075,
+        "coins": 525,
         "unlocks": [],
         "badges": {
           "first-dig": "2026-07-08",
@@ -129,7 +129,20 @@
           "iguanodon",
           "struthiomimus",
           "stegosaurus",
-          "maiasaura"
+          "maiasaura",
+          "ouranosaurus",
+          "archaeopteryx",
+          "styracosaurus",
+          "therizinosaurus",
+          "parasaurolophus",
+          "ankylosaurus",
+          "camarasaurus",
+          "coelophysis",
+          "apatosaurus",
+          "dryosaurus",
+          "pachyrhinosaurus",
+          "diplodocus",
+          "nodosaurus"
         ],
         "redig": [
           {
@@ -141,10 +154,16 @@
             "slug": "archaeopteryx",
             "misses": 1,
             "lastSeen": "2026-07-08"
+          },
+          {
+            "slug": "sauropelta",
+            "misses": 1,
+            "lastSeen": "2026-07-09"
           }
         ],
         "playDates": [
-          "2026-07-08"
+          "2026-07-08",
+          "2026-07-09"
         ],
         "expeditions": {
           "2026-07-08": "hunters"
@@ -206,13 +225,32 @@
       "name": "Ignaz",
       "firstSeen": "7/8/2026",
       "profile": {
-        "xp": 0,
-        "coins": 0,
+        "xp": 110,
+        "coins": 18,
         "unlocks": [],
-        "badges": {},
-        "discovered": [],
+        "badges": {
+          "first-dig": "2026-07-09",
+          "perfect-10": "2026-07-09",
+          "no-hint-hero": "2026-07-09",
+          "streak-5": "2026-07-09",
+          "streak-10": "2026-07-09"
+        },
+        "discovered": [
+          "brachiosaurus",
+          "archaeopteryx",
+          "ankylosaurus",
+          "tyrannosaurus",
+          "allosaurus",
+          "velociraptor",
+          "stegosaurus",
+          "parasaurolophus",
+          "triceratops",
+          "carnotaurus"
+        ],
         "redig": [],
-        "playDates": [],
+        "playDates": [
+          "2026-07-09"
+        ],
         "expeditions": {},
         "duels": {
           "won": 0,
@@ -259,6 +297,65 @@
         ],
         "playDates": [
           "2026-07-08"
+        ],
+        "expeditions": {},
+        "duels": {
+          "won": 0,
+          "played": 0
+        }
+      }
+    },
+    {
+      "name": "Beat",
+      "firstSeen": "7/9/2026",
+      "profile": {
+        "xp": 495,
+        "coins": 71,
+        "unlocks": [],
+        "badges": {
+          "first-dig": "2026-07-09",
+          "no-hint-hero": "2026-07-09",
+          "streak-5": "2026-07-09"
+        },
+        "discovered": [
+          "stegosaurus",
+          "spinosaurus",
+          "ankylosaurus",
+          "velociraptor",
+          "allosaurus",
+          "brachiosaurus",
+          "parasaurolophus",
+          "tyrannosaurus",
+          "archaeopteryx",
+          "dilophosaurus",
+          "iguanodon",
+          "apatosaurus",
+          "giganotosaurus",
+          "carnotaurus",
+          "therizinosaurus",
+          "corythosaurus",
+          "edmontosaurus",
+          "sauropelta",
+          "lambeosaurus",
+          "gallimimus",
+          "triceratops",
+          "microraptor",
+          "mapusaurus"
+        ],
+        "redig": [
+          {
+            "slug": "tyrannosaurus",
+            "misses": 1,
+            "lastSeen": "2026-07-09"
+          },
+          {
+            "slug": "diplodocus",
+            "misses": 1,
+            "lastSeen": "2026-07-09"
+          }
+        ],
+        "playDates": [
+          "2026-07-09"
         ],
         "expeditions": {},
         "duels": {
@@ -330,6 +427,18 @@
       "dateISO": "2026-07-08"
     },
     {
+      "id": "1783612055154-b4d7e8fd0b4b1",
+      "name": "Isaac",
+      "score": 275,
+      "maxScore": 250,
+      "accuracy": 100,
+      "hints": 0,
+      "difficulty": "Hard",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
       "id": "1783527575591-979ca7cba8afc",
       "name": "Isaac",
       "score": 250,
@@ -352,6 +461,42 @@
       "title": "Expert Paleontologist",
       "date": "7/8/2026",
       "dateISO": "2026-07-08"
+    },
+    {
+      "id": "1783612129842-c6a9e6069b7128",
+      "name": "Isaac",
+      "score": 250,
+      "maxScore": 250,
+      "accuracy": 90,
+      "hints": 0,
+      "difficulty": "Hard",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
+      "id": "1783612190985-848f6eeca0b978",
+      "name": "Isaac",
+      "score": 250,
+      "maxScore": 250,
+      "accuracy": 90,
+      "hints": 0,
+      "difficulty": "Hard",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
+      "id": "1783612264957-4d9e6acd528d4",
+      "name": "Isaac",
+      "score": 250,
+      "maxScore": 250,
+      "accuracy": 90,
+      "hints": 0,
+      "difficulty": "Hard",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
     },
     {
       "id": "1783527741509-8b656e07315bb8",
@@ -390,6 +535,42 @@
       "dateISO": "2026-07-08"
     },
     {
+      "id": "1783612533766-d3c6239f99358",
+      "name": "Beat",
+      "score": 150,
+      "maxScore": 150,
+      "accuracy": 90,
+      "hints": 0,
+      "difficulty": "Medium",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
+      "id": "1783612574489-5dabeef9ba9248",
+      "name": "Beat",
+      "score": 135,
+      "maxScore": 150,
+      "accuracy": 80,
+      "hints": 0,
+      "difficulty": "Medium",
+      "title": "Fossil Field Captain",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
+      "id": "1783612493175-8be639bd249878",
+      "name": "Beat",
+      "score": 120,
+      "maxScore": 150,
+      "accuracy": 70,
+      "hints": 0,
+      "difficulty": "Medium",
+      "title": "Fossil Field Captain",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
       "id": "1783523939093-f5a94058b4975",
       "name": "Papi",
       "score": 110,
@@ -400,6 +581,18 @@
       "title": "Expert Paleontologist",
       "date": "7/8/2026",
       "dateISO": "2026-07-08"
+    },
+    {
+      "id": "1783611619347-296fca536443",
+      "name": "Ignaz",
+      "score": 110,
+      "maxScore": 100,
+      "accuracy": 100,
+      "hints": 0,
+      "difficulty": "Easy",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
     },
     {
       "id": "1783526951012-3cee93031470e8",
@@ -438,6 +631,18 @@
       "dateISO": "2026-07-08"
     },
     {
+      "id": "1783612424191-37069173f7471",
+      "name": "Beat",
+      "score": 90,
+      "maxScore": 100,
+      "accuracy": 90,
+      "hints": 0,
+      "difficulty": "Easy",
+      "title": "Expert Paleontologist",
+      "date": "7/9/2026",
+      "dateISO": "2026-07-09"
+    },
+    {
       "id": "1783526828496-b4a8ea534ede1",
       "name": "Summer",
       "score": 90,
@@ -458,18 +663,6 @@
       "hints": 0,
       "difficulty": "Easy",
       "title": "Fossil Field Captain",
-      "date": "7/8/2026",
-      "dateISO": "2026-07-08"
-    },
-    {
-      "id": "1783524697095-889b094b207fd",
-      "name": "Teddy",
-      "score": 70,
-      "maxScore": 100,
-      "accuracy": 70,
-      "hints": 0,
-      "difficulty": "Easy",
-      "title": "Dino Detective",
       "date": "7/8/2026",
       "dateISO": "2026-07-08"
     }
