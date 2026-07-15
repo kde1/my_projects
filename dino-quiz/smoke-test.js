@@ -48,8 +48,10 @@ if (!Array.isArray(leaderboardData.players)) throw new Error("data/leaderboard.j
 if (!Array.isArray(leaderboardData.leaderboard)) throw new Error("data/leaderboard.json leaderboard must be an array.");
 
 // Drift check (A2): the auto-generated player-data.js must mirror leaderboard.json.
+// JSON round-trip first: playerData was created inside a vm context, and
+// deepStrictEqual compares prototypes, which always differ across realms.
 assert.deepStrictEqual(
-  playerData,
+  JSON.parse(JSON.stringify(playerData)),
   leaderboardData,
   "js/player-data.js is out of sync with data/leaderboard.json — press Save Leaderboard to regenerate."
 );
